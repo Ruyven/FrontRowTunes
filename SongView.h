@@ -37,6 +37,8 @@
 	NSTimer *updatePlayerPositionTimer;
 	
 	BOOL displayPlayerPositionBar, displayPlayerPositionLabel, displayClock, clockSeconds;
+    
+    NSTrackingArea *trackingArea;
 }
 
 - (void)setupLayers;

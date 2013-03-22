@@ -27,7 +27,8 @@
 	clockSeconds = NO;
 	
 	// go full screen
-	NSMutableDictionary *fullScreenOptions = [[NSMutableDictionary alloc] init];
+	/*DEBUG: Don't go full screen.
+    NSMutableDictionary *fullScreenOptions = [[NSMutableDictionary alloc] init];
 	[fullScreenOptions setObject:[NSNumber numberWithBool:NO] forKey:NSFullScreenModeAllScreens];
 	
 	[self enterFullScreenMode:[NSScreen mainScreen] withOptions:fullScreenOptions];
@@ -36,7 +37,7 @@
 	//DEBUG [self.window setLevel:CGShieldingWindowLevel()];
 
 	[self.window setFrame:[[NSScreen mainScreen] frame] display:NO];
-	//[self.window setFrame:[[[NSScreen screens] objectAtIndex:1] frame] display:NO];//DEBUG
+	//[self.window setFrame:[[[NSScreen screens] objectAtIndex:1] frame] display:NO];//DEBUG*/
 
 	// Make the window the first responder to get keystrokes
 	[self.window makeFirstResponder:self];
@@ -51,11 +52,14 @@
 
 	// bring the window to the front
 	[self.window makeKeyAndOrderFront:self];
+    
+    // ToDo DontForge: if the app is fullscreen, find a way to switch to it automatically!
 	
+    // mouse-tracking
+    trackingArea = [[NSTrackingArea alloc] initWithRect:self.frame options:(NSTrackingMouseEnteredAndExited | NSTrackingActiveInActiveApp) owner:self userInfo:nil];
+    [self addTrackingArea:trackingArea];
+    
 	[[NSDistributedNotificationCenter defaultCenter] addObserver:self selector:@selector(getTrack:) name:@"com.apple.iTunes.playerInfo" object:nil];
-
-	// ToDo: only hide the cursor when it's over the window and show it when it moves
-	[NSCursor hide];
 
 	updatePlayerPositionTimer = [NSTimer scheduledTimerWithTimeInterval:UPDATEINTERVAL target:self selector:@selector(updatePlayerPosition) userInfo:nil repeats:YES];
 }
@@ -367,6 +371,24 @@
 	[CATransaction setAnimationDuration:1.0];
 	remoteEventLayer.opacity = 0.0;
 	[CATransaction commit];
+}
+
+#pragma mark - Mouse Tracking
+
+- (void)setFrame:(NSRect)frameRect {
+    NSLog(@"setting frame");
+    [super setFrame:frameRect];
+    [self removeTrackingArea:trackingArea];
+    trackingArea = [[NSTrackingArea alloc] initWithRect:frameRect options:(NSTrackingMouseEnteredAndExited | NSTrackingActiveInActiveApp) owner:self userInfo:nil];
+    [self addTrackingArea:trackingArea];
+}
+
+- (void)mouseEntered:(NSEvent *)theEvent {
+    [NSCursor hide];
+}
+
+- (void)mouseExited:(NSEvent *)theEvent {
+    [NSCursor unhide];
 }
 
 @end
