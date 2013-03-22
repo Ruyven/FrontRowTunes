@@ -26,20 +26,8 @@
 	displayClock = NO;
 	clockSeconds = NO;
 	
-	// go full screen
-	/*DEBUG: Don't go full screen.
-    NSMutableDictionary *fullScreenOptions = [[NSMutableDictionary alloc] init];
-	[fullScreenOptions setObject:[NSNumber numberWithBool:NO] forKey:NSFullScreenModeAllScreens];
-	
-	[self enterFullScreenMode:[NSScreen mainScreen] withOptions:fullScreenOptions];
-	
-	[self.window setStyleMask:NSBorderlessWindowMask];
-	//DEBUG [self.window setLevel:CGShieldingWindowLevel()];
 
-	[self.window setFrame:[[NSScreen mainScreen] frame] display:NO];
-	//[self.window setFrame:[[[NSScreen screens] objectAtIndex:1] frame] display:NO];//DEBUG*/
-
-	// Make the window the first responder to get keystrokes
+	// make this view the first responder to get keystrokes
 	[self.window makeFirstResponder:self];
     [self.window setDelegate:self];
 
@@ -54,8 +42,6 @@
 	// bring the window to the front
 	[self.window makeKeyAndOrderFront:self];
     
-    // ToDo DontForge: if the app is fullscreen, find a way to switch to it automatically!
-	
 	[[NSDistributedNotificationCenter defaultCenter] addObserver:self selector:@selector(getTrack:) name:@"com.apple.iTunes.playerInfo" object:nil];
 
 	updatePlayerPositionTimer = [NSTimer scheduledTimerWithTimeInterval:UPDATEINTERVAL target:self selector:@selector(updatePlayerPosition) userInfo:nil repeats:YES];
@@ -112,7 +98,7 @@
 		
 		[self setTrack:[iTunes currentTrack] prev:prevTrack];
 		prevTrack = NO;
-		currentSongID = [songID retain];
+		currentSongID = songID;
 	}
 	[activeSongLayer setPlayerState:[iTunes playerState]];
 }
@@ -189,7 +175,7 @@
 			NSLog(@"release");
 			[changeTrackTimer release];
 		}*/
-		changeTrackTimer = [[NSTimer scheduledTimerWithTimeInterval:1 target:self selector:@selector(resetJustChangedTrack) userInfo:nil repeats:NO] retain];
+		changeTrackTimer = [NSTimer scheduledTimerWithTimeInterval:1 target:self selector:@selector(resetJustChangedTrack) userInfo:nil repeats:NO];
 	}
 }
 
@@ -211,7 +197,6 @@
 		[CATransaction setValue:(id)kCFBooleanTrue forKey:kCATransactionDisableActions];
 		[lastSongLayer removeFromSuperlayer];
 		[CATransaction commit];
-		[lastSongLayer release];
 		lastSongLayer = nil;
 	}
 }
@@ -356,7 +341,7 @@
 - (void)setPrevTrack:(BOOL)newPrevTrack {
 	prevTrack = newPrevTrack;
 	if (prevTrack) {
-		prevTrackTimeStamp = [[NSDate date] retain];
+		prevTrackTimeStamp = [NSDate date];
 	}
 }
 

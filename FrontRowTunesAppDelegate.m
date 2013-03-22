@@ -30,7 +30,6 @@ IOPMAssertionID assertionID;
 	/*IOReturn success = */
 	IOPMAssertionRelease(assertionID);
 	
-	[remoteController release];
 }
 
 

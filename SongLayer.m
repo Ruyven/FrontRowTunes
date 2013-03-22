@@ -38,7 +38,7 @@
 		
 		timePassedLayer = [CATextLayer layer];
 		timePassedLayer.alignmentMode = kCAAlignmentLeft;
-		timePassedLayer.font = @"Lucida-Grande";
+		timePassedLayer.font = CFBridgingRetain(@"Lucida-Grande");
 		timePassedLayer.bounds = CGRectMake(0, 0, 500, 50);
 		timePassedLayer.anchorPoint = CGPointMake(0, 1);
 		timePassedLayer.opaque = NO;
@@ -46,7 +46,7 @@
 
 		timeRemainingLayer = [[CATextLayer alloc] initWithLayer:timePassedLayer];
 		timeRemainingLayer.alignmentMode = kCAAlignmentRight;
-		timeRemainingLayer.font = @"Lucida-Grande";
+		timeRemainingLayer.font = CFBridgingRetain(@"Lucida-Grande");
 		timeRemainingLayer.anchorPoint = CGPointMake(1, 1);
 		timeRemainingLayer.bounds = CGRectMake(-500, 0, 500, 50);
 		[self addSublayer:timeRemainingLayer];
@@ -69,7 +69,7 @@
 
 		clockLayer = [CATextLayer layer];
 		clockLayer.alignmentMode = kCAAlignmentLeft;
-		clockLayer.font = @"Lucida-Grande";
+		clockLayer.font = CFBridgingRetain(@"Lucida-Grande");
 		clockLayer.anchorPoint = CGPointMake(0, 1);
 		clockLayer.bounds = CGRectMake(-500, 0, 500, 100);
 		[self updateClock];
@@ -134,7 +134,7 @@
 //		NSAttributedString *tripleLinebreak = [[NSAttributedString alloc] initWithString:@"\n\n\n"];
 		NSMutableAttributedString *string = [[NSMutableAttributedString alloc] initWithString:[track name] attributes:songnameAttributes];
 		[string appendAttributedString:doubleLinebreak];
-		[string appendAttributedString:doubleLinebreak];
+		//[string appendAttributedString:doubleLinebreak];
 		[string appendAttributedString:[[NSAttributedString alloc] initWithString:[track artist] attributes:artistAttributes]];
 		[string appendAttributedString:doubleLinebreak];
 		[string appendAttributedString:[[NSAttributedString alloc] initWithString:[track album] attributes:artistAttributes]];
@@ -199,7 +199,7 @@
 
 		if (trackDuration != 0 &&
 			(displayPlayerPositionBar || 
-			!displayPlayerPositionLabel && (playerState == iTunesEPlSFastForwarding || playerState == iTunesEPlSRewinding))) {
+			(!displayPlayerPositionLabel && (playerState == iTunesEPlSFastForwarding || playerState == iTunesEPlSRewinding)))) {
 			
 			trackDurationLayer.opacity = 1;
 			
@@ -240,7 +240,7 @@
 }
 
 - (void)setTrack:(iTunesTrack *)thetrack {
-	track = [thetrack retain]; //ToDo: hilft das retain?
+	track = thetrack;
 
 	// update cover
 	SBElementArray *trackArtworks = [track artworks];
@@ -258,10 +258,8 @@
 }
 
 - (void)dealloc {
-	[track release];
 	CGColorRelease(foregroundCGColor); // is that necessary? Or rather: should I do that every time I create a new foregroundCGColor?
 	// ToDo: is there anything else that needs to be released?
-	[super dealloc];
 }
 
 - (void)setWhiteBackground:(BOOL)white {
@@ -303,6 +301,7 @@
 	if (clockSeconds) {
 		clockLayer.string = [now descriptionWithCalendarFormat:@"%H:%M:%S" timeZone:nil locale:nil];
 	} else {
+        [now thLocale:<#(id)#>]
 		clockLayer.string = [now descriptionWithCalendarFormat:@"%H:%M" timeZone:nil locale:nil];
 	}
 }
@@ -334,47 +333,6 @@
 	timeRemainingLayer.string = [NSString stringWithFormat:@"-%d:%02d",minutes,seconds];
 	
 	[timeRemainingLayer setNeedsDisplay]; // warum auch immer das nötig ist...
-
-/*	Mein Versuch, eine flüssige Positionsanzeige hinzubekommen
-        double change = newPlayerPosition - playerPosition;
-
-        playerPosition = newPlayerPosition;
-        NSLog(@"playerPosition: %0.2lf",playerPosition);
-        CGFloat minX = [trackDurationLayer frame].origin.x + durationLayerHeight / 2.;
-        CGFloat maxX = [self bounds].size.width - minX;
-        CGFloat xPosition;
-        if (change >= 0 && change <= 1) {
-                // normal behavior, no drastic position change
-                if (paused) {
-                        [CATransaction setValue:[NSNumber numberWithFloat:0.1f] forKey:kCATransactionAnimationDuration];
-                        xPosition = (maxX - minX) * (playerPosition) / trackDuration + minX;
-                }
-                else {
-                        [CATransaction setAnimationDuration:UPDATEINTERVAL];
-                        // try to predict what the player position will be at the next update,
-                        // since it takes that long for Core Animation to animate it
-                        xPosition = (maxX - minX) * ((double)playerPosition + UPDATEINTERVAL) / trackDuration + minX;
-                        if (xPosition > maxX) xPosition = maxX;
-                }
-        }
-        else {
-                [CATransaction setValue:[NSNumber numberWithFloat:0.2f] forKey:kCATransactionAnimationDuration];
-                xPosition = (maxX - minX) * (playerPosition) / trackDuration + minX;
-
-                // ToDo: delete prediction here unless I decide to uncomment it
-
-                // if the position is zero, don't predict; in that case
-                // we want the position indicator to go all the way to the left
-   /*		if (!paused && playerPosition != 0) {
-                        // make a second transaction to predict where the position should be in a second
-                        [CATransaction commit];
-
-                        [CATransaction begin];
-                        [CATransaction setValue:[NSNumber numberWithFloat:0.2f] forKey:kCATransactionAnimationDuration];
-                        xPosition = (maxX - minX) * (playerPosition + UPDATEINTERVAL) / trackDuration + minX;
-                        if (xPosition > maxX) xPosition = maxX;
-                }*/
-//	}
 }
 
 - (BOOL)needsDisplayOnBoundsChange {

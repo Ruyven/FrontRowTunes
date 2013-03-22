@@ -23,8 +23,8 @@
 		// context options
 		CGColorSpaceRef colorSpace = CGColorSpaceCreateWithName(kCGColorSpaceGenericRGB);
 		NSDictionary *contextOptions = [NSDictionary
-		                                dictionaryWithObjectsAndKeys:(id)colorSpace,
-		                                kCIContextWorkingColorSpace, (id)colorSpace,
+		                                dictionaryWithObjectsAndKeys:(id)CFBridgingRelease(colorSpace),
+		                                kCIContextWorkingColorSpace, (id)CFBridgingRelease(colorSpace),
 		                                kCIContextOutputColorSpace, nil];
 
 
@@ -62,7 +62,7 @@
 }
 
 - (void)setCoverImageWithData:(NSData *)data {
-	coverImage = [[CIImage imageWithData:data] retain];
+	coverImage = [CIImage imageWithData:data];
 }
 
 @end

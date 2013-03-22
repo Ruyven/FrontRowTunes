@@ -29,10 +29,8 @@
 		[hidRemote stopRemoteControl];
 	}
 	[hidRemote setDelegate:nil];
-	[hidRemote release];
 	hidRemote = nil;
 
-	[super dealloc];
 }
 
 - (void)hidRemote:(HIDRemote *)hidRemote eventWithButton:(HIDRemoteButtonCode)buttonCode isPressed:(BOOL)isPressed fromHardwareWithAttributes:(NSMutableDictionary *)attributes {

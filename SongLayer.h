@@ -49,10 +49,10 @@
 - (void)updateWithDuration:(CGFloat)duration;
 - (void)updateClock;
 
-@property (nonatomic, retain) iTunesTrack *track;
-@property BOOL whiteBackground;
-@property int playerPosition;
-@property iTunesEPlS playerState;
+@property (nonatomic, strong) iTunesTrack *track;
+@property (nonatomic) BOOL whiteBackground;
+@property (nonatomic) int playerPosition;
+@property (nonatomic) iTunesEPlS playerState;
 @property BOOL displayPlayerPositionBar, displayPlayerPositionLabel, displayClock, clockSeconds;
 
 @end

@@ -13,12 +13,12 @@
 #import "RemoteController.h"
 
 @interface FrontRowTunesAppDelegate : NSObject <NSApplicationDelegate> {
-    NSWindow *window;
+    NSWindow *__weak window;
 	IBOutlet SongView *songView;
 	
 	RemoteController *remoteController;
 }
 
-@property (assign) IBOutlet NSWindow *window;
+@property (weak) IBOutlet NSWindow *window;
 
 @end
