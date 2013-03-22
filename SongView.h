@@ -13,8 +13,8 @@
 
 
 
-@interface SongView : NSView {
-	iTunesApplication *iTunes;
+@interface SongView : NSView <NSWindowDelegate> {
+    iTunesApplication *iTunes;
 	NSString *currentSongID;
 	
 	CALayer *rootLayer;
@@ -54,6 +54,6 @@
 - (void) showRemoteEvent;
 
 @property BOOL whiteBackground;
-@property BOOL prevTrack;
+@property (nonatomic) BOOL prevTrack;
 
 @end
