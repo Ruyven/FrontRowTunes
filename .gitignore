@@ -1,0 +1,12 @@
+# Sample .gitignore file for Xcode Projects
+.DS_Store
+*.swp
+*~.nib
+
+build/
+
+*.pbxuser
+*.perspective
+*.perspectivev3
+
+xcuserdata
