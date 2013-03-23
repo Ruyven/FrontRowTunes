@@ -225,7 +225,7 @@ static HIDRemote *sHIDRemote = nil;
 	{
 		NSNumber *deviceSupportLevel;
 		
-		if ((deviceSupportLevel = [hidAttribsDict objectForKey:kHIDRemoteAluminumRemoteSupportLevel]) != nil)
+		if ((deviceSupportLevel = hidAttribsDict[kHIDRemoteAluminumRemoteSupportLevel]) != nil)
 		{
 			if ([deviceSupportLevel intValue] > (int)supportLevel)
 			{
@@ -414,10 +414,8 @@ static HIDRemote *sHIDRemote = nil;
 				{
 					[[NSDistributedNotificationCenter defaultCenter] postNotificationName:kHIDRemoteDNHIDRemoteRetry
 												       object:kHIDRemoteDNHIDRemoteRetryGlobalObject
-												     userInfo:[NSDictionary dictionaryWithObjectsAndKeys:
-														[NSNumber numberWithUnsignedInt:(unsigned int)getpid()], kHIDRemoteDNStatusPIDKey,
-														[[NSBundle mainBundle] bundleIdentifier],		 (NSString *)kCFBundleIdentifierKey,
-													       nil]
+												     userInfo:@{kHIDRemoteDNStatusPIDKey: @((unsigned int)getpid()),
+														(NSString *)kCFBundleIdentifierKey: [[NSBundle mainBundle] bundleIdentifier]}
 											   deliverImmediately:YES];
 				}
 			}
@@ -639,16 +637,14 @@ static HIDRemote *sHIDRemote = nil;
 	{
 		[[NSDistributedNotificationCenter defaultCenter] postNotificationName:kHIDRemoteDNHIDRemoteStatus
 									       object:((_pidString!=nil) ? _pidString : [NSString stringWithFormat:@"%d",getpid()])
-									     userInfo:[NSDictionary dictionaryWithObjectsAndKeys:
-												[NSNumber numberWithInt:1],							kHIDRemoteDNStatusHIDRemoteVersionKey,
-												[NSNumber numberWithUnsignedInt:(unsigned int)getpid()],			kHIDRemoteDNStatusPIDKey,
-												[NSNumber numberWithInt:(int)_mode],						kHIDRemoteDNStatusModeKey,
-												[NSNumber numberWithUnsignedInt:(unsigned int)[self activeRemoteControlCount]], kHIDRemoteDNStatusRemoteControlCountKey,
-												((_unusedButtonCodes!=nil) ? _unusedButtonCodes : [NSArray array]),		kHIDRemoteDNStatusUnusedButtonCodesKey,
-												action,										kHIDRemoteDNStatusActionKey,
-												[[NSBundle mainBundle] bundleIdentifier],					(NSString *)kCFBundleIdentifierKey,
-												_returnToPID,									kHIDRemoteDNStatusReturnToPIDKey,
-										      nil]
+									     userInfo:@{kHIDRemoteDNStatusHIDRemoteVersionKey: @1,
+												kHIDRemoteDNStatusPIDKey: @((unsigned int)getpid()),
+												kHIDRemoteDNStatusModeKey: @((int)_mode),
+												kHIDRemoteDNStatusRemoteControlCountKey: @((unsigned int)[self activeRemoteControlCount]),
+												kHIDRemoteDNStatusUnusedButtonCodesKey: ((_unusedButtonCodes!=nil) ? _unusedButtonCodes : @[]),
+												kHIDRemoteDNStatusActionKey: action,
+												(NSString *)kCFBundleIdentifierKey: [[NSBundle mainBundle] bundleIdentifier],
+												kHIDRemoteDNStatusReturnToPIDKey: _returnToPID}
 								   deliverImmediately:YES
 		];
 	}
@@ -687,7 +683,7 @@ static HIDRemote *sHIDRemote = nil;
 				{
 					NSNumber *fromPID;
 
-					if ((fromPID = [[notification userInfo] objectForKey:kHIDRemoteDNStatusPIDKey]) != nil)
+					if ((fromPID = [notification userInfo][kHIDRemoteDNStatusPIDKey]) != nil)
 					{
 						if (getpid() == (int)[fromPID unsignedIntValue])
 						{
@@ -721,7 +717,7 @@ static HIDRemote *sHIDRemote = nil;
 						
 						if (restartInMode != kHIDRemoteModeShared)
 						{
-							_returnToPID = [[notification userInfo] objectForKey:kHIDRemoteDNStatusPIDKey];
+							_returnToPID = [notification userInfo][kHIDRemoteDNStatusPIDKey];
 						}
 					}
 				}
@@ -729,7 +725,7 @@ static HIDRemote *sHIDRemote = nil;
 				{
 					NSNumber *cacheReturnPID = _returnToPID;
 
-					_returnToPID = [[notification userInfo] objectForKey:kHIDRemoteDNStatusPIDKey];
+					_returnToPID = [notification userInfo][kHIDRemoteDNStatusPIDKey];
 					[self _postStatusWithAction:kHIDRemoteDNStatusActionNoNeed];
 					
 					_returnToPID = cacheReturnPID;
@@ -743,15 +739,15 @@ static HIDRemote *sHIDRemote = nil;
 			{
 				NSString *action;
 				
-				if ((action = [[notification userInfo] objectForKey:kHIDRemoteDNStatusActionKey]) != nil)
+				if ((action = [notification userInfo][kHIDRemoteDNStatusActionKey]) != nil)
 				{
 					if ((_mode == kHIDRemoteModeNone) && (_waitForReturnByPID!=nil))
 					{
 						NSNumber *pidNumber, *returnToPIDNumber;
 
-						if ((pidNumber		= [[notification userInfo] objectForKey:kHIDRemoteDNStatusPIDKey]) != nil)
+						if ((pidNumber		= [notification userInfo][kHIDRemoteDNStatusPIDKey]) != nil)
 						{
-							returnToPIDNumber = [[notification userInfo] objectForKey:kHIDRemoteDNStatusReturnToPIDKey];
+							returnToPIDNumber = [notification userInfo][kHIDRemoteDNStatusReturnToPIDKey];
 						
 							if ([action isEqual:kHIDRemoteDNStatusActionStart])
 							{
@@ -759,11 +755,11 @@ static HIDRemote *sHIDRemote = nil;
 								{
 									NSNumber *startMode;
 									
-									 if ((startMode = [[notification userInfo] objectForKey:kHIDRemoteDNStatusModeKey]) != nil)
+									 if ((startMode = [notification userInfo][kHIDRemoteDNStatusModeKey]) != nil)
 									 {
 										if ([startMode intValue] == kHIDRemoteModeShared)
 										{
-											returnToPIDNumber = [NSNumber numberWithInt:getpid()];
+											returnToPIDNumber = @(getpid());
 											action = kHIDRemoteDNStatusActionNoNeed;
 										}
 									 }
@@ -797,7 +793,7 @@ static HIDRemote *sHIDRemote = nil;
 					{
 						if ([action isEqual:kHIDRemoteDNStatusActionStart])
 						{
-							NSNumber *originPID = [[notification userInfo] objectForKey:kHIDRemoteDNStatusPIDKey];
+							NSNumber *originPID = [notification userInfo][kHIDRemoteDNStatusPIDKey];
 							BOOL lendLock = YES;
 						
 							if ([originPID intValue] != getpid())
@@ -818,10 +814,8 @@ static HIDRemote *sHIDRemote = nil;
 										
 										[[NSDistributedNotificationCenter defaultCenter] postNotificationName:kHIDRemoteDNHIDRemoteRetry
 																	       object:[NSString stringWithFormat:@"%d", [_waitForReturnByPID intValue]]
-																	     userInfo:[NSDictionary dictionaryWithObjectsAndKeys:
-																				[NSNumber numberWithUnsignedInt:(unsigned int)getpid()], kHIDRemoteDNStatusPIDKey,
-																				[[NSBundle mainBundle] bundleIdentifier],		 (NSString *)kCFBundleIdentifierKey,
-																		      nil]
+																	     userInfo:@{kHIDRemoteDNStatusPIDKey: @((unsigned int)getpid()),
+																				(NSString *)kCFBundleIdentifierKey: [[NSBundle mainBundle] bundleIdentifier]}
 																   deliverImmediately:YES];
 									}
 								}
@@ -1172,7 +1166,7 @@ static HIDRemote *sHIDRemote = nil;
 					if (buttonCode != kHIDRemoteButtonCodeNone)
 					{
 						NSString *pairString	    = [[NSString alloc] initWithFormat:@"%u_%u", [usagePage unsignedIntValue], [usage unsignedIntValue]];
-						NSNumber *buttonCodeNumber  = [[NSNumber alloc] initWithUnsignedInt:(unsigned int)buttonCode];
+						NSNumber *buttonCodeNumber  = @((unsigned int)buttonCode);
 						
 						#ifdef _HIDREMOTE_EXTENSIONS
 							// Debug logging code
@@ -1181,8 +1175,8 @@ static HIDRemote *sHIDRemote = nil;
 							#undef _HIDREMOTE_EXTENSIONS_SECTION
 						#endif /* _HIDREMOTE_EXTENSIONS */
 						
-						[cookieCount		setObject:buttonCodeNumber forKey:pairString];
-						[cookieButtonCodeLUT	setObject:buttonCodeNumber forKey:cookie];
+						cookieCount[pairString] = buttonCodeNumber;
+						cookieButtonCodeLUT[cookie] = buttonCodeNumber;
 						
 						(*hidQueueInterface)->addElement(hidQueueInterface,
 										 (IOHIDElementCookie) [cookie unsignedIntValue],
@@ -1211,7 +1205,7 @@ static HIDRemote *sHIDRemote = nil;
 				break;
 			}
 
-			[hidAttribsDict setObject:cookieButtonCodeLUT forKey:kHIDRemoteCookieButtonCodeLUT];
+			hidAttribsDict[kHIDRemoteCookieButtonCodeLUT] = cookieButtonCodeLUT;
 
 			cookieButtonCodeLUT = nil;
 
@@ -1238,7 +1232,7 @@ static HIDRemote *sHIDRemote = nil;
 		CFRunLoopAddSource(	CFRunLoopGetCurrent(),
 					queueEventSource,
 					kCFRunLoopCommonModes);
-		[hidAttribsDict setObject:[NSValue valueWithPointer:(const void *)queueEventSource] forKey:kHIDRemoteCFRunLoopSource];
+		hidAttribsDict[kHIDRemoteCFRunLoopSource] = [NSValue valueWithPointer:(const void *)queueEventSource];
 		
 		returnCode = (*hidQueueInterface)->start(hidQueueInterface);
 		if (returnCode != kIOReturnSuccess)
@@ -1264,7 +1258,7 @@ static HIDRemote *sHIDRemote = nil;
 			break;
 		}
 
-		[hidAttribsDict setObject:[NSNumber numberWithUnsignedInt:(unsigned int)serviceNotification] forKey:kHIDRemoteServiceNotification];
+		hidAttribsDict[kHIDRemoteServiceNotification] = @((unsigned int)serviceNotification);
 		
 		// Retain service
 		if (IOObjectRetain(service) != kIOReturnSuccess)
@@ -1274,7 +1268,7 @@ static HIDRemote *sHIDRemote = nil;
 			break;
 		}
 		
-		[hidAttribsDict setObject:[NSNumber numberWithUnsignedInt:(unsigned int)service] forKey:kHIDRemoteService];
+		hidAttribsDict[kHIDRemoteService] = @((unsigned int)service);
 		
 		// Get some (somewhat optional) infos on the device
 		{
@@ -1287,7 +1281,7 @@ static HIDRemote *sHIDRemote = nil;
 			{
 				if (CFGetTypeID(product) == CFStringGetTypeID())
 				{
-					[hidAttribsDict setObject:(__bridge NSString *)product forKey:kHIDRemoteProduct];
+					hidAttribsDict[kHIDRemoteProduct] = (__bridge NSString *)product;
 				}
 				
 				CFRelease(product);
@@ -1300,7 +1294,7 @@ static HIDRemote *sHIDRemote = nil;
 			{
 				if (CFGetTypeID(manufacturer) == CFStringGetTypeID())
 				{
-					[hidAttribsDict setObject:(__bridge NSString *)manufacturer forKey:kHIDRemoteManufacturer];
+					hidAttribsDict[kHIDRemoteManufacturer] = (__bridge NSString *)manufacturer;
 				}
 				
 				CFRelease(manufacturer);
@@ -1313,7 +1307,7 @@ static HIDRemote *sHIDRemote = nil;
 			{
 				if (CFGetTypeID(transport) == CFStringGetTypeID())
 				{
-					[hidAttribsDict setObject:(__bridge NSString *)transport forKey:kHIDRemoteTransport];
+					hidAttribsDict[kHIDRemoteTransport] = (__bridge NSString *)transport;
 				}
 				
 				CFRelease(transport);
@@ -1336,17 +1330,15 @@ static HIDRemote *sHIDRemote = nil;
 					// There is => request the driver to enable it for us
 					if (IORegistryEntrySetCFProperty((io_registry_entry_t)service,
 									 CFSTR("EnableAluminumRemoteSupportForMe"),
-									 (__bridge CFTypeRef)([NSDictionary dictionaryWithObjectsAndKeys:
-										[NSNumber numberWithLongLong:(long long)getpid()],	@"pid",
-										[NSNumber numberWithLongLong:(long long)getuid()],	@"uid",
-									 nil])) == kIOReturnSuccess)
+									 (__bridge CFTypeRef)(@{@"pid": @((long long)getpid()),
+										@"uid": @((long long)getuid())})) == kIOReturnSuccess)
 					{
 						if (CFGetTypeID(aluSupport) == CFNumberGetTypeID())
 						{
 							supportLevel = (HIDRemoteAluminumRemoteSupportLevel) [(__bridge NSNumber *)aluSupport intValue];
 						}
 
-						[hidAttribsDict setObject:[NSNumber numberWithBool:YES] forKey:kHIDRemoteAluminumRemoteSupportOnDemand];
+						hidAttribsDict[kHIDRemoteAluminumRemoteSupportOnDemand] = @YES;
 					}
 					
 					CFRelease(aluSupport);
@@ -1402,11 +1394,11 @@ static HIDRemote *sHIDRemote = nil;
 				}
 			}
 
-			[hidAttribsDict setObject:(NSNumber *)[NSNumber numberWithInt:(int)supportLevel] forKey:kHIDRemoteAluminumRemoteSupportLevel];
+			hidAttribsDict[kHIDRemoteAluminumRemoteSupportLevel] = (NSNumber *)@((int)supportLevel);
 		}
 		
 		// Add it to the serviceAttribMap
-		[_serviceAttribMap setObject:hidAttribsDict forKey:[NSNumber numberWithUnsignedInt:(unsigned int)service]];
+		_serviceAttribMap[@((unsigned int)service)] = hidAttribsDict;
 		
 		// And we're done with setup ..
 		if (([self delegate]!=nil) &&
@@ -1430,7 +1422,7 @@ static HIDRemote *sHIDRemote = nil;
 		{
 			error = [NSError errorWithDomain:[error domain] 
 						    code:[error code]
-						userInfo:[NSDictionary dictionaryWithObject:[NSNumber numberWithInt:errorCode] forKey:@"InternalErrorCode"]
+						userInfo:@{@"InternalErrorCode": [NSNumber numberWithInt:errorCode]}
 				];
 		}
 
@@ -1497,12 +1489,12 @@ static HIDRemote *sHIDRemote = nil;
 	NSNumber	    *serviceValue;
 	NSMutableDictionary *serviceDict = NULL;
 	
-	if ((serviceValue = [NSNumber numberWithUnsignedInt:(unsigned int)service]) == nil)
+	if ((serviceValue = @((unsigned int)service)) == nil)
 	{
 		return;
 	}
 	
-	serviceDict  = [_serviceAttribMap objectForKey:serviceValue];
+	serviceDict  = _serviceAttribMap[serviceValue];
 	
 	if (serviceDict!=nil)
 	{
@@ -1515,26 +1507,24 @@ static HIDRemote *sHIDRemote = nil;
 		NSMutableDictionary	 *cookieButtonMap	= nil;
 		NSTimer			 *simulateHoldTimer	= nil;
 
-		serviceNotification = (io_object_t)			([serviceDict objectForKey:kHIDRemoteServiceNotification]	? [[serviceDict objectForKey:kHIDRemoteServiceNotification] unsignedIntValue] :   0);
-		theService	    = (io_object_t)			([serviceDict objectForKey:kHIDRemoteService]			? [[serviceDict objectForKey:kHIDRemoteService]		    unsignedIntValue] :   0);
-		queueEventSource    = (CFRunLoopSourceRef)		([serviceDict objectForKey:kHIDRemoteCFRunLoopSource]		? [[serviceDict objectForKey:kHIDRemoteCFRunLoopSource]	    pointerValue]     : NULL);
-		hidQueueInterface   = (IOHIDQueueInterface **)		([serviceDict objectForKey:kHIDRemoteHIDQueueInterface]		? [[serviceDict objectForKey:kHIDRemoteHIDQueueInterface]   pointerValue]     : NULL);
-		hidDeviceInterface  = (IOHIDDeviceInterface122 **)	([serviceDict objectForKey:kHIDRemoteHIDDeviceInterface]	? [[serviceDict objectForKey:kHIDRemoteHIDDeviceInterface]  pointerValue]     : NULL);
-		cfPluginInterface   = (IOCFPlugInInterface **)		([serviceDict objectForKey:kHIDRemoteCFPluginInterface]		? [[serviceDict objectForKey:kHIDRemoteCFPluginInterface]   pointerValue]     : NULL);
-		cookieButtonMap	    = (NSMutableDictionary *)		 [serviceDict objectForKey:kHIDRemoteCookieButtonCodeLUT];
-		simulateHoldTimer   = (NSTimer *)			 [serviceDict objectForKey:kHIDRemoteSimulateHoldEventsTimer];
+		serviceNotification = (io_object_t)			(serviceDict[kHIDRemoteServiceNotification]	? [serviceDict[kHIDRemoteServiceNotification] unsignedIntValue] :   0);
+		theService	    = (io_object_t)			(serviceDict[kHIDRemoteService]			? [serviceDict[kHIDRemoteService]		    unsignedIntValue] :   0);
+		queueEventSource    = (CFRunLoopSourceRef)		(serviceDict[kHIDRemoteCFRunLoopSource]		? [serviceDict[kHIDRemoteCFRunLoopSource]	    pointerValue]     : NULL);
+		hidQueueInterface   = (IOHIDQueueInterface **)		(serviceDict[kHIDRemoteHIDQueueInterface]		? [serviceDict[kHIDRemoteHIDQueueInterface]   pointerValue]     : NULL);
+		hidDeviceInterface  = (IOHIDDeviceInterface122 **)	(serviceDict[kHIDRemoteHIDDeviceInterface]	? [serviceDict[kHIDRemoteHIDDeviceInterface]  pointerValue]     : NULL);
+		cfPluginInterface   = (IOCFPlugInInterface **)		(serviceDict[kHIDRemoteCFPluginInterface]		? [serviceDict[kHIDRemoteCFPluginInterface]   pointerValue]     : NULL);
+		cookieButtonMap	    = (NSMutableDictionary *)		 serviceDict[kHIDRemoteCookieButtonCodeLUT];
+		simulateHoldTimer   = (NSTimer *)			 serviceDict[kHIDRemoteSimulateHoldEventsTimer];
 		
 		[_serviceAttribMap removeObjectForKey:serviceValue];
 
-		if (([serviceDict objectForKey:kHIDRemoteAluminumRemoteSupportOnDemand]!=nil) && [[serviceDict objectForKey:kHIDRemoteAluminumRemoteSupportOnDemand] boolValue] && (theService != 0))
+		if ((serviceDict[kHIDRemoteAluminumRemoteSupportOnDemand]!=nil) && [serviceDict[kHIDRemoteAluminumRemoteSupportOnDemand] boolValue] && (theService != 0))
 		{
 			// We previously requested the driver to enable Aluminum Remote support for us. Tell it to turn it off again - now that we no longer need it
 			IORegistryEntrySetCFProperty(	(io_registry_entry_t)theService,
 							CFSTR("DisableAluminumRemoteSupportForMe"),
-							(__bridge CFTypeRef)([NSDictionary dictionaryWithObjectsAndKeys:
-								[NSNumber numberWithLongLong:(long long)getpid()],	@"pid",
-								[NSNumber numberWithLongLong:(long long)getuid()],	@"uid",
-							nil]));
+							(__bridge CFTypeRef)(@{@"pid": @((long long)getpid()),
+								@"uid": @((long long)getuid())}));
 		}
 
 		if (([self delegate]!=nil) &&
@@ -1610,8 +1600,8 @@ static HIDRemote *sHIDRemote = nil;
 	
 	if ((hidAttribsDict = (NSMutableDictionary *)[aTimer userInfo]) != nil)
 	{
-		if (((shTimer	   = [hidAttribsDict objectForKey:kHIDRemoteSimulateHoldEventsTimer]) != nil) &&
-		    ((shButtonCode = [hidAttribsDict objectForKey:kHIDRemoteSimulateHoldEventsOriginButtonCode]) != nil)) 
+		if (((shTimer	   = hidAttribsDict[kHIDRemoteSimulateHoldEventsTimer]) != nil) &&
+		    ((shButtonCode = hidAttribsDict[kHIDRemoteSimulateHoldEventsOriginButtonCode]) != nil)) 
 		{
 			[shTimer invalidate];
 			[hidAttribsDict removeObjectForKey:kHIDRemoteSimulateHoldEventsTimer];
@@ -1636,15 +1626,15 @@ static HIDRemote *sHIDRemote = nil;
 				NSTimer  *shTimer = nil;
 				NSNumber *shButtonCode = nil;
 
-				[[hidAttribsDict objectForKey:kHIDRemoteSimulateHoldEventsTimer] invalidate];
+				[hidAttribsDict[kHIDRemoteSimulateHoldEventsTimer] invalidate];
 
 				if (isPressed)
 				{
-					[hidAttribsDict setObject:[NSNumber numberWithUnsignedInt:buttonCode] forKey:kHIDRemoteSimulateHoldEventsOriginButtonCode];
+					hidAttribsDict[kHIDRemoteSimulateHoldEventsOriginButtonCode] = [NSNumber numberWithUnsignedInt:buttonCode];
 				
 					if ((shTimer = [[NSTimer alloc] initWithFireDate:[NSDate dateWithTimeIntervalSinceNow:0.7] interval:0.1 target:self selector:@selector(_simulateHoldEvent:) userInfo:hidAttribsDict repeats:NO]) != nil)
 					{
-						[hidAttribsDict setObject:shTimer forKey:kHIDRemoteSimulateHoldEventsTimer];
+						hidAttribsDict[kHIDRemoteSimulateHoldEventsTimer] = shTimer;
 					
 						// Using CFRunLoopAddTimer instead of [[NSRunLoop currentRunLoop] addTimer:.. for consistency with run loop modes.
 						// The kCFRunLoopCommonModes counterpart NSRunLoopCommonModes is only available in 10.5 and later, whereas this code
@@ -1656,8 +1646,8 @@ static HIDRemote *sHIDRemote = nil;
 				}
 				else
 				{
-					shTimer	     = [hidAttribsDict objectForKey:kHIDRemoteSimulateHoldEventsTimer];
-					shButtonCode = [hidAttribsDict objectForKey:kHIDRemoteSimulateHoldEventsOriginButtonCode];
+					shTimer	     = hidAttribsDict[kHIDRemoteSimulateHoldEventsTimer];
+					shButtonCode = hidAttribsDict[kHIDRemoteSimulateHoldEventsOriginButtonCode];
 				
 					if ((shTimer!=nil) && (shButtonCode!=nil))
 					{
@@ -1701,7 +1691,7 @@ static HIDRemote *sHIDRemote = nil;
 				}
 				else
 				{
-					switch ((HIDRemoteAluminumRemoteSupportLevel)[[hidAttribsDict objectForKey:kHIDRemoteAluminumRemoteSupportLevel] intValue])
+					switch ((HIDRemoteAluminumRemoteSupportLevel)[hidAttribsDict[kHIDRemoteAluminumRemoteSupportLevel] intValue])
 					{
 						case kHIDRemoteAluminumRemoteSupportLevelNone:
 						case kHIDRemoteAluminumRemoteSupportLevelEmulation:
@@ -1734,13 +1724,13 @@ static HIDRemote *sHIDRemote = nil;
 
 - (void)_hidEventFor:(io_service_t)hidDevice from:(IOHIDQueueInterface **)interface withResult:(IOReturn)result
 {
-	NSMutableDictionary *hidAttribsDict = [_serviceAttribMap objectForKey:[NSNumber numberWithUnsignedInt:(unsigned int)hidDevice]];
+	NSMutableDictionary *hidAttribsDict = _serviceAttribMap[@((unsigned int)hidDevice)];
 	
 	if (hidAttribsDict!=nil)
 	{
 		IOHIDQueueInterface **queueInterface  = NULL;
 		
-		queueInterface  = [[hidAttribsDict objectForKey:kHIDRemoteHIDQueueInterface] pointerValue];
+		queueInterface  = [hidAttribsDict[kHIDRemoteHIDQueueInterface] pointerValue];
 		
 		if (interface == queueInterface)
 		{
@@ -1748,9 +1738,9 @@ static HIDRemote *sHIDRemote = nil;
 			HIDRemoteButtonCode  lastButtonPressed = kHIDRemoteButtonCodeNone;
 			NSMutableDictionary *cookieButtonMap = nil;
 			
-			cookieButtonMap  = [hidAttribsDict objectForKey:kHIDRemoteCookieButtonCodeLUT];
+			cookieButtonMap  = hidAttribsDict[kHIDRemoteCookieButtonCodeLUT];
 
-			if ((lastButtonPressedNumber = [hidAttribsDict objectForKey:kHIDRemoteLastButtonPressed]) != nil)
+			if ((lastButtonPressedNumber = hidAttribsDict[kHIDRemoteLastButtonPressed]) != nil)
 			{
 				lastButtonPressed = [lastButtonPressedNumber unsignedIntValue];
 			}
@@ -1767,7 +1757,7 @@ static HIDRemote *sHIDRemote = nil;
 									
 				if (result == kIOReturnSuccess)
 				{
-					NSNumber *buttonCodeNumber = [cookieButtonMap objectForKey:[NSNumber numberWithUnsignedInt:(unsigned int) hidEvent.elementCookie]];
+					NSNumber *buttonCodeNumber = cookieButtonMap[@((unsigned int) hidEvent.elementCookie)];
 					
 					#ifdef _HIDREMOTE_EXTENSIONS
 						// Debug logging code
@@ -1816,7 +1806,7 @@ static HIDRemote *sHIDRemote = nil;
 				}
 			};
 		
-			[hidAttribsDict setObject:[NSNumber numberWithUnsignedInt:lastButtonPressed] forKey:kHIDRemoteLastButtonPressed];
+			hidAttribsDict[kHIDRemoteLastButtonPressed] = [NSNumber numberWithUnsignedInt:lastButtonPressed];
 		}
 		
 		#ifdef _HIDREMOTE_EXTENSIONS
@@ -1878,7 +1868,7 @@ static HIDRemote *sHIDRemote = nil;
 							NSNumber *onConsole;
 							NSNumber *userID;
 						
-							if ((secureInputPID = [consoleUserDict objectForKey:@"kCGSSessionSecureInputPID"]) != nil)
+							if ((secureInputPID = consoleUserDict[@"kCGSSessionSecureInputPID"]) != nil)
 							{
 								if ([secureInputPID isKindOfClass:[NSNumber class]])
 								{
@@ -1886,8 +1876,8 @@ static HIDRemote *sHIDRemote = nil;
 								}
 							}
 							
-							if (((onConsole = [consoleUserDict objectForKey:@"kCGSSessionOnConsoleKey"]) != nil) &&
-							    ((userID    = [consoleUserDict objectForKey:@"kCGSSessionUserIDKey"]) != nil))
+							if (((onConsole = consoleUserDict[@"kCGSSessionOnConsoleKey"]) != nil) &&
+							    ((userID    = consoleUserDict[@"kCGSSessionUserIDKey"]) != nil))
 							{
 								if ([onConsole isKindOfClass:[NSNumber class]] && [userID isKindOfClass:[NSNumber class]])
 								{

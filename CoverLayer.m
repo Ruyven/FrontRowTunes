@@ -22,15 +22,12 @@
 
 - (void)drawInContext:(CGContextRef)ctx {
 	if (coverImage != nil) {
-		[CATransaction setValue:[NSNumber numberWithFloat:0.5f] forKey:kCATransactionAnimationDuration];
+		[CATransaction setValue:@0.5f forKey:kCATransactionAnimationDuration];
 		
 		double gradientBrightness = whiteBackground ? 1.0 : 0.0;
 		
 		// context options
-		NSDictionary *contextOptions = [NSDictionary
-		                                dictionaryWithObjectsAndKeys:(__bridge id)colorSpace,
-		                                kCIContextWorkingColorSpace, (__bridge id)colorSpace,
-		                                kCIContextOutputColorSpace, nil];
+		NSDictionary *contextOptions = @{kCIContextWorkingColorSpace: (__bridge id)colorSpace, kCIContextOutputColorSpace: (__bridge id)colorSpace};
 
 
 		CGFloat width = [self bounds].size.width;

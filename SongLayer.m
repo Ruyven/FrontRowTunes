@@ -87,7 +87,7 @@
 		[CATransaction setValue:(id) kCFBooleanTrue forKey:kCATransactionDisableActions];
 	}
 	else {
-		[CATransaction setValue:[NSNumber numberWithFloat:duration] forKey:kCATransactionAnimationDuration];
+		[CATransaction setValue:@(duration) forKey:kCATransactionAnimationDuration];
 	}
 
 
@@ -96,18 +96,18 @@
 	CGFloat height = self.bounds.size.height;
 
 	NSMutableDictionary *songnameAttributes = [[NSMutableDictionary alloc] init];
-	[songnameAttributes setObject:[NSFont fontWithName:@"Lucida Grande Bold" size:height * .06] forKey:NSFontAttributeName];
-	[songnameAttributes setObject:foregroundColor forKey:NSForegroundColorAttributeName];
+	songnameAttributes[NSFontAttributeName] = [NSFont fontWithName:@"Lucida Grande Bold" size:height * .06];
+	songnameAttributes[NSForegroundColorAttributeName] = foregroundColor;
 //	[songnameAttributes setObject:[NSColor whiteColor] forKey:NSBoldFontMask];
 
 
 	NSMutableDictionary *artistAttributes = [[NSMutableDictionary alloc] init];
-	[artistAttributes setObject:[NSFont fontWithName:@"Lucida Grande" size:height * .04] forKey:NSFontAttributeName];
-	[artistAttributes setObject:lightForegroundColor forKey:NSForegroundColorAttributeName];
+	artistAttributes[NSFontAttributeName] = [NSFont fontWithName:@"Lucida Grande" size:height * .04];
+	artistAttributes[NSForegroundColorAttributeName] = lightForegroundColor;
     
 	NSMutableDictionary *ratingAttributes = [[NSMutableDictionary alloc] init];
-	[ratingAttributes setObject:[NSFont fontWithName:@"Lucida Grande" size:height * .04] forKey:NSFontAttributeName];
-	[ratingAttributes setObject:foregroundColor forKey:NSForegroundColorAttributeName];
+	ratingAttributes[NSFontAttributeName] = [NSFont fontWithName:@"Lucida Grande" size:height * .04];
+	ratingAttributes[NSForegroundColorAttributeName] = foregroundColor;
 
 //	songnameAttributes = [[NSDictionary alloc] initWithObjectsAndKeys:NSFontAttributeName, [NSFont fontWithName:@"Lucida Grande" size:height*0.05], NSForegroundColorAttributeName, [NSColor whiteColor], nil];
 //	artistAttributes = [[NSDictionary alloc] initWithObjectsAndKeys:NSFontAttributeName, [NSFont fontWithName:@"Lucida Grande" size:height*0.04], NSForegroundColorAttributeName, [NSColor colorWithCalibratedHue:0 saturation:0 brightness:.9 alpha:0], nil];
@@ -192,8 +192,8 @@
 		}
 
 		// pause icon
-		CALayer *pausePart1 = [[pauseLayer sublayers] objectAtIndex:0];
-		CALayer *pausePart2 = [[pauseLayer sublayers] objectAtIndex:1];
+		CALayer *pausePart1 = [pauseLayer sublayers][0];
+		CALayer *pausePart2 = [pauseLayer sublayers][1];
 		pausePart1.backgroundColor = foregroundCGColor;
 		pausePart2.backgroundColor = foregroundCGColor;
 		pausePart1.bounds = CGRectMake(0, 0, layerDiameter * .4, layerDiameter);
@@ -263,7 +263,7 @@
 	SBElementArray *trackArtworks = [track artworks];
 	if ([trackArtworks count] > 0) {
 		coverLayer.opacity = 1;
-		[coverLayer setCoverImageWithData:[[trackArtworks objectAtIndex:0] rawData]];
+		[coverLayer setCoverImageWithData:[trackArtworks[0] rawData]];
 		coverExists = YES;
 	}
 	else {

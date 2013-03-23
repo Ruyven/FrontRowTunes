@@ -183,7 +183,7 @@
 
 - (void)activateNewLayer {
 	[CATransaction setAnimationTimingFunction:[CAMediaTimingFunction functionWithName:kCAMediaTimingFunctionEaseOut]];
-	[CATransaction setValue:[NSNumber numberWithFloat:0.5f] forKey:kCATransactionAnimationDuration];
+	[CATransaction setValue:@0.5f forKey:kCATransactionAnimationDuration];
 	activeSongLayer.opacity = 1;
 	[activeSongLayer setAffineTransform:CGAffineTransformMake(1, 0, 0, 1, 0, 0)];
 	
@@ -217,7 +217,7 @@
 			// screen change is not allowed when the song is changed, otherwise the new songLayer would be too small
 			
 			// if animate is YES, you can see the window resize over to the other display
-			[self.window setFrame:[[screenArray objectAtIndex:screen] frame] display:YES animate:YES];
+			[self.window setFrame:[screenArray[screen] frame] display:YES animate:YES];
 		}
 	} else if ([character isEqualToString:@" "]) {
 		[iTunes playpause];
@@ -272,7 +272,7 @@
 		[activeSongLayer setDisplayPlayerPositionBar:displayPlayerPositionBar];
 		[activeSongLayer updateWithDuration:.5];
 	} else if ([character isEqualToString:@"w"]) {
-		[CATransaction setValue:[NSNumber numberWithFloat:0.5f] forKey:kCATransactionAnimationDuration];
+		[CATransaction setValue:@0.5f forKey:kCATransactionAnimationDuration];
 		whiteBackground = YES;
 		[activeSongLayer setWhiteBackground:YES];
 		CGColorRef whiteColor = CGColorCreateGenericRGB(1, 1, 1, 1);
@@ -280,7 +280,7 @@
 		CGColorRelease(whiteColor);
 		[activeSongLayer updateWithDuration:0.5];
 	} else if ([character isEqualToString:@"b"]) {
-		[CATransaction setValue:[NSNumber numberWithFloat:0.5f] forKey:kCATransactionAnimationDuration];
+		[CATransaction setValue:@0.5f forKey:kCATransactionAnimationDuration];
 		whiteBackground = NO;
 		[activeSongLayer setWhiteBackground:NO];
 		CGColorRef blackColor = CGColorCreateGenericRGB(0, 0, 0, 1);
