@@ -11,6 +11,7 @@
 @interface CoverLayer : CALayer {
 	CIImage *coverImage;
 	BOOL whiteBackground;
+    CGColorSpaceRef colorSpace;
 }
 
 - (void)setCoverImageWithData:(NSData *)data;

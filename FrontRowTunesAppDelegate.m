@@ -7,28 +7,26 @@
 //
 
 #import "FrontRowTunesAppDelegate.h"
-#import <IOKit/pwr_mgt/IOPMLib.h>
 
 @implementation FrontRowTunesAppDelegate
 
 @synthesize window;
 
-IOPMAssertionID assertionID;
-
 - (void)applicationDidFinishLaunching:(NSNotification *)aNotification {
 	// prevent the display from sleeping
 	/*IOReturn success = */
-	IOPMAssertionCreateWithName(kIOPMAssertionTypeNoDisplaySleep, kIOPMAssertionLevelOn, (CFStringRef)@"FrontRowTunes", &assertionID);
+	IOPMAssertionCreateWithName(kIOPMAssertionTypeNoDisplaySleep, kIOPMAssertionLevelOn, (CFStringRef)@"FrontRowTunes", &assertionID); // display sleep prevention
 	
 	// create a RemoteController instance
 	remoteController = [[RemoteController alloc] init];
 	[remoteController setSongView:songView];
 }
 
+
 - (void)applicationWillTerminate:(NSNotification *)notification {
 	// this will get called if the application is quit, but not if it is killed or crashes!
 	/*IOReturn success = */
-	IOPMAssertionRelease(assertionID);
+	IOPMAssertionRelease(assertionID); // display sleep prevention
 	
 }
 

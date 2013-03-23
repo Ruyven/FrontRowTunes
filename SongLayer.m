@@ -51,7 +51,7 @@
 		timeRemainingLayer.bounds = CGRectMake(-500, 0, 500, 50);
 		[self addSublayer:timeRemainingLayer];
 		
-		coverLayer = [CoverLayer layer];
+		coverLayer = [[CoverLayer alloc] init]; // so that init gets called (see CoverLayer.m)
 		[self addSublayer:coverLayer];
 
 		// Cover dreidimensional drehen
@@ -104,6 +104,10 @@
 	NSMutableDictionary *artistAttributes = [[NSMutableDictionary alloc] init];
 	[artistAttributes setObject:[NSFont fontWithName:@"Lucida Grande" size:height * .04] forKey:NSFontAttributeName];
 	[artistAttributes setObject:lightForegroundColor forKey:NSForegroundColorAttributeName];
+    
+	NSMutableDictionary *ratingAttributes = [[NSMutableDictionary alloc] init];
+	[ratingAttributes setObject:[NSFont fontWithName:@"Lucida Grande" size:height * .04] forKey:NSFontAttributeName];
+	[ratingAttributes setObject:foregroundColor forKey:NSForegroundColorAttributeName];
 
 //	songnameAttributes = [[NSDictionary alloc] initWithObjectsAndKeys:NSFontAttributeName, [NSFont fontWithName:@"Lucida Grande" size:height*0.05], NSForegroundColorAttributeName, [NSColor whiteColor], nil];
 //	artistAttributes = [[NSDictionary alloc] initWithObjectsAndKeys:NSFontAttributeName, [NSFont fontWithName:@"Lucida Grande" size:height*0.04], NSForegroundColorAttributeName, [NSColor colorWithCalibratedHue:0 saturation:0 brightness:.9 alpha:0], nil];
@@ -118,7 +122,7 @@
 		songInfoTextLayer.alignmentMode = kCAAlignmentCenter;
 		songInfoTextLayer.string = string;
 	}
-	else if (track != nil &&[track name] != nil) {
+	else if (track != nil) {
 		// display track info
 		if (coverExists) {
 			songInfoTextLayer.bounds = CGRectMake(0, 0, width * .5, height / 2);
@@ -138,6 +142,19 @@
 		[string appendAttributedString:[[NSAttributedString alloc] initWithString:[track artist] attributes:artistAttributes]];
 		[string appendAttributedString:doubleLinebreak];
 		[string appendAttributedString:[[NSAttributedString alloc] initWithString:[track album] attributes:artistAttributes]];
+        [string appendAttributedString:doubleLinebreak];
+        [string appendAttributedString:doubleLinebreak];
+        
+        NSMutableString *ratingString = [[NSMutableString alloc] init];
+        
+        for (int i = 0; i < 100; i+=20) {
+            if (i < track.rating) {
+                [ratingString appendString:@"★"];
+            } else {
+                [ratingString appendString:@"☆"];
+            }
+        }
+        [string appendAttributedString:[[NSAttributedString alloc] initWithString:ratingString attributes:ratingAttributes]];
 
 		songInfoTextLayer.string = string;
 
@@ -301,7 +318,6 @@
 	if (clockSeconds) {
 		clockLayer.string = [now descriptionWithCalendarFormat:@"%H:%M:%S" timeZone:nil locale:nil];
 	} else {
-        [now thLocale:<#(id)#>]
 		clockLayer.string = [now descriptionWithCalendarFormat:@"%H:%M" timeZone:nil locale:nil];
 	}
 }

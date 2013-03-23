@@ -14,6 +14,12 @@
 
 @synthesize whiteBackground;
 
+- (id)init {
+    self = [super init];
+    colorSpace = CGColorSpaceCreateWithName(kCGColorSpaceGenericRGB);
+    return self;
+}
+
 - (void)drawInContext:(CGContextRef)ctx {
 	if (coverImage != nil) {
 		[CATransaction setValue:[NSNumber numberWithFloat:0.5f] forKey:kCATransactionAnimationDuration];
@@ -21,10 +27,9 @@
 		double gradientBrightness = whiteBackground ? 1.0 : 0.0;
 		
 		// context options
-		CGColorSpaceRef colorSpace = CGColorSpaceCreateWithName(kCGColorSpaceGenericRGB);
 		NSDictionary *contextOptions = [NSDictionary
-		                                dictionaryWithObjectsAndKeys:(id)CFBridgingRelease(colorSpace),
-		                                kCIContextWorkingColorSpace, (id)CFBridgingRelease(colorSpace),
+		                                dictionaryWithObjectsAndKeys:(__bridge id)colorSpace,
+		                                kCIContextWorkingColorSpace, (__bridge id)colorSpace,
 		                                kCIContextOutputColorSpace, nil];
 
 

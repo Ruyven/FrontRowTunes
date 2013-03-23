@@ -16,13 +16,12 @@
 		FA1930CD1268C4530032A143 /* MainWindow.m in Sources */ = {isa = PBXBuildFile; fileRef = FA1930CC1268C4530032A143 /* MainWindow.m */; };
 		FA1931011268CA410032A143 /* SongLayer.m in Sources */ = {isa = PBXBuildFile; fileRef = FA1931001268CA410032A143 /* SongLayer.m */; };
 		FA1931A61268D1B50032A143 /* CoverLayer.m in Sources */ = {isa = PBXBuildFile; fileRef = FA1931A51268D1B50032A143 /* CoverLayer.m */; };
-		FA57C591126B33750054C817 /* HIDRemote.m in Sources */ = {isa = PBXBuildFile; fileRef = FA57C58E126B33750054C817 /* HIDRemote.m */; };
-		FA57C592126B33750054C817 /* README.txt in Resources */ = {isa = PBXBuildFile; fileRef = FA57C590126B33750054C817 /* README.txt */; };
 		FA57C598126B33CA0054C817 /* RemoteController.m in Sources */ = {isa = PBXBuildFile; fileRef = FA57C597126B33CA0054C817 /* RemoteController.m */; };
 		FA8A0C4B16FC7886008A6779 /* QuartzCore.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = FA8A0C4A16FC7886008A6779 /* QuartzCore.framework */; };
 		FA8A0C4D16FC78A7008A6779 /* ScriptingBridge.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = FA8A0C4C16FC78A7008A6779 /* ScriptingBridge.framework */; };
 		FA8A0C4F16FC78AE008A6779 /* IOKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = FA8A0C4E16FC78AE008A6779 /* IOKit.framework */; };
 		FABE0A9112BCDBBE0022F455 /* FrontRow.icns in Resources */ = {isa = PBXBuildFile; fileRef = FABE0A9012BCDBBE0022F455 /* FrontRow.icns */; };
+		FABF53CF16FE38D7009AB8A7 /* HIDRemote.m in Sources */ = {isa = PBXBuildFile; fileRef = FABF53CE16FE38D7009AB8A7 /* HIDRemote.m */; };
 		FAF6248516FC9CFD004AD978 /* FrontRowTunes.iconset in Resources */ = {isa = PBXBuildFile; fileRef = FAF6248416FC9CFD004AD978 /* FrontRowTunes.iconset */; };
 /* End PBXBuildFile section */
 
@@ -48,15 +47,14 @@
 		FA1931A41268D1B50032A143 /* CoverLayer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CoverLayer.h; sourceTree = "<group>"; };
 		FA1931A51268D1B50032A143 /* CoverLayer.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CoverLayer.m; sourceTree = "<group>"; };
 		FA4331DB16FC7D0700B4FA59 /* iTunes.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = iTunes.h; sourceTree = "<group>"; };
-		FA57C58E126B33750054C817 /* HIDRemote.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = HIDRemote.m; sourceTree = "<group>"; };
-		FA57C58F126B33750054C817 /* HIDRemote.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = HIDRemote.h; sourceTree = "<group>"; };
-		FA57C590126B33750054C817 /* README.txt */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = README.txt; sourceTree = "<group>"; };
 		FA57C596126B33CA0054C817 /* RemoteController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = RemoteController.h; sourceTree = "<group>"; };
 		FA57C597126B33CA0054C817 /* RemoteController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = RemoteController.m; sourceTree = "<group>"; };
 		FA8A0C4A16FC7886008A6779 /* QuartzCore.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = QuartzCore.framework; path = /System/Library/Frameworks/QuartzCore.framework; sourceTree = "<absolute>"; };
 		FA8A0C4C16FC78A7008A6779 /* ScriptingBridge.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = ScriptingBridge.framework; path = /System/Library/Frameworks/ScriptingBridge.framework; sourceTree = "<absolute>"; };
 		FA8A0C4E16FC78AE008A6779 /* IOKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = IOKit.framework; path = /System/Library/Frameworks/IOKit.framework; sourceTree = "<absolute>"; };
 		FABE0A9012BCDBBE0022F455 /* FrontRow.icns */ = {isa = PBXFileReference; lastKnownFileType = image.icns; path = FrontRow.icns; sourceTree = "<group>"; };
+		FABF53CD16FE38D7009AB8A7 /* HIDRemote.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = HIDRemote.h; sourceTree = "<group>"; };
+		FABF53CE16FE38D7009AB8A7 /* HIDRemote.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = HIDRemote.m; sourceTree = "<group>"; };
 		FAF6248416FC9CFD004AD978 /* FrontRowTunes.iconset */ = {isa = PBXFileReference; lastKnownFileType = folder.iconset; path = FrontRowTunes.iconset; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -178,9 +176,8 @@
 		FA57C58D126B33750054C817 /* HID Remote Class */ = {
 			isa = PBXGroup;
 			children = (
-				FA57C58E126B33750054C817 /* HIDRemote.m */,
-				FA57C58F126B33750054C817 /* HIDRemote.h */,
-				FA57C590126B33750054C817 /* README.txt */,
+				FABF53CD16FE38D7009AB8A7 /* HIDRemote.h */,
+				FABF53CE16FE38D7009AB8A7 /* HIDRemote.m */,
 			);
 			name = "HID Remote Class";
 			sourceTree = "<group>";
@@ -237,7 +234,6 @@
 			files = (
 				8D11072B0486CEB800E47090 /* InfoPlist.strings in Resources */,
 				1DDD58160DA1D0A300B32029 /* MainMenu.xib in Resources */,
-				FA57C592126B33750054C817 /* README.txt in Resources */,
 				FABE0A9112BCDBBE0022F455 /* FrontRow.icns in Resources */,
 				FAF6248516FC9CFD004AD978 /* FrontRowTunes.iconset in Resources */,
 			);
@@ -256,8 +252,8 @@
 				FA1930CD1268C4530032A143 /* MainWindow.m in Sources */,
 				FA1931011268CA410032A143 /* SongLayer.m in Sources */,
 				FA1931A61268D1B50032A143 /* CoverLayer.m in Sources */,
-				FA57C591126B33750054C817 /* HIDRemote.m in Sources */,
 				FA57C598126B33CA0054C817 /* RemoteController.m in Sources */,
+				FABF53CF16FE38D7009AB8A7 /* HIDRemote.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

@@ -19,6 +19,7 @@
 	
 	CALayer *rootLayer;
 	CALayer *remoteEventLayer;
+    CALayer *infoLayer;
 	SongLayer *activeSongLayer;
 	SongLayer *lastSongLayer;
 	BOOL justChangedTrack;
@@ -32,6 +33,7 @@
 	
 	int keyCode;
 	BOOL whiteBackground;
+    BOOL infoLayerOn;
 	
 	double playerPosition;
 	NSTimer *updatePlayerPositionTimer;
@@ -51,9 +53,13 @@
 
 - (void)updatePlayerPosition;
 
-- (void) showRemoteEvent;
+- (void)showRemoteEvent;
 
 @property BOOL whiteBackground;
 @property (nonatomic) BOOL prevTrack;
+
+@property (weak, nonatomic) IBOutlet NSPanel *infoPanel;
+
+- (IBAction)toggleInfoPanel:(id)sender;
 
 @end

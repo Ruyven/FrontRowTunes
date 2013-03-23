@@ -45,6 +45,8 @@
 	[[NSDistributedNotificationCenter defaultCenter] addObserver:self selector:@selector(getTrack:) name:@"com.apple.iTunes.playerInfo" object:nil];
 
 	updatePlayerPositionTimer = [NSTimer scheduledTimerWithTimeInterval:UPDATEINTERVAL target:self selector:@selector(updatePlayerPosition) userInfo:nil repeats:YES];
+    
+    
 }
 
 - (void)setupLayers {
@@ -215,7 +217,7 @@
 			// screen change is not allowed when the song is changed, otherwise the new songLayer would be too small
 			
 			// if animate is YES, you can see the window resize over to the other display
-			[self.window setFrame:[[screenArray objectAtIndex:screen] frame] display:YES animate:NO];
+			[self.window setFrame:[[screenArray objectAtIndex:screen] frame] display:YES animate:YES];
 		}
 	} else if ([character isEqualToString:@" "]) {
 		[iTunes playpause];
@@ -287,6 +289,8 @@
 		[activeSongLayer updateWithDuration:0.5];
     } else if ([character isEqualToString:@"f"]) {
         [self.window toggleFullScreen:self];
+    } else if ([character isEqualToString:@"i"] || [character isEqualToString:@"h"]) {
+        [self toggleInfoPanel:nil];
 	} else {
 		NSLog(@"keyCode:%d character:%@",[event keyCode],character);
 	}
@@ -357,6 +361,16 @@
 	[CATransaction commit];
 }
 
+- (IBAction)toggleInfoPanel:(id)sender {
+    infoLayerOn = _infoPanel.isVisible;
+    if (infoLayerOn) {
+        [_infoPanel close];
+    } else {
+        [_infoPanel orderFront:nil];
+        [_infoPanel setLevel:1];
+    }
+}
+
 #pragma mark Window Delegate
 
 - (void)mouseEntered:(NSEvent *)theEvent {
@@ -382,5 +396,10 @@
     [super setFrame:frameRect];
     remoteEventLayer.frame = frameRect;
 }
+
+- (void)windowWillClose:(NSNotification *)notification {
+	[NSApp terminate:self];
+}
+
 
 @end
