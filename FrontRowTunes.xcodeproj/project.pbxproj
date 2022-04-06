@@ -22,7 +22,7 @@
 		FA8A0C4F16FC78AE008A6779 /* IOKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = FA8A0C4E16FC78AE008A6779 /* IOKit.framework */; };
 		FABE0A9112BCDBBE0022F455 /* FrontRow.icns in Resources */ = {isa = PBXBuildFile; fileRef = FABE0A9012BCDBBE0022F455 /* FrontRow.icns */; };
 		FABF53CF16FE38D7009AB8A7 /* HIDRemote.m in Sources */ = {isa = PBXBuildFile; fileRef = FABF53CE16FE38D7009AB8A7 /* HIDRemote.m */; };
-		FAF6248516FC9CFD004AD978 /* FrontRowTunes.iconset in Resources */ = {isa = PBXBuildFile; fileRef = FAF6248416FC9CFD004AD978 /* FrontRowTunes.iconset */; };
+		FABF53D116FE5EB0009AB8A7 /* FrontRowTunes.iconset in Resources */ = {isa = PBXBuildFile; fileRef = FABF53D016FE5EB0009AB8A7 /* FrontRowTunes.iconset */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -55,7 +55,7 @@
 		FABE0A9012BCDBBE0022F455 /* FrontRow.icns */ = {isa = PBXFileReference; lastKnownFileType = image.icns; path = FrontRow.icns; sourceTree = "<group>"; };
 		FABF53CD16FE38D7009AB8A7 /* HIDRemote.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = HIDRemote.h; sourceTree = "<group>"; };
 		FABF53CE16FE38D7009AB8A7 /* HIDRemote.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = HIDRemote.m; sourceTree = "<group>"; };
-		FAF6248416FC9CFD004AD978 /* FrontRowTunes.iconset */ = {isa = PBXFileReference; lastKnownFileType = folder.iconset; path = FrontRowTunes.iconset; sourceTree = "<group>"; };
+		FABF53D016FE5EB0009AB8A7 /* FrontRowTunes.iconset */ = {isa = PBXFileReference; lastKnownFileType = folder.iconset; path = FrontRowTunes.iconset; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -144,8 +144,8 @@
 		29B97317FDCFA39411CA2CEA /* Resources */ = {
 			isa = PBXGroup;
 			children = (
-				FAF6248416FC9CFD004AD978 /* FrontRowTunes.iconset */,
 				FABE0A9012BCDBBE0022F455 /* FrontRow.icns */,
+				FABF53D016FE5EB0009AB8A7 /* FrontRowTunes.iconset */,
 				8D1107310486CEB800E47090 /* FrontRowTunes-Info.plist */,
 				089C165CFE840E0CC02AAC07 /* InfoPlist.strings */,
 				1DDD58140DA1D0A300B32029 /* MainMenu.xib */,
@@ -235,7 +235,7 @@
 				8D11072B0486CEB800E47090 /* InfoPlist.strings in Resources */,
 				1DDD58160DA1D0A300B32029 /* MainMenu.xib in Resources */,
 				FABE0A9112BCDBBE0022F455 /* FrontRow.icns in Resources */,
-				FAF6248516FC9CFD004AD978 /* FrontRowTunes.iconset in Resources */,
+				FABF53D116FE5EB0009AB8A7 /* FrontRowTunes.iconset in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

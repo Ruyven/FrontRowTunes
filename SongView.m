@@ -20,7 +20,7 @@
 	justChangedTrack = NO;
 	allowScreenChange = YES;
 	
-	// ToDo: einstellbar machen
+	// ToDo: einstellbar machen, bzw. letzte Einstellung speichern
 	displayPlayerPositionBar = YES;
 	displayPlayerPositionLabel = NO;
 	displayClock = NO;
@@ -246,7 +246,7 @@
 /*	} else if (keyCode == 123 || keyCode == 124) {
 		switchTrack = YES;*/
 		// ToDo: bei langem drücken spulen, ansonsten nextTrack bzw. backTrack
-		// oder einfach wie iTunes: beim keyDown nextTrack bzw. backTrack
+		// oder einfach wie iTunes lassen: beim keyDown nextTrack bzw. backTrack
 //		[NSTimer 
 		// 123 = previous, 124 = next
 //		[iTunes backTrack];
@@ -258,8 +258,7 @@
 		// rechts
 		self.prevTrack = NO;
 		[iTunes nextTrack];
-	} else if (keyCode == 53 || [character isEqualToString:@"q"] || [character isEqualToString:@"Q"]) {
-		// Esc oder Q
+	} else if ([character isEqualToString:@"q"] || [character isEqualToString:@"Q"]) {
 		[NSApp terminate:self];
 /*	} else if ([character isEqualToString:@"h"]) {
 		[NSApp hide:self]; // doesn't seem to work.*/
@@ -287,13 +286,15 @@
 		[rootLayer setBackgroundColor:blackColor];
 		CGColorRelease(blackColor);
 		[activeSongLayer updateWithDuration:0.5];
-    } else if ([character isEqualToString:@"f"]) {
+    } else if ([character isEqualToString:@"f"] || (keyCode == 53 && ([self.window styleMask] & NSFullScreenWindowMask) == NSFullScreenWindowMask)) {
+        // esc quits out of fullscreen
         [self.window toggleFullScreen:self];
     } else if ([character isEqualToString:@"i"] || [character isEqualToString:@"h"]) {
         [self toggleInfoPanel:nil];
-	} else {
-		NSLog(@"keyCode:%d character:%@",[event keyCode],character);
 	}
+    /*else {
+		NSLog(@"keyCode:%d character:%@",[event keyCode],character);
+	}*/
 }
 
 - (void)updatePlayerPosition {

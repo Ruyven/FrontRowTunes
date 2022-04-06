@@ -31,11 +31,11 @@
 
 
 		CGFloat width = [self bounds].size.width;
-		
+        
 		CIContext *context = [CIContext contextWithCGContext:ctx options:contextOptions];
 		CIFilter *gradient = [CIFilter filterWithName:@"CILinearGradient"];
 		[gradient setDefaults];
-		[gradient setValue:[CIVector vectorWithX:0 Y:width*.3] forKey:@"inputPoint0"];
+		[gradient setValue:[CIVector vectorWithX:0 Y:width*.5] forKey:@"inputPoint0"];
 		[gradient setValue:[CIVector vectorWithX:0 Y:0] forKey:@"inputPoint1"];
 		[gradient setValue:[CIColor colorWithRed:0 green:0 blue:0 alpha:1] forKey:@"inputColor0"];
 		[gradient setValue:[CIColor colorWithRed:.3 green:.3 blue:.3 alpha:1] forKey:@"inputColor1"];

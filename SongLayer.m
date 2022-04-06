@@ -275,7 +275,7 @@
 }
 
 - (void)dealloc {
-	CGColorRelease(foregroundCGColor); // is that necessary? Or rather: should I do that every time I create a new foregroundCGColor?
+	CGColorRelease(foregroundCGColor); // is that necessary? Or rather: should I maybe do that every time I create a new foregroundCGColor?
 	// ToDo: is there anything else that needs to be released?
 }
 

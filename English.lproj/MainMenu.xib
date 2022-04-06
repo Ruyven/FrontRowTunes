@@ -243,7 +243,7 @@
 				<nil key="NSViewClass"/>
 				<nil key="NSUserInterfaceItemIdentifier"/>
 				<object class="NSView" key="NSWindowView" id="439893737">
-					<reference key="NSNextResponder"/>
+					<nil key="NSNextResponder"/>
 					<int key="NSvFlags">256</int>
 					<object class="NSMutableArray" key="NSSubviews">
 						<bool key="EncodedWithXMLCoder">YES</bool>
@@ -252,14 +252,10 @@
 							<int key="NSvFlags">274</int>
 							<string key="NSFrameSize">{480, 360}</string>
 							<reference key="NSSuperview" ref="439893737"/>
-							<reference key="NSWindow"/>
-							<reference key="NSNextKeyView"/>
 							<string key="NSClassName">SongView</string>
 						</object>
 					</object>
 					<string key="NSFrameSize">{480, 360}</string>
-					<reference key="NSSuperview"/>
-					<reference key="NSWindow"/>
 					<reference key="NSNextKeyView" ref="227189140"/>
 				</object>
 				<string key="NSScreenRect">{{0, 0}, {1680, 1028}}</string>
@@ -293,7 +289,6 @@
 							<string key="NSFrame">{{17, 20}, {494, 323}}</string>
 							<reference key="NSSuperview" ref="639854822"/>
 							<reference key="NSWindow"/>
-							<reference key="NSNextKeyView"/>
 							<string key="NSReuseIdentifierKey">_NS:9</string>
 							<string key="NSAntiCompressionPriority">{250, 750}</string>
 							<bool key="NSEnabled">YES</bool>
@@ -306,12 +301,12 @@ ZC4KClJlbW90ZSBDb250cm9sIFN1cHBvcnQ6IEhJRFJlbW90ZQpDb3B5cmlnaHQgwqkgMjAwNy0yMDEx
 IElPU1BJUklUIEdtYkggKGh0dHA6Ly93d3cuaW9zcGlyaXQuY29tLykKQWxsIHJpZ2h0cyByZXNlcnZl
 ZC4KClNob3J0Y3V0IEtleXM6CuKAoiB3CQkgICAgd2hpdGUgYmFja2dyb3VuZArigKIgYgkJICAgIGJs
 YWNrIGJhY2tncm91bmQK4oCiIGYJCSAgICBmdWxsIHNjcmVlbgrigKIgMSwyLOKApgkgICAgc2hvdyBt
-YXhpbWl6ZWQgb24gZGlmZmVyZW50IHNjcmVlbnMgKHdvcmtzIGluIGZ1bGwgc2NyZWVuIG1vZGUhKQri
-gKIg4oaQLCDihpIJICAgIHN3aXRjaCB0cmFjawrigKIgc3BhY2UJICAgIHBsYXkvcGF1c2UK4oCiIFQg
-LyB0CSAgICB0b2dnbGUgZGlzcGxheSBjdXJyZW50IHRpbWUgd2l0aCAvIHdpdGhvdXQgc2Vjb25kcywg
-cmVzcGVjdGl2ZWx5CuKAoiDihrUJCSAgICB0b2dnbGUgZGlzcGxheSB0cmFjayBwb3NpdGlvbiBpbiBu
-dW1iZXJzCuKAoiBmbivihrUJICAgIHRvZ2dsZSBkaXNwbGF5IHRyYWNrIHBvc2l0aW9uIGJhcgrigKIg
-aSwgaAkgICAgdG9nZ2xlIGRpc3BsYXkgaW5mbyBwYW5lbArigKIgcSwgZXNjCSAgICBxdWl0A</bytes>
+YXhpbWl6ZWQgb24gZGlmZmVyZW50IHNjcmVlbnMK4oCiIOKGkCwg4oaSCSAgICBzd2l0Y2ggdHJhY2sK
+4oCiIHNwYWNlCSAgICBwbGF5L3BhdXNlCuKAoiBUIC8gdAkgICAgdG9nZ2xlIGRpc3BsYXkgY3VycmVu
+dCB0aW1lIHdpdGggLyB3aXRob3V0IHNlY29uZHMsIHJlc3BlY3RpdmVseQrigKIg4oa1CQkgICAgdG9n
+Z2xlIGRpc3BsYXkgdHJhY2sgcG9zaXRpb24gYXMgbTpzcwrigKIgZm4r4oa1CSAgICB0b2dnbGUgZGlz
+cGxheSB0cmFjayBwb3NpdGlvbiBiYXIK4oCiIGksIGgJICAgIHRvZ2dsZSBkaXNwbGF5IHRoaXMgaW5m
+byBwYW5lbArigKIgcQkJICAgIHF1aXQ</bytes>
 								</object>
 								<object class="NSFont" key="NSSupport">
 									<string key="NSName">LucidaGrande</string>
