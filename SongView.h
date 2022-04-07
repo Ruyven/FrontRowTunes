@@ -8,13 +8,10 @@
 
 #import <Cocoa/Cocoa.h>
 #import <QuartzCore/CoreAnimation.h>
-#import "iTunes.h"
+#import "FrontRowTunes-Swift.h"
 #import "SongLayer.h"
 
-
-
 @interface SongView : NSView <NSWindowDelegate> {
-    iTunesApplication *iTunes;
 	NSString *currentSongID;
 	
 	CALayer *rootLayer;
@@ -47,7 +44,7 @@
 - (void)activateNewLayer;
 
 - (void)getTrack:(NSNotification *)notification;
-- (void)setTrack:(iTunesTrack *)track prev:(BOOL)prev;
+- (void)setTrack:(MusicTrack *)track prev:(BOOL)prev;
 
 - (void)resetJustChangedTrack;
 

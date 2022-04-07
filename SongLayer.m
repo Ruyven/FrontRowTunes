@@ -8,7 +8,6 @@
 
 #import "SongLayer.h"
 
-
 @implementation SongLayer
 
 @synthesize track;
@@ -145,16 +144,16 @@
         [string appendAttributedString:doubleLinebreak];
         [string appendAttributedString:doubleLinebreak];
         
-        NSMutableString *ratingString = [[NSMutableString alloc] init];
-        
-        for (int i = 0; i < 100; i+=20) {
-            if (i < track.rating) {
-                [ratingString appendString:@"★"];
-            } else {
-                [ratingString appendString:@"☆"];
-            }
-        }
-        [string appendAttributedString:[[NSAttributedString alloc] initWithString:ratingString attributes:ratingAttributes]];
+//        NSMutableString *ratingString = [[NSMutableString alloc] init];
+//
+//        for (int i = 0; i < 100; i+=20) {
+//            if (i < track.rating) {
+//                [ratingString appendString:@"★"];
+//            } else {
+//                [ratingString appendString:@"☆"];
+//            }
+//        }
+//        [string appendAttributedString:[[NSAttributedString alloc] initWithString:ratingString attributes:ratingAttributes]];
 
 		songInfoTextLayer.string = string;
 
@@ -202,7 +201,7 @@
 		pausePart2.position = CGPointMake(layerDiameter * .6, 0);
 		pauseLayer.frame = CGRectMake(trackDurationLayer.frame.origin.x, durationLayerYPosition, layerDiameter, layerDiameter);
 		
-		if (playerState == iTunesEPlSPaused || playerState == iTunesEPlSStopped) {
+		if (playerState == MusicBridge.PLAYER_STATE_PAUSED || playerState == MusicBridge.PLAYER_STATE_STOPPED) {
 			pauseLayer.opacity = 1;
 			CGRect old = trackDurationLayer.frame;
 			CGFloat moveBy = layerDiameter * 1.2;
@@ -216,7 +215,7 @@
 
 		if (trackDuration != 0 &&
 			(displayPlayerPositionBar || 
-			(!displayPlayerPositionLabel && (playerState == iTunesEPlSFastForwarding || playerState == iTunesEPlSRewinding)))) {
+			(!displayPlayerPositionLabel && (playerState == MusicBridge.PLAYER_STATE_FAST_FORWARDING || playerState == MusicBridge.PLAYER_STATE_REWINDING)))) {
 			
 			trackDurationLayer.opacity = 1;
 			
@@ -256,14 +255,12 @@
 	[self layoutIfNeeded];
 }
 
-- (void)setTrack:(iTunesTrack *)thetrack {
-	track = thetrack;
+- (void)setTrack:(MusicTrack *)thetrack {
+    track = thetrack;
 
-	// update cover
-	SBElementArray *trackArtworks = [track artworks];
-	if ([trackArtworks count] > 0) {
+    if (track.artwork) {
 		coverLayer.opacity = 1;
-		[coverLayer setCoverImageWithData:[trackArtworks[0] rawData]];
+		[coverLayer setCoverImageWithData:track.artwork];
 		coverExists = YES;
 	}
 	else {
@@ -295,11 +292,11 @@
 	}
 }
 
-- (void)setPlayerState:(iTunesEPlS)newPlayerState {
+- (void)setPlayerState:(NSString *)newPlayerState {
 	if (playerState != newPlayerState) {
 		playerState = newPlayerState;
 		if ([track name] != nil) {
-			if (playerState == iTunesEPlSPaused || playerState == iTunesEPlSStopped) {
+			if (playerState == MusicBridge.PLAYER_STATE_PAUSED || playerState == MusicBridge.PLAYER_STATE_STOPPED) {
 				// if changing to a new track while paused, the player state will be 'stopped'!
 				[CATransaction setAnimationDuration:2.0f];
 				[pauseLayer setOpacity:1];

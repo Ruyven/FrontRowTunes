@@ -1,0 +1,131 @@
+//
+//  MusicBridge.swift
+//  FrontRowTunes
+//
+//  Created by Alexander Decker on 7/04/22.
+//
+
+import Foundation
+
+@objc class MusicBridge: NSObject {
+    private static func executeScript(source: String) -> NSAppleEventDescriptor? {
+        var errorInfo: NSDictionary?
+        guard let script = NSAppleScript(source: source) else {
+            print("Failed to create script")
+            return nil
+        }
+
+        let output = script.executeAndReturnError(&errorInfo)
+        if let errorInfo = errorInfo {
+            print("Error: \(errorInfo.description)")
+            return nil
+        }
+        return output
+    }
+    
+    private static func isTrackPlaying() -> Bool {
+        let eventDescriptor = executeScript(source: "tell application \"Music\" to exists current track")
+        return eventDescriptor?.booleanValue ?? false
+    }
+    
+    @objc static func getTrackID() -> String? {
+        let eventDescriptor = executeScript(source: "tell application \"Music\" to get persistent ID of current track")
+        return eventDescriptor?.stringValue
+    }
+    
+    private static func getAlbum() -> String? {
+        return executeScript(source: "tell application \"Music\" to get album of current track")?.stringValue
+    }
+
+    private static func getArtist() -> String? {
+        return executeScript(source: "tell application \"Music\" to get artist of current track")?.stringValue
+    }
+
+    private static func getTrackName() -> String? {
+        return executeScript(source: "tell application \"Music\" to get name of current track")?.stringValue
+    }
+    
+    private static func getArtwork() -> Data? {
+        return executeScript(source: """
+            tell application \"Music\" to tell current track
+                if exists artworks then
+                    get data of artwork 1
+                end if
+            end tell
+        """)?.data
+    }
+    
+    //FIXME: rewrite and use
+//    func downloadMusicArtwork(){
+//            let editedSongArtist = currentSongArtist.replacingOccurrences(of: "&", with: "+", options: .literal, range: nil)
+//            let safeArtistURL = editedSongArtist.addingPercentEncoding(withAllowedCharacters: NSCharacterSet.urlQueryAllowed) ?? ""
+//            let safeSongURL = currentSongName.addingPercentEncoding(withAllowedCharacters: NSCharacterSet.urlQueryAllowed) ?? ""
+//            let safeAlbumURL = currentAlbumName.addingPercentEncoding(withAllowedCharacters: NSCharacterSet.urlQueryAllowed) ?? ""
+//            let stringURL = "https://itunes.apple.com/search?term=\(safeArtistURL)+\(safeAlbumURL)+\(safeSongURL)&country=us&limit=1"
+//            let editedStringURL = stringURL.replacingOccurrences(of: " ", with: "+", options: .literal, range: nil)
+//
+//            let url = URL(string: editedStringURL)
+//            URLSession.shared.dataTask(with:url!, completionHandler: {(data, response, error) in
+//                guard let data = data, error == nil else { return }
+//
+//                do {
+//                    let json = try JSONSerialization.jsonObject(with: data, options: .allowFragments) as? [String:Any]
+//                    let posts = json!["results"] as? [[String: Any]] ?? []
+//                    if posts.count != 0{
+//                        let originalURL = posts[0]["artworkUrl100"] as! String
+//                        let editedURL = originalURL.replacingOccurrences(of: "100x100bb.jpg", with: "600x600bb.jpg", options: .literal, range: nil)
+//                        let imageURL = URL(string: editedURL)!
+//                        DispatchQueue.main.async {
+//                            if self.newSong{
+//                                self.newArtworkURL(url: imageURL)
+//                            }else{
+//                                self.albumArt.image = NSImage(contentsOf: imageURL)
+//                            }
+//                            self.circularProgress.removeFromSuperview()
+//                        }
+//                    }else{
+//                        DispatchQueue.main.async {
+//                            self.noArtwork()
+//                        }
+//                    }
+//
+//
+//                } catch {
+//                    print(error)
+//                }
+//            }).resume()
+//        }
+    
+    private static func getDuration() -> Double? {
+        return executeScript(source: "tell application \"Music\" to get duration of current track")?.doubleValue
+    }
+
+    @objc static func getCurrentTrack() -> MusicTrack? {
+        guard isTrackPlaying(), let trackID = getTrackID() else {
+            return nil
+        }
+        
+        return MusicTrack(
+            id: trackID,
+            name: getTrackName(),
+            artist: getArtist(),
+            album: getAlbum(),
+            artwork: getArtwork(),
+            duration: getDuration() ?? 0
+        )
+    }
+    
+    @objc static let PLAYER_STATE_PLAYING = "playing"
+    @objc static let PLAYER_STATE_PAUSED = "paused"
+    @objc static let PLAYER_STATE_STOPPED = "stopped"
+    @objc static let PLAYER_STATE_FAST_FORWARDING = "fast forwarding"
+    @objc static let PLAYER_STATE_REWINDING = "rewinding"
+    
+    @objc static func getPlayerState() -> String? {
+        return executeScript(source: "tell application \"Music\" to get player state")?.stringValue
+    }
+    
+    @objc static func getPlayerPosition() -> Double {
+        return executeScript(source: "tell application \"Music\" to get player position")?.doubleValue ?? 0
+    }
+}

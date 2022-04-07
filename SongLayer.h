@@ -8,8 +8,8 @@
 
 #import <Cocoa/Cocoa.h>
 #import <QuartzCore/QuartzCore.h>
-#import "iTunes.h"
 #import "CoverLayer.h"
+#import "FrontRowTunes-Swift.h"
 
 #define UPDATEINTERVAL 0.5
 
@@ -27,7 +27,7 @@
 	CGFloat durationLayerHeight;
 	CGFloat durationLayerYPosition;
 	
-	iTunesTrack *track;
+	MusicTrack *track;
 	BOOL coverExists;
 
 	BOOL whiteBackground;
@@ -39,7 +39,7 @@
 	int trackDuration;
 	int playerPosition;
 	
-	iTunesEPlS playerState;
+	NSString *playerState;
 
 	BOOL displayPlayerPositionBar, displayPlayerPositionLabel, displayClock, clockSeconds;
 }
@@ -49,10 +49,10 @@
 - (void)updateWithDuration:(CGFloat)duration;
 - (void)updateClock;
 
-@property (nonatomic, strong) iTunesTrack *track;
+@property (nonatomic, strong) MusicTrack *track;
 @property (nonatomic) BOOL whiteBackground;
 @property (nonatomic) int playerPosition;
-@property (nonatomic) iTunesEPlS playerState;
+@property (nonatomic) NSString *playerState;
 @property BOOL displayPlayerPositionBar, displayPlayerPositionLabel, displayClock, clockSeconds;
 
 @end

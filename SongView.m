@@ -8,14 +8,13 @@
 
 #import "SongView.h"
 
-
 @implementation SongView
 
 @synthesize whiteBackground;
 @synthesize prevTrack;
 
 - (void)awakeFromNib {
-	firstSong = YES;
+    firstSong = YES;
 	switchTrack = NO;
 	justChangedTrack = NO;
 	allowScreenChange = YES;
@@ -31,22 +30,19 @@
 	[self.window makeFirstResponder:self];
     [self.window setDelegate:self];
 
-	// initialize iTunes
-	iTunes = [SBApplication applicationWithBundleIdentifier:@"com.apple.iTunes"];
+	// initialize iTunes //TODO: update comments and method names to Music
 	currentSongID = @"";
-	playerPosition = (double)[iTunes playerPosition];
+	playerPosition = [MusicBridge getPlayerPosition];
 	
 	[self setupLayers];
-	[self getTrack:nil];
-
+    [self setTrack:[MusicBridge getCurrentTrack] prev:nil];
+	
 	// bring the window to the front
 	[self.window makeKeyAndOrderFront:self];
     
-	[[NSDistributedNotificationCenter defaultCenter] addObserver:self selector:@selector(getTrack:) name:@"com.apple.iTunes.playerInfo" object:nil];
+	[[NSDistributedNotificationCenter defaultCenter] addObserver:self selector:@selector(getTrack:) name:@"com.apple.Music.playerInfo" object:nil];
 
 	updatePlayerPositionTimer = [NSTimer scheduledTimerWithTimeInterval:UPDATEINTERVAL target:self selector:@selector(updatePlayerPosition) userInfo:nil repeats:YES];
-    
-    
 }
 
 - (void)setupLayers {
@@ -60,7 +56,7 @@
 	
 	activeSongLayer = [[SongLayer alloc] initWithFrame:[self frame] whiteBackground:whiteBackground];
 	activeSongLayer.playerPosition = playerPosition;
-	[activeSongLayer setPlayerState:[iTunes playerState]];
+	[activeSongLayer setPlayerState:[MusicBridge getPlayerState]];
 	activeSongLayer.displayPlayerPositionBar = displayPlayerPositionBar;
 	activeSongLayer.displayPlayerPositionLabel = displayPlayerPositionLabel;
 	activeSongLayer.displayClock = displayClock;
@@ -87,28 +83,27 @@
 }
 
 - (void)getTrack:(NSNotification *)notification {
-    iTunes = [SBApplication applicationWithBundleIdentifier:@"com.apple.iTunes"]; // am I going to have to do that every time?
-	NSString *songID = [[iTunes currentTrack] persistentID];
-	if (![songID isEqualToString:currentSongID]) {
-		// Lied wurde gewechselt!
-		if (prevTrack) {
-			// wenn das prevTrackEvent nicht länger als drei Sekunden her ist, wurde der Track gerade zurück gewechselt!
-			if (-[prevTrackTimeStamp timeIntervalSinceNow] >= 3) {
-				prevTrack = NO;
-			}
-		}
-		
-		[self setTrack:[iTunes currentTrack] prev:prevTrack];
-		prevTrack = NO;
-		currentSongID = songID;
-	}
-	[activeSongLayer setPlayerState:[iTunes playerState]];
+    MusicTrack *track = [MusicBridge getCurrentTrack];
+    if (![track.id isEqualToString:currentSongID]) {
+        // Lied wurde gewechselt!
+        if (prevTrack) {
+            // wenn das prevTrackEvent nicht länger als drei Sekunden her ist, wurde der Track gerade zurück gewechselt!
+            if (-[prevTrackTimeStamp timeIntervalSinceNow] >= 3) {
+                prevTrack = NO;
+            }
+        }
+        
+        [self setTrack:[MusicBridge getCurrentTrack] prev:prevTrack];
+        prevTrack = NO;
+        currentSongID = track.id;
+    }
+    
+	[activeSongLayer setPlayerState:[MusicBridge getPlayerState]];
 }
 
-- (void)setTrack:(iTunesTrack *)track prev:(BOOL)prev {
-    iTunes = [SBApplication applicationWithBundleIdentifier:@"com.apple.iTunes"]; // am I going to have to do that every time?
-	if (firstSong || justChangedTrack) {
-		[activeSongLayer setTrack:[iTunes currentTrack]];
+- (void)setTrack:(MusicTrack *)track prev:(BOOL)prev {
+    if (firstSong || justChangedTrack) {
+		[activeSongLayer setTrack:track];
 		firstSong = NO;
 	} else {
 		// generate new SongLayer
@@ -145,9 +140,9 @@
 		//	[activeSongLayer setBackgroundColor:CGColorCreateGenericRGB(0, 0, 1, 1)];
 		// auto-resize activeSongLayer as the view is resized
 		[activeSongLayer setAutoresizingMask:kCALayerWidthSizable | kCALayerHeightSizable];
-		[activeSongLayer setTrack:[iTunes currentTrack]];
+		[activeSongLayer setTrack:track];
 		// position is zero, so that doesn't have to be set
-		[activeSongLayer setPlayerState:[iTunes playerState]];
+		[activeSongLayer setPlayerState:[MusicBridge getPlayerState]];
 		if (!prev) {
 			// normale Animation: Layer fängt klein an
 			[activeSongLayer setAffineTransform:CGAffineTransformMakeScale(.2, .2)];
@@ -204,9 +199,7 @@
 }
 
 - (void)keyDown:(NSEvent *)event {
-    iTunes = [SBApplication applicationWithBundleIdentifier:@"com.apple.iTunes"]; // am I going to have to do that every time?
-
-	NSString *character = [event characters];
+    NSString *character = [event characters];
 	int characterInt = [character intValue];
 	keyCode = [event keyCode];
 	
@@ -220,7 +213,7 @@
 			[self.window setFrame:[screenArray[screen] frame] display:YES animate:YES];
 		}
 	} else if ([character isEqualToString:@" "]) {
-		[iTunes playpause];
+        //FIXME: [MusicBridge playpause];
 	} else if ([character isEqualToString:@"t"]) {
 		if (clockSeconds) {
 			clockSeconds = NO;
@@ -253,11 +246,11 @@
 	} else if (keyCode == 123) {
 		// links
 		self.prevTrack = YES;
-		[iTunes backTrack];
+		//FIXME: [iTunes backTrack];
 	} else if (keyCode == 124) {
 		// rechts
 		self.prevTrack = NO;
-		[iTunes nextTrack];
+		//FIXME: [iTunes nextTrack];
 	} else if ([character isEqualToString:@"q"] || [character isEqualToString:@"Q"]) {
 		[NSApp terminate:self];
 /*	} else if ([character isEqualToString:@"h"]) {
@@ -286,7 +279,7 @@
 		[rootLayer setBackgroundColor:blackColor];
 		CGColorRelease(blackColor);
 		[activeSongLayer updateWithDuration:0.5];
-    } else if ([character isEqualToString:@"f"] || (keyCode == 53 && ([self.window styleMask] & NSFullScreenWindowMask) == NSFullScreenWindowMask)) {
+    } else if ([character isEqualToString:@"f"] || (keyCode == 53 && ([self.window styleMask] & NSWindowStyleMaskFullScreen) == NSWindowStyleMaskFullScreen)) {
         // esc quits out of fullscreen
         [self.window toggleFullScreen:self];
     } else if ([character isEqualToString:@"i"] || [character isEqualToString:@"h"]) {
@@ -298,19 +291,18 @@
 }
 
 - (void)updatePlayerPosition {
-    iTunes = [SBApplication applicationWithBundleIdentifier:@"com.apple.iTunes"]; // am I going to have to do that every time?
-	int newPlayerPosition = [iTunes playerPosition];
+    int newPlayerPosition = (int)[MusicBridge getPlayerPosition];
 	
 	if (newPlayerPosition != playerPosition) {
 		if (newPlayerPosition == 0) {
-			NSString *songID = [[iTunes currentTrack] persistentID];
+			NSString *songID = [MusicBridge getTrackID];
 			if ([songID isEqualToString:currentSongID]) {
 				// current song started over
 				self.prevTrack = NO;
 			} else {
 				return; // if song just changed, don't update until the notification reaches FrontRowTunes
 			}
-		} else if (!displayPlayerPositionBar && abs(newPlayerPosition - playerPosition) > 1) {
+        } else if (!displayPlayerPositionBar && fabs(newPlayerPosition - playerPosition) > 1) {
 			// weit gespult, zeig die PlayerPosition irgendwie an (bar anzeigen, wenn label ausgeblendet)
 			activeSongLayer.displayPlayerPositionBar = !displayPlayerPositionLabel;
 			[activeSongLayer updateWithDuration:.1];

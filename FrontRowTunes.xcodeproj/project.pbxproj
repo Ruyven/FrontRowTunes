@@ -23,6 +23,9 @@
 		FABE0A9112BCDBBE0022F455 /* FrontRow.icns in Resources */ = {isa = PBXBuildFile; fileRef = FABE0A9012BCDBBE0022F455 /* FrontRow.icns */; };
 		FABF53CF16FE38D7009AB8A7 /* HIDRemote.m in Sources */ = {isa = PBXBuildFile; fileRef = FABF53CE16FE38D7009AB8A7 /* HIDRemote.m */; };
 		FABF53D116FE5EB0009AB8A7 /* FrontRowTunes.iconset in Resources */ = {isa = PBXBuildFile; fileRef = FABF53D016FE5EB0009AB8A7 /* FrontRowTunes.iconset */; };
+		FAED62AB27FDA23E0007E965 /* iTunesLibrary.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = FAED62AA27FDA23E0007E965 /* iTunesLibrary.framework */; };
+		FAED62AF27FE1F740007E965 /* MusicBridge.swift in Sources */ = {isa = PBXBuildFile; fileRef = FAED62AE27FE1F740007E965 /* MusicBridge.swift */; };
+		FAED62B427FEBE260007E965 /* MusicTrack.swift in Sources */ = {isa = PBXBuildFile; fileRef = FAED62B327FEBE260007E965 /* MusicTrack.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -56,6 +59,10 @@
 		FABF53CD16FE38D7009AB8A7 /* HIDRemote.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = HIDRemote.h; sourceTree = "<group>"; };
 		FABF53CE16FE38D7009AB8A7 /* HIDRemote.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = HIDRemote.m; sourceTree = "<group>"; };
 		FABF53D016FE5EB0009AB8A7 /* FrontRowTunes.iconset */ = {isa = PBXFileReference; lastKnownFileType = folder.iconset; path = FrontRowTunes.iconset; sourceTree = "<group>"; };
+		FAED62AA27FDA23E0007E965 /* iTunesLibrary.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = iTunesLibrary.framework; path = System/Library/Frameworks/iTunesLibrary.framework; sourceTree = SDKROOT; };
+		FAED62AD27FE1F730007E965 /* FrontRowTunes-Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "FrontRowTunes-Bridging-Header.h"; sourceTree = "<group>"; };
+		FAED62AE27FE1F740007E965 /* MusicBridge.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MusicBridge.swift; sourceTree = "<group>"; };
+		FAED62B327FEBE260007E965 /* MusicTrack.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MusicTrack.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -64,6 +71,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				8D11072F0486CEB800E47090 /* Cocoa.framework in Frameworks */,
+				FAED62AB27FDA23E0007E965 /* iTunesLibrary.framework in Frameworks */,
 				FA8A0C4B16FC7886008A6779 /* QuartzCore.framework in Frameworks */,
 				FA8A0C4D16FC78A7008A6779 /* ScriptingBridge.framework in Frameworks */,
 				FA8A0C4F16FC78AE008A6779 /* IOKit.framework in Frameworks */,
@@ -120,6 +128,7 @@
 		29B97314FDCFA39411CA2CEA /* FrontRowTunes */ = {
 			isa = PBXGroup;
 			children = (
+				FAED62AC27FE1F550007E965 /* MusicBridge */,
 				FA57C58D126B33750054C817 /* HID Remote Class */,
 				FA1930FE1268CA2A0032A143 /* Layers */,
 				080E96DDFE201D6D7F000001 /* Classes */,
@@ -156,6 +165,7 @@
 		29B97323FDCFA39411CA2CEA /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
+				FAED62AA27FDA23E0007E965 /* iTunesLibrary.framework */,
 				1058C7A0FEA54F0111CA2CBB /* Linked Frameworks */,
 				1058C7A2FEA54F0111CA2CBB /* Other Frameworks */,
 			);
@@ -180,6 +190,16 @@
 				FABF53CE16FE38D7009AB8A7 /* HIDRemote.m */,
 			);
 			name = "HID Remote Class";
+			sourceTree = "<group>";
+		};
+		FAED62AC27FE1F550007E965 /* MusicBridge */ = {
+			isa = PBXGroup;
+			children = (
+				FAED62AE27FE1F740007E965 /* MusicBridge.swift */,
+				FAED62AD27FE1F730007E965 /* FrontRowTunes-Bridging-Header.h */,
+				FAED62B327FEBE260007E965 /* MusicTrack.swift */,
+			);
+			path = MusicBridge;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -210,12 +230,18 @@
 			isa = PBXProject;
 			attributes = {
 				LastUpgradeCheck = 0460;
+				TargetAttributes = {
+					8D1107260486CEB800E47090 = {
+						LastSwiftMigration = 1320;
+					};
+				};
 			};
 			buildConfigurationList = C01FCF4E08A954540054247B /* Build configuration list for PBXProject "FrontRowTunes" */;
 			compatibilityVersion = "Xcode 3.2";
 			developmentRegion = English;
 			hasScannedForEncodings = 1;
 			knownRegions = (
+				English,
 				en,
 			);
 			mainGroup = 29B97314FDCFA39411CA2CEA /* FrontRowTunes */;
@@ -254,6 +280,8 @@
 				FA1931A61268D1B50032A143 /* CoverLayer.m in Sources */,
 				FA57C598126B33CA0054C817 /* RemoteController.m in Sources */,
 				FABF53CF16FE38D7009AB8A7 /* HIDRemote.m in Sources */,
+				FAED62AF27FE1F740007E965 /* MusicBridge.swift in Sources */,
+				FAED62B427FEBE260007E965 /* MusicTrack.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -284,6 +312,7 @@
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
 				ARCHS = "$(ARCHS_STANDARD_64_BIT)";
+				CLANG_ENABLE_MODULES = YES;
 				CLANG_ENABLE_OBJC_ARC = YES;
 				COMBINE_HIDPI_IMAGES = YES;
 				COPY_PHASE_STRIP = NO;
@@ -294,9 +323,14 @@
 				GCC_PREFIX_HEADER = FrontRowTunes_Prefix.pch;
 				INFOPLIST_FILE = "FrontRowTunes-Info.plist";
 				INSTALL_PATH = "$(HOME)/Applications";
-				MACOSX_DEPLOYMENT_TARGET = 10.8;
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks";
+				MACOSX_DEPLOYMENT_TARGET = 10.15;
+				MARKETING_VERSION = 0.1;
 				PRODUCT_NAME = FrontRowTunes;
 				SDKROOT = macosx;
+				SWIFT_OBJC_BRIDGING_HEADER = "MusicBridge/FrontRowTunes-Bridging-Header.h";
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+				SWIFT_VERSION = 5.0;
 			};
 			name = Debug;
 		};
@@ -305,6 +339,7 @@
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
 				ARCHS = "$(ARCHS_STANDARD_64_BIT)";
+				CLANG_ENABLE_MODULES = YES;
 				CLANG_ENABLE_OBJC_ARC = YES;
 				COMBINE_HIDPI_IMAGES = YES;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
@@ -313,9 +348,13 @@
 				GCC_PREFIX_HEADER = FrontRowTunes_Prefix.pch;
 				INFOPLIST_FILE = "FrontRowTunes-Info.plist";
 				INSTALL_PATH = "$(HOME)/Applications";
-				MACOSX_DEPLOYMENT_TARGET = 10.8;
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks";
+				MACOSX_DEPLOYMENT_TARGET = 10.15;
+				MARKETING_VERSION = 0.1;
 				PRODUCT_NAME = FrontRowTunes;
 				SDKROOT = macosx;
+				SWIFT_OBJC_BRIDGING_HEADER = "MusicBridge/FrontRowTunes-Bridging-Header.h";
+				SWIFT_VERSION = 5.0;
 			};
 			name = Release;
 		};
