@@ -20,7 +20,6 @@
 		FA8A0C4B16FC7886008A6779 /* QuartzCore.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = FA8A0C4A16FC7886008A6779 /* QuartzCore.framework */; };
 		FA8A0C4D16FC78A7008A6779 /* ScriptingBridge.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = FA8A0C4C16FC78A7008A6779 /* ScriptingBridge.framework */; };
 		FA8A0C4F16FC78AE008A6779 /* IOKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = FA8A0C4E16FC78AE008A6779 /* IOKit.framework */; };
-		FABE0A9112BCDBBE0022F455 /* FrontRow.icns in Resources */ = {isa = PBXBuildFile; fileRef = FABE0A9012BCDBBE0022F455 /* FrontRow.icns */; };
 		FABF53CF16FE38D7009AB8A7 /* HIDRemote.m in Sources */ = {isa = PBXBuildFile; fileRef = FABF53CE16FE38D7009AB8A7 /* HIDRemote.m */; };
 		FABF53D116FE5EB0009AB8A7 /* FrontRowTunes.iconset in Resources */ = {isa = PBXBuildFile; fileRef = FABF53D016FE5EB0009AB8A7 /* FrontRowTunes.iconset */; };
 		FAED62AB27FDA23E0007E965 /* iTunesLibrary.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = FAED62AA27FDA23E0007E965 /* iTunesLibrary.framework */; };
@@ -55,7 +54,6 @@
 		FA8A0C4A16FC7886008A6779 /* QuartzCore.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = QuartzCore.framework; path = /System/Library/Frameworks/QuartzCore.framework; sourceTree = "<absolute>"; };
 		FA8A0C4C16FC78A7008A6779 /* ScriptingBridge.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = ScriptingBridge.framework; path = /System/Library/Frameworks/ScriptingBridge.framework; sourceTree = "<absolute>"; };
 		FA8A0C4E16FC78AE008A6779 /* IOKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = IOKit.framework; path = /System/Library/Frameworks/IOKit.framework; sourceTree = "<absolute>"; };
-		FABE0A9012BCDBBE0022F455 /* FrontRow.icns */ = {isa = PBXFileReference; lastKnownFileType = image.icns; path = FrontRow.icns; sourceTree = "<group>"; };
 		FABF53CD16FE38D7009AB8A7 /* HIDRemote.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = HIDRemote.h; sourceTree = "<group>"; };
 		FABF53CE16FE38D7009AB8A7 /* HIDRemote.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = HIDRemote.m; sourceTree = "<group>"; };
 		FABF53D016FE5EB0009AB8A7 /* FrontRowTunes.iconset */ = {isa = PBXFileReference; lastKnownFileType = folder.iconset; path = FrontRowTunes.iconset; sourceTree = "<group>"; };
@@ -153,7 +151,6 @@
 		29B97317FDCFA39411CA2CEA /* Resources */ = {
 			isa = PBXGroup;
 			children = (
-				FABE0A9012BCDBBE0022F455 /* FrontRow.icns */,
 				FABF53D016FE5EB0009AB8A7 /* FrontRowTunes.iconset */,
 				8D1107310486CEB800E47090 /* FrontRowTunes-Info.plist */,
 				089C165CFE840E0CC02AAC07 /* InfoPlist.strings */,
@@ -260,7 +257,6 @@
 			files = (
 				8D11072B0486CEB800E47090 /* InfoPlist.strings in Resources */,
 				1DDD58160DA1D0A300B32029 /* MainMenu.xib in Resources */,
-				FABE0A9112BCDBBE0022F455 /* FrontRow.icns in Resources */,
 				FABF53D116FE5EB0009AB8A7 /* FrontRowTunes.iconset in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -325,7 +321,7 @@
 				INSTALL_PATH = "$(HOME)/Applications";
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks";
 				MACOSX_DEPLOYMENT_TARGET = 10.15;
-				MARKETING_VERSION = 0.1;
+				MARKETING_VERSION = 0.1.1;
 				PRODUCT_NAME = FrontRowTunes;
 				SDKROOT = macosx;
 				SWIFT_OBJC_BRIDGING_HEADER = "MusicBridge/FrontRowTunes-Bridging-Header.h";
@@ -350,7 +346,7 @@
 				INSTALL_PATH = "$(HOME)/Applications";
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks";
 				MACOSX_DEPLOYMENT_TARGET = 10.15;
-				MARKETING_VERSION = 0.1;
+				MARKETING_VERSION = 0.1.1;
 				PRODUCT_NAME = FrontRowTunes;
 				SDKROOT = macosx;
 				SWIFT_OBJC_BRIDGING_HEADER = "MusicBridge/FrontRowTunes-Bridging-Header.h";
