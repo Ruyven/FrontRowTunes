@@ -166,23 +166,25 @@
 		coverLayer.position = CGPointMake(width * .25, height * .5);
 		[coverLayer setNeedsDisplay];
 
-		durationLayerHeight = height * .05;
+		durationLayerHeight = height * .04;
 		durationLayerYPosition = height * .05;
 		if (displayPlayerPositionLabel) durationLayerYPosition = height * .08;
-		CGFloat layerDiameter = durationLayerHeight - 6;
-		CGFloat layerWidth = width * .9;
+        trackDurationLayer.borderWidth = durationLayerHeight * 0.1;
+        CGFloat layerWidth = width * .9;
 		trackDurationLayer.bounds = CGRectMake(0, 0, layerWidth, durationLayerHeight);
 		trackDurationLayer.position = CGPointMake(width / 2, durationLayerYPosition);
 		trackDurationLayer.cornerRadius = durationLayerHeight / 2.;
 		trackDurationLayer.borderColor = foregroundCGColor;
 
-		playerPositionLayer.bounds = CGRectMake(0, 0, layerDiameter, layerDiameter);
+        CGFloat layerDiameter = durationLayerHeight * 0.6;
+        playerPositionLayer.bounds = CGRectMake(0, 0, layerDiameter, layerDiameter);
 		playerPositionLayer.cornerRadius = layerDiameter / 2.;
 		playerPositionLayer.backgroundColor = foregroundCGColor;
 
 		// update the position of playerPositionLayer
 		trackDuration = [track duration];
-		[self setPlayerPosition:playerPosition];
+        playerPositionDiameter = layerDiameter;
+        [self setPlayerPosition:playerPosition];
 		
 		if (clockSeconds) {
 			clockLayer.position = CGPointMake(width*.85, height);
@@ -328,12 +330,15 @@
 	[CATransaction begin];
 	[CATransaction setAnimationDuration:.4];
 
-	CGFloat minX = durationLayerHeight / 2.;
-	CGFloat maxX = trackDurationLayer.bounds.size.width - minX;
-	CGFloat xPosition = (maxX - minX) * (double)playerPosition / trackDuration + minX;
-	playerPositionLayer.position = CGPointMake(xPosition, durationLayerHeight / 2.);
+    CGFloat padding = (durationLayerHeight - playerPositionDiameter) / 2;
 
-	[CATransaction commit];
+    CGFloat minX = playerPositionDiameter;
+    CGFloat maxX = trackDurationLayer.bounds.size.width - padding * 2;
+    CGFloat width = (maxX - minX) * (double)playerPosition / trackDuration + minX;
+    playerPositionLayer.bounds = CGRectMake(0, 0, width, durationLayerHeight - padding*2);
+    playerPositionLayer.position = CGPointMake(width/2 + padding, durationLayerHeight / 2.);
+    
+    [CATransaction commit];
 
 
 	int minutes = playerPosition / 60; // Ganzzahldivision

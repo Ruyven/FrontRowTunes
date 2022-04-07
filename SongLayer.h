@@ -38,6 +38,7 @@
 	
 	int trackDuration;
 	int playerPosition;
+    CGFloat playerPositionDiameter;
 	
 	NSString *playerState;
 
