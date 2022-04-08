@@ -16,10 +16,6 @@
 	// prevent the display from sleeping
 	/*IOReturn success = */
 	IOPMAssertionCreateWithName(kIOPMAssertionTypeNoDisplaySleep, kIOPMAssertionLevelOn, (CFStringRef)@"FrontRowTunes", &assertionID); // display sleep prevention
-	
-	// create a RemoteController instance
-	remoteController = [[RemoteController alloc] init];
-	[remoteController setSongView:songView];
 }
 
 

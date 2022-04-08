@@ -16,11 +16,9 @@
 		FA1930CD1268C4530032A143 /* MainWindow.m in Sources */ = {isa = PBXBuildFile; fileRef = FA1930CC1268C4530032A143 /* MainWindow.m */; };
 		FA1931011268CA410032A143 /* SongLayer.m in Sources */ = {isa = PBXBuildFile; fileRef = FA1931001268CA410032A143 /* SongLayer.m */; };
 		FA1931A61268D1B50032A143 /* CoverLayer.m in Sources */ = {isa = PBXBuildFile; fileRef = FA1931A51268D1B50032A143 /* CoverLayer.m */; };
-		FA57C598126B33CA0054C817 /* RemoteController.m in Sources */ = {isa = PBXBuildFile; fileRef = FA57C597126B33CA0054C817 /* RemoteController.m */; };
 		FA8A0C4B16FC7886008A6779 /* QuartzCore.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = FA8A0C4A16FC7886008A6779 /* QuartzCore.framework */; };
 		FA8A0C4D16FC78A7008A6779 /* ScriptingBridge.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = FA8A0C4C16FC78A7008A6779 /* ScriptingBridge.framework */; };
 		FA8A0C4F16FC78AE008A6779 /* IOKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = FA8A0C4E16FC78AE008A6779 /* IOKit.framework */; };
-		FABF53CF16FE38D7009AB8A7 /* HIDRemote.m in Sources */ = {isa = PBXBuildFile; fileRef = FABF53CE16FE38D7009AB8A7 /* HIDRemote.m */; };
 		FABF53D116FE5EB0009AB8A7 /* FrontRowTunes.iconset in Resources */ = {isa = PBXBuildFile; fileRef = FABF53D016FE5EB0009AB8A7 /* FrontRowTunes.iconset */; };
 		FAED62AB27FDA23E0007E965 /* iTunesLibrary.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = FAED62AA27FDA23E0007E965 /* iTunesLibrary.framework */; };
 		FAED62AF27FE1F740007E965 /* MusicBridge.swift in Sources */ = {isa = PBXBuildFile; fileRef = FAED62AE27FE1F740007E965 /* MusicBridge.swift */; };
@@ -50,13 +48,9 @@
 		FA1931A41268D1B50032A143 /* CoverLayer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CoverLayer.h; sourceTree = "<group>"; };
 		FA1931A51268D1B50032A143 /* CoverLayer.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CoverLayer.m; sourceTree = "<group>"; };
 		FA4331DB16FC7D0700B4FA59 /* iTunes.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = iTunes.h; sourceTree = "<group>"; };
-		FA57C596126B33CA0054C817 /* RemoteController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = RemoteController.h; sourceTree = "<group>"; };
-		FA57C597126B33CA0054C817 /* RemoteController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = RemoteController.m; sourceTree = "<group>"; };
 		FA8A0C4A16FC7886008A6779 /* QuartzCore.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = QuartzCore.framework; path = /System/Library/Frameworks/QuartzCore.framework; sourceTree = "<absolute>"; };
 		FA8A0C4C16FC78A7008A6779 /* ScriptingBridge.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = ScriptingBridge.framework; path = /System/Library/Frameworks/ScriptingBridge.framework; sourceTree = "<absolute>"; };
 		FA8A0C4E16FC78AE008A6779 /* IOKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = IOKit.framework; path = /System/Library/Frameworks/IOKit.framework; sourceTree = "<absolute>"; };
-		FABF53CD16FE38D7009AB8A7 /* HIDRemote.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = HIDRemote.h; sourceTree = "<group>"; };
-		FABF53CE16FE38D7009AB8A7 /* HIDRemote.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = HIDRemote.m; sourceTree = "<group>"; };
 		FABF53D016FE5EB0009AB8A7 /* FrontRowTunes.iconset */ = {isa = PBXFileReference; lastKnownFileType = folder.iconset; path = FrontRowTunes.iconset; sourceTree = "<group>"; };
 		FAED62AA27FDA23E0007E965 /* iTunesLibrary.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = iTunesLibrary.framework; path = System/Library/Frameworks/iTunesLibrary.framework; sourceTree = SDKROOT; };
 		FAED62AD27FE1F730007E965 /* FrontRowTunes-Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "FrontRowTunes-Bridging-Header.h"; sourceTree = "<group>"; };
@@ -88,8 +82,6 @@
 				FA1930CC1268C4530032A143 /* MainWindow.m */,
 				256AC3D80F4B6AC300CF3369 /* FrontRowTunesAppDelegate.h */,
 				256AC3D90F4B6AC300CF3369 /* FrontRowTunesAppDelegate.m */,
-				FA57C596126B33CA0054C817 /* RemoteController.h */,
-				FA57C597126B33CA0054C817 /* RemoteController.m */,
 				FA1930A11268BE4B0032A143 /* SongView.h */,
 				FA1930A21268BE4B0032A143 /* SongView.m */,
 			);
@@ -129,7 +121,6 @@
 			isa = PBXGroup;
 			children = (
 				FAED62AC27FE1F550007E965 /* MusicBridge */,
-				FA57C58D126B33750054C817 /* HID Remote Class */,
 				FA1930FE1268CA2A0032A143 /* Layers */,
 				080E96DDFE201D6D7F000001 /* Classes */,
 				29B97315FDCFA39411CA2CEA /* Other Sources */,
@@ -181,15 +172,6 @@
 				FA1931A51268D1B50032A143 /* CoverLayer.m */,
 			);
 			name = Layers;
-			sourceTree = "<group>";
-		};
-		FA57C58D126B33750054C817 /* HID Remote Class */ = {
-			isa = PBXGroup;
-			children = (
-				FABF53CD16FE38D7009AB8A7 /* HIDRemote.h */,
-				FABF53CE16FE38D7009AB8A7 /* HIDRemote.m */,
-			);
-			name = "HID Remote Class";
 			sourceTree = "<group>";
 		};
 		FAED62AC27FE1F550007E965 /* MusicBridge */ = {
@@ -278,8 +260,6 @@
 				FA1930CD1268C4530032A143 /* MainWindow.m in Sources */,
 				FA1931011268CA410032A143 /* SongLayer.m in Sources */,
 				FA1931A61268D1B50032A143 /* CoverLayer.m in Sources */,
-				FA57C598126B33CA0054C817 /* RemoteController.m in Sources */,
-				FABF53CF16FE38D7009AB8A7 /* HIDRemote.m in Sources */,
 				FAED62AF27FE1F740007E965 /* MusicBridge.swift in Sources */,
 				FAED62B427FEBE260007E965 /* MusicTrack.swift in Sources */,
 			);

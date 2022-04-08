@@ -12,15 +12,12 @@
 
 
 #import <IOKit/pwr_mgt/IOPMLib.h> // display sleep prevention
-#import "RemoteController.h"
 
 @interface FrontRowTunesAppDelegate : NSObject <NSApplicationDelegate> {
     NSWindow *__weak window;
 	IBOutlet SongView *songView;
     
     IOPMAssertionID assertionID; // display sleep prevention
-	
-	RemoteController *remoteController;
 }
 
 @property (weak) IBOutlet NSWindow *window;
