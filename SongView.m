@@ -216,7 +216,7 @@
 			[self.window setFrame:[screenArray[screen] frame] display:YES animate:YES];
 		}
 	} else if ([character isEqualToString:@" "]) {
-        //FIXME: [MusicBridge playpause];
+        [MusicBridge playpause];
 	} else if ([character isEqualToString:@"t"]) {
 		if (clockSeconds) {
 			clockSeconds = NO;
@@ -249,11 +249,11 @@
 	} else if (keyCode == 123) {
 		// links
 		self.prevTrack = YES;
-		//FIXME: [iTunes backTrack];
+		[MusicBridge backTrack];
 	} else if (keyCode == 124) {
 		// rechts
 		self.prevTrack = NO;
-		//FIXME: [iTunes nextTrack];
+		[MusicBridge nextTrack];
 	} else if ([character isEqualToString:@"q"] || [character isEqualToString:@"Q"]) {
 		[NSApp terminate:self];
 /*	} else if ([character isEqualToString:@"h"]) {

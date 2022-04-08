@@ -8,6 +8,7 @@
 import Foundation
 
 @objc class MusicBridge: NSObject {
+    @discardableResult
     private static func executeScript(source: String) -> NSAppleEventDescriptor? {
         var errorInfo: NSDictionary?
         guard let script = NSAppleScript(source: source) else {
@@ -127,5 +128,19 @@ import Foundation
     
     @objc static func getPlayerPosition() -> Double {
         return executeScript(source: "tell application \"Music\" to get player position")?.doubleValue ?? 0
+    }
+    
+    // MARK: - Trigger events
+    
+    @objc static func playpause() {
+        executeScript(source: "tell application \"Music\" to tell current track to playpause");
+    }
+    
+    @objc static func backTrack() {
+        executeScript(source: "tell application \"Music\" to tell current track to back track");
+    }
+    
+    @objc static func nextTrack() {
+        executeScript(source: "tell application \"Music\" to tell current track to next track");
     }
 }
