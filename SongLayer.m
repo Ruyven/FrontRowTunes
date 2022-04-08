@@ -225,7 +225,7 @@
 		else {
 			trackDurationLayer.opacity = 0;
 			timePassedLayer.position = CGPointMake(height*.05, height*.05);
-            timeRemainingLayer.position = CGPointMake(height*.05, height*.05);
+            timeRemainingLayer.position = CGPointMake(width * 0.98, height * .05);
 		}
 		
 		if (trackDuration != 0 && displayPlayerPositionLabel) {
