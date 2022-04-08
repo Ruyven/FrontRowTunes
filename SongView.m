@@ -98,18 +98,18 @@
         
         [self setTrack:[MusicBridge getCurrentTrack] prev:prevTrack];
         prevTrack = NO;
-        currentSongID = track.id;
     }
     
 	[activeSongLayer setPlayerState:[MusicBridge getPlayerState]];
 }
 
 - (void)setTrack:(MusicTrack *)track prev:(BOOL)prev {
+    currentSongID = track.id;
     if (firstSong || justChangedTrack) {
-		[activeSongLayer setTrack:track];
+        [activeSongLayer setTrack:track];
 		firstSong = NO;
 	} else {
-		// generate new SongLayer
+        // generate new SongLayer
 		
 		activeSongLayer.zPosition = 1;
 		
