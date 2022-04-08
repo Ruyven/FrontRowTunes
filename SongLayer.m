@@ -47,7 +47,7 @@
 		timeRemainingLayer.alignmentMode = kCAAlignmentRight;
 		timeRemainingLayer.font = CFBridgingRetain(@"Lucida-Grande");
 		timeRemainingLayer.anchorPoint = CGPointMake(1, 1);
-		timeRemainingLayer.bounds = CGRectMake(-500, 0, 500, 50);
+		timeRemainingLayer.bounds = CGRectMake(0, 0, 500, 50);
 		[self addSublayer:timeRemainingLayer];
 		
 		coverLayer = [[CoverLayer alloc] init]; // so that init gets called (see CoverLayer.m)
@@ -70,7 +70,7 @@
 		clockLayer.alignmentMode = kCAAlignmentLeft;
 		clockLayer.font = CFBridgingRetain(@"Lucida-Grande");
 		clockLayer.anchorPoint = CGPointMake(0, 1);
-		clockLayer.bounds = CGRectMake(-500, 0, 500, 100);
+		clockLayer.bounds = CGRectMake(0, 0, 500, 100);
 		[self updateClock];
 		[self addSublayer:clockLayer];
 		
@@ -157,8 +157,6 @@
 
 		songInfoTextLayer.string = string;
 
-		//coverLayer.bounds = CGRectMake(0, -300, 300, 900);
-		//coverLayer.position = CGPointMake(300, 400);
 		CGFloat coverWidth = width * .35;
 
 		coverLayer.bounds = CGRectMake(0, -coverWidth, coverWidth, 3 * coverWidth);
@@ -227,7 +225,7 @@
 		else {
 			trackDurationLayer.opacity = 0;
 			timePassedLayer.position = CGPointMake(height*.05, height*.05);
-			timeRemainingLayer.position = CGPointMake(width - height*.05, height*.05);
+            timeRemainingLayer.position = CGPointMake(height*.05, height*.05);
 		}
 		
 		if (trackDuration != 0 && displayPlayerPositionLabel) {
@@ -237,9 +235,6 @@
 			timePassedLayer.opacity = timeRemainingLayer.opacity = 1;
 		} else {
 			timePassedLayer.opacity = timeRemainingLayer.opacity = 0;
-			
-//			timePassedLayer.position = CGPointMake(width*.05, height*.05);
-//			timeRemainingLayer.position = CGPointMake(width * .95, height * .05); // für's einblenden
 		}
 		
 		clockLayer.fontSize = height * .05;
@@ -356,8 +351,6 @@
 	minutes = remainingTime / 60;
 	seconds = remainingTime % 60;
 	timeRemainingLayer.string = [NSString stringWithFormat:@"-%d:%02d",minutes,seconds];
-	
-	[timeRemainingLayer setNeedsDisplay]; // warum auch immer das nötig ist...
 }
 
 - (BOOL)needsDisplayOnBoundsChange {

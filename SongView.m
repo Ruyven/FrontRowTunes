@@ -218,25 +218,17 @@
 	} else if ([character isEqualToString:@" "]) {
         [MusicBridge playpause];
 	} else if ([character isEqualToString:@"t"]) {
-		if (clockSeconds) {
-			clockSeconds = NO;
-			if (!displayClock) displayClock = YES;
-			activeSongLayer.clockSeconds = clockSeconds;
-		} else {
-			displayClock = !displayClock;
-		}
+        displayClock = !displayClock;
 		activeSongLayer.displayClock = displayClock;
 		[activeSongLayer updateClock];
 		[activeSongLayer updateWithDuration:.5];
 	} else if ([character isEqualToString:@"T"]) {
-		if (!clockSeconds) {
-			clockSeconds = YES;
-			if (!displayClock) displayClock = YES;
-			activeSongLayer.clockSeconds = clockSeconds;
-		} else {
-			displayClock = !displayClock;
-		}
-		activeSongLayer.displayClock = displayClock;
+        clockSeconds = !clockSeconds;
+        activeSongLayer.clockSeconds = clockSeconds;
+        if (!displayClock) {
+            displayClock = true;
+            activeSongLayer.displayClock = displayClock;
+        }
 		[activeSongLayer updateClock];
 		[activeSongLayer updateWithDuration:.5];
 /*	} else if (keyCode == 123 || keyCode == 124) {
