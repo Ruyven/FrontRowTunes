@@ -43,6 +43,9 @@
 	[[NSDistributedNotificationCenter defaultCenter] addObserver:self selector:@selector(getTrack:) name:@"com.apple.Music.playerInfo" object:nil];
 
 	updatePlayerPositionTimer = [NSTimer scheduledTimerWithTimeInterval:UPDATEINTERVAL target:self selector:@selector(updatePlayerPosition) userInfo:nil repeats:YES];
+    
+    lastEventTracker = [[LastEventTracker alloc] init];
+    [lastEventTracker setDelegate:self timeout:60];
 }
 
 - (void)setupLayers {
@@ -279,7 +282,7 @@
 		[rootLayer setBackgroundColor:blackColor];
 		CGColorRelease(blackColor);
 		[activeSongLayer updateWithDuration:0.5];
-    } else if ([character isEqualToString:@"f"] || (keyCode == 53 && ([self.window styleMask] & NSWindowStyleMaskFullScreen) == NSWindowStyleMaskFullScreen)) {
+    } else if ([character isEqualToString:@"f"] || (keyCode == 53 && [self isWindowFullScreen])) {
         // esc quits out of fullscreen
         [self.window toggleFullScreen:self];
     } else if ([character isEqualToString:@"i"] || [character isEqualToString:@"h"]) {
@@ -394,5 +397,23 @@
 	[NSApp terminate:self];
 }
 
+#pragma mark
+
+- (bool)isWindowFullScreen {
+    return ([self.window styleMask] & NSWindowStyleMaskFullScreen) == NSWindowStyleMaskFullScreen;
+}
+
+- (void)lastEventTracker:(LastEventTracker *)lastEventTracker timeoutPassed:(NSTimeInterval)timeoutPassed {
+    if ([MusicBridge getPlayerState] == MusicBridge.PLAYER_STATE_PLAYING) {
+        if ([self isWindowFullScreen]) {
+            if (![NSApp isActive]) {
+                [NSApp activateIgnoringOtherApps:true];
+                [self.window makeKeyAndOrderFront:self];
+            }
+        } else {
+            [self.window toggleFullScreen:self];
+        }
+    }
+}
 
 @end

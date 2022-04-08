@@ -11,7 +11,7 @@
 #import "FrontRowTunes-Swift.h"
 #import "SongLayer.h"
 
-@interface SongView : NSView <NSWindowDelegate> {
+@interface SongView : NSView <NSWindowDelegate, LastEventTrackerDelegate> {
 	NSString *currentSongID;
 	
 	CALayer *rootLayer;
@@ -38,6 +38,8 @@
 	BOOL displayPlayerPositionBar, displayPlayerPositionLabel, displayClock, clockSeconds;
     
     NSTrackingArea *trackingArea;
+    
+    LastEventTracker *lastEventTracker;
 }
 
 - (void)setupLayers;

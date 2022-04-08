@@ -24,6 +24,7 @@
 		FAED62AF27FE1F740007E965 /* MusicBridge.swift in Sources */ = {isa = PBXBuildFile; fileRef = FAED62AE27FE1F740007E965 /* MusicBridge.swift */; };
 		FAED62B427FEBE260007E965 /* MusicTrack.swift in Sources */ = {isa = PBXBuildFile; fileRef = FAED62B327FEBE260007E965 /* MusicTrack.swift */; };
 		FAF1DD3B27FFF32800706C92 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = FAF1DD3A27FFF32800706C92 /* Assets.xcassets */; };
+		FAF1DD3E280001AB00706C92 /* LastEventTracker.swift in Sources */ = {isa = PBXBuildFile; fileRef = FAF1DD3D280001AB00706C92 /* LastEventTracker.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -47,7 +48,6 @@
 		FA1931001268CA410032A143 /* SongLayer.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SongLayer.m; sourceTree = "<group>"; };
 		FA1931A41268D1B50032A143 /* CoverLayer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CoverLayer.h; sourceTree = "<group>"; };
 		FA1931A51268D1B50032A143 /* CoverLayer.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CoverLayer.m; sourceTree = "<group>"; };
-		FA4331DB16FC7D0700B4FA59 /* iTunes.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = iTunes.h; sourceTree = "<group>"; };
 		FA8A0C4A16FC7886008A6779 /* QuartzCore.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = QuartzCore.framework; path = /System/Library/Frameworks/QuartzCore.framework; sourceTree = "<absolute>"; };
 		FA8A0C4C16FC78A7008A6779 /* ScriptingBridge.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = ScriptingBridge.framework; path = /System/Library/Frameworks/ScriptingBridge.framework; sourceTree = "<absolute>"; };
 		FA8A0C4E16FC78AE008A6779 /* IOKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = IOKit.framework; path = /System/Library/Frameworks/IOKit.framework; sourceTree = "<absolute>"; };
@@ -57,6 +57,7 @@
 		FAED62AE27FE1F740007E965 /* MusicBridge.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MusicBridge.swift; sourceTree = "<group>"; };
 		FAED62B327FEBE260007E965 /* MusicTrack.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MusicTrack.swift; sourceTree = "<group>"; };
 		FAF1DD3A27FFF32800706C92 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+		FAF1DD3D280001AB00706C92 /* LastEventTracker.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LastEventTracker.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -120,6 +121,7 @@
 		29B97314FDCFA39411CA2CEA /* FrontRowTunes */ = {
 			isa = PBXGroup;
 			children = (
+				FAF1DD3C2800019700706C92 /* Helpers */,
 				FAED62AC27FE1F550007E965 /* MusicBridge */,
 				FA1930FE1268CA2A0032A143 /* Layers */,
 				080E96DDFE201D6D7F000001 /* Classes */,
@@ -134,7 +136,6 @@
 		29B97315FDCFA39411CA2CEA /* Other Sources */ = {
 			isa = PBXGroup;
 			children = (
-				FA4331DB16FC7D0700B4FA59 /* iTunes.h */,
 				256AC3F00F4B6AF500CF3369 /* FrontRowTunes_Prefix.pch */,
 				29B97316FDCFA39411CA2CEA /* main.m */,
 			);
@@ -182,6 +183,14 @@
 				FAED62B327FEBE260007E965 /* MusicTrack.swift */,
 			);
 			path = MusicBridge;
+			sourceTree = "<group>";
+		};
+		FAF1DD3C2800019700706C92 /* Helpers */ = {
+			isa = PBXGroup;
+			children = (
+				FAF1DD3D280001AB00706C92 /* LastEventTracker.swift */,
+			);
+			path = Helpers;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -258,6 +267,7 @@
 				256AC3DA0F4B6AC300CF3369 /* FrontRowTunesAppDelegate.m in Sources */,
 				FA1930A31268BE4B0032A143 /* SongView.m in Sources */,
 				FA1930CD1268C4530032A143 /* MainWindow.m in Sources */,
+				FAF1DD3E280001AB00706C92 /* LastEventTracker.swift in Sources */,
 				FA1931011268CA410032A143 /* SongLayer.m in Sources */,
 				FA1931A61268D1B50032A143 /* CoverLayer.m in Sources */,
 				FAED62AF27FE1F740007E965 /* MusicBridge.swift in Sources */,

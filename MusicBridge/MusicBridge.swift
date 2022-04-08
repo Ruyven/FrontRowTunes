@@ -115,11 +115,11 @@ import Foundation
         )
     }
     
-    @objc static let PLAYER_STATE_PLAYING = "playing"
-    @objc static let PLAYER_STATE_PAUSED = "paused"
-    @objc static let PLAYER_STATE_STOPPED = "stopped"
-    @objc static let PLAYER_STATE_FAST_FORWARDING = "fast forwarding"
-    @objc static let PLAYER_STATE_REWINDING = "rewinding"
+    @objc static let PLAYER_STATE_PLAYING = "kPSP"
+    @objc static let PLAYER_STATE_PAUSED = "kPSp"
+    @objc static let PLAYER_STATE_STOPPED = "kPSS"
+    @objc static let PLAYER_STATE_FAST_FORWARDING = "kPSF"
+    @objc static let PLAYER_STATE_REWINDING = "kPSR"
     
     @objc static func getPlayerState() -> String? {
         return executeScript(source: "tell application \"Music\" to get player state")?.stringValue
