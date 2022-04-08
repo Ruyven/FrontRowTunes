@@ -20,5 +20,6 @@
 }
 
 @property (weak) IBOutlet NSWindow *window;
+@property (weak) IBOutlet NSTextField *infoTextField;
 
 @end

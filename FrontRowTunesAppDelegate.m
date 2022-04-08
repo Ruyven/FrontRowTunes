@@ -23,8 +23,17 @@
 	// this will get called if the application is quit, but not if it is killed or crashes!
 	/*IOReturn success = */
 	IOPMAssertionRelease(assertionID); // display sleep prevention
-	
 }
 
+- (void)awakeFromNib {
+    NSMutableString *infoText = [NSMutableString stringWithString:_infoTextField.stringValue];
+    if (infoText) {
+        NSRange range = [infoText rangeOfString:@"{{appVersion}}"];
+        if (range.location != -1) {
+            [infoText replaceCharactersInRange:range withString:[[NSBundle mainBundle] objectForInfoDictionaryKey:@"CFBundleShortVersionString"]];
+            [_infoTextField setStringValue:infoText];
+        }
+    }
+}
 
 @end
