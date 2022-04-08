@@ -6,6 +6,7 @@
 //
 
 import Foundation
+import AppKit
 
 @objc class MusicTrack: NSObject {
     @objc let id: String

@@ -25,6 +25,7 @@
 		FAED62AB27FDA23E0007E965 /* iTunesLibrary.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = FAED62AA27FDA23E0007E965 /* iTunesLibrary.framework */; };
 		FAED62AF27FE1F740007E965 /* MusicBridge.swift in Sources */ = {isa = PBXBuildFile; fileRef = FAED62AE27FE1F740007E965 /* MusicBridge.swift */; };
 		FAED62B427FEBE260007E965 /* MusicTrack.swift in Sources */ = {isa = PBXBuildFile; fileRef = FAED62B327FEBE260007E965 /* MusicTrack.swift */; };
+		FAF1DD3B27FFF32800706C92 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = FAF1DD3A27FFF32800706C92 /* Assets.xcassets */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -61,6 +62,7 @@
 		FAED62AD27FE1F730007E965 /* FrontRowTunes-Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "FrontRowTunes-Bridging-Header.h"; sourceTree = "<group>"; };
 		FAED62AE27FE1F740007E965 /* MusicBridge.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MusicBridge.swift; sourceTree = "<group>"; };
 		FAED62B327FEBE260007E965 /* MusicTrack.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MusicTrack.swift; sourceTree = "<group>"; };
+		FAF1DD3A27FFF32800706C92 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -151,6 +153,7 @@
 		29B97317FDCFA39411CA2CEA /* Resources */ = {
 			isa = PBXGroup;
 			children = (
+				FAF1DD3A27FFF32800706C92 /* Assets.xcassets */,
 				FABF53D016FE5EB0009AB8A7 /* FrontRowTunes.iconset */,
 				8D1107310486CEB800E47090 /* FrontRowTunes-Info.plist */,
 				089C165CFE840E0CC02AAC07 /* InfoPlist.strings */,
@@ -258,6 +261,7 @@
 				8D11072B0486CEB800E47090 /* InfoPlist.strings in Resources */,
 				1DDD58160DA1D0A300B32029 /* MainMenu.xib in Resources */,
 				FABF53D116FE5EB0009AB8A7 /* FrontRowTunes.iconset in Resources */,
+				FAF1DD3B27FFF32800706C92 /* Assets.xcassets in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

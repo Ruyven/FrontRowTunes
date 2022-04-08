@@ -259,10 +259,17 @@
 
 - (void)setTrack:(MusicTrack *)thetrack {
     track = thetrack;
+    
+    NSData *artwork;
+    if (track.artwork.bytes) {
+        artwork = track.artwork;
+    } else {
+        artwork = [[NSImage imageNamed:@"FrontRowGradient"] TIFFRepresentation];
+    }
 
-    if (track.artwork) {
+    if (artwork) {
 		coverLayer.opacity = 1;
-		[coverLayer setCoverImageWithData:track.artwork];
+		[coverLayer setCoverImageWithData:artwork];
 		coverExists = YES;
 	}
 	else {
