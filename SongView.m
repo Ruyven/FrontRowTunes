@@ -8,10 +8,36 @@
 
 #import "SongView.h"
 
-@implementation SongView
-
-@synthesize whiteBackground;
-@synthesize prevTrack;
+@implementation SongView {
+    NSString *currentSongID;
+    
+    CALayer *rootLayer;
+    CALayer *remoteEventLayer;
+    CALayer *infoLayer;
+    SongLayer *activeSongLayer;
+    SongLayer *lastSongLayer;
+    
+    BOOL justChangedTrack;
+    BOOL allowScreenChange;
+    NSTimer *changeTrackTimer;
+    
+    BOOL firstSong;
+    BOOL switchTrack;
+    BOOL prevTrack;
+    NSDate *prevTrackTimeStamp;
+    
+    int keyCode;
+    BOOL whiteBackground;
+    BOOL infoLayerOn;
+    
+    double playerPosition;
+    NSTimer *updatePlayerPositionTimer;
+    
+    BOOL displayPlayerPositionBar, displayPlayerPositionLabel, displayClock, clockSeconds;
+    
+    LastEventTracker *systemInactivityTracker;
+    LastEventTracker *mouseHideTracker;
+}
 
 - (void)awakeFromNib {
     firstSong = YES;
@@ -44,8 +70,11 @@
 
 	updatePlayerPositionTimer = [NSTimer scheduledTimerWithTimeInterval:UPDATEINTERVAL target:self selector:@selector(updatePlayerPosition) userInfo:nil repeats:YES];
     
-    lastEventTracker = [[LastEventTracker alloc] init];
-    [lastEventTracker setDelegate:self timeout:60];
+    systemInactivityTracker = [[LastEventTracker alloc] init];
+    [systemInactivityTracker setDelegate:self eventType:kCGAnyInputEventType timeout:60];
+    
+    mouseHideTracker = [[LastEventTracker alloc] init];
+    [mouseHideTracker setDelegate:self eventType:kCGEventMouseMoved timeout:2];
 }
 
 - (void)setupLayers {
@@ -361,23 +390,12 @@
 
 #pragma mark Window Delegate
 
-- (void)mouseEntered:(NSEvent *)theEvent {
-    [NSCursor hide];
-}
-
-- (void)mouseExited:(NSEvent *)theEvent {
-    [NSCursor unhide];
-}
-
 - (void)windowDidEnterFullScreen:(NSNotification *)notification {
-    [NSCursor hide];
-    trackingArea = [[NSTrackingArea alloc] initWithRect:self.frame options:(NSTrackingMouseEnteredAndExited | NSTrackingActiveInActiveApp) owner:self userInfo:nil];
-    [self addTrackingArea:trackingArea];
+    [mouseHideTracker resetTrigger];
 }
 
-- (void)windowDidExitFullScreen:(NSNotification *)notification {
-    [NSCursor unhide];
-    [self removeTrackingArea:trackingArea];
+- (void)windowDidBecomeKey:(NSNotification *)notification {
+    [mouseHideTracker resetTrigger];
 }
 
 - (void)setFrame:(NSRect)frameRect {
@@ -396,6 +414,14 @@
 }
 
 - (void)lastEventTracker:(LastEventTracker *)lastEventTracker timeoutPassed:(NSTimeInterval)timeoutPassed {
+    if (lastEventTracker == systemInactivityTracker) {
+        [self handleEventTimeout];
+    } else if (lastEventTracker == mouseHideTracker) {
+        [self handleMouseInactivity];
+    }
+}
+
+- (void)handleEventTimeout {
     if ([MusicBridge getPlayerState] == MusicBridge.PLAYER_STATE_PLAYING) {
         if ([self isWindowFullScreen]) {
             if (![NSApp isActive]) {
@@ -405,6 +431,12 @@
         } else {
             [self.window toggleFullScreen:self];
         }
+    }
+}
+
+- (void)handleMouseInactivity {
+    if ([self isWindowFullScreen]) {
+        [NSCursor setHiddenUntilMouseMoves:true];
     }
 }
 

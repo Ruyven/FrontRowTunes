@@ -315,7 +315,7 @@
 				INSTALL_PATH = "$(HOME)/Applications";
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks";
 				MACOSX_DEPLOYMENT_TARGET = 10.15;
-				MARKETING_VERSION = 0.2.1;
+				MARKETING_VERSION = 0.2.2;
 				PRODUCT_NAME = FrontRowTunes;
 				SDKROOT = macosx;
 				SWIFT_OBJC_BRIDGING_HEADER = "MusicBridge/FrontRowTunes-Bridging-Header.h";
@@ -340,7 +340,7 @@
 				INSTALL_PATH = "$(HOME)/Applications";
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks";
 				MACOSX_DEPLOYMENT_TARGET = 10.15;
-				MARKETING_VERSION = 0.2.1;
+				MARKETING_VERSION = 0.2.2;
 				PRODUCT_NAME = FrontRowTunes;
 				SDKROOT = macosx;
 				SWIFT_OBJC_BRIDGING_HEADER = "MusicBridge/FrontRowTunes-Bridging-Header.h";
