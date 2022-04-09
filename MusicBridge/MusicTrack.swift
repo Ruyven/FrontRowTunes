@@ -28,4 +28,31 @@ import AppKit
     @objc static var defaultArtwork: NSImage? {
         return NSImage(named: "FrontRowGradient")
     }
+    
+    @objc func tintColor(darkMode: Bool, strongAdjustment: Bool) -> NSColor {
+        let tintColor: NSColor
+        if let artwork = artwork,
+           artwork.count > 0,
+           let artworkImage = NSImage(data: artwork),
+           let color = artworkImage.averageColor
+        {
+            tintColor = color
+        } else {
+            tintColor = .defaultTintColor
+        }
+        
+        return tintColor.adjustingHSBA { hue, saturation, brightness, alpha in
+            let maxLightModeBrightness: CGFloat = strongAdjustment ? 0.8 : 0.9
+            let minDarkModeBrightness: CGFloat = strongAdjustment ? 0.8 : 0.6
+            if darkMode && brightness < minDarkModeBrightness {
+                brightness = minDarkModeBrightness
+                return true
+            } else if !darkMode && brightness > maxLightModeBrightness {
+                brightness = maxLightModeBrightness
+                return true
+            } else {
+                return false
+            }
+        }
+    }
 }

@@ -16,10 +16,12 @@
 		FA1930CD1268C4530032A143 /* MainWindow.m in Sources */ = {isa = PBXBuildFile; fileRef = FA1930CC1268C4530032A143 /* MainWindow.m */; };
 		FA1931011268CA410032A143 /* SongLayer.m in Sources */ = {isa = PBXBuildFile; fileRef = FA1931001268CA410032A143 /* SongLayer.m */; };
 		FA1931A61268D1B50032A143 /* CoverLayer.m in Sources */ = {isa = PBXBuildFile; fileRef = FA1931A51268D1B50032A143 /* CoverLayer.m */; };
+		FA581B862800F55B0039EB2E /* AnalogClockLayer.swift in Sources */ = {isa = PBXBuildFile; fileRef = FA581B852800F55A0039EB2E /* AnalogClockLayer.swift */; };
 		FA8A0C4B16FC7886008A6779 /* QuartzCore.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = FA8A0C4A16FC7886008A6779 /* QuartzCore.framework */; };
 		FA8A0C4D16FC78A7008A6779 /* ScriptingBridge.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = FA8A0C4C16FC78A7008A6779 /* ScriptingBridge.framework */; };
 		FA8A0C4F16FC78AE008A6779 /* IOKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = FA8A0C4E16FC78AE008A6779 /* IOKit.framework */; };
 		FA8E3A6C2804E2EA00449554 /* NSImage+averageColor.swift in Sources */ = {isa = PBXBuildFile; fileRef = FA8E3A6B2804E2EA00449554 /* NSImage+averageColor.swift */; };
+		FAA1B7ED280B72AF0011925A /* Constants.swift in Sources */ = {isa = PBXBuildFile; fileRef = FAA1B7EC280B72AF0011925A /* Constants.swift */; };
 		FABF53D116FE5EB0009AB8A7 /* FrontRowTunes.iconset in Resources */ = {isa = PBXBuildFile; fileRef = FABF53D016FE5EB0009AB8A7 /* FrontRowTunes.iconset */; };
 		FAED62AB27FDA23E0007E965 /* iTunesLibrary.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = FAED62AA27FDA23E0007E965 /* iTunesLibrary.framework */; };
 		FAED62AF27FE1F740007E965 /* MusicBridge.swift in Sources */ = {isa = PBXBuildFile; fileRef = FAED62AE27FE1F740007E965 /* MusicBridge.swift */; };
@@ -49,10 +51,12 @@
 		FA1931001268CA410032A143 /* SongLayer.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SongLayer.m; sourceTree = "<group>"; };
 		FA1931A41268D1B50032A143 /* CoverLayer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CoverLayer.h; sourceTree = "<group>"; };
 		FA1931A51268D1B50032A143 /* CoverLayer.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CoverLayer.m; sourceTree = "<group>"; };
+		FA581B852800F55A0039EB2E /* AnalogClockLayer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = AnalogClockLayer.swift; path = Layers/AnalogClockLayer.swift; sourceTree = "<group>"; };
 		FA8A0C4A16FC7886008A6779 /* QuartzCore.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = QuartzCore.framework; path = /System/Library/Frameworks/QuartzCore.framework; sourceTree = "<absolute>"; };
 		FA8A0C4C16FC78A7008A6779 /* ScriptingBridge.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = ScriptingBridge.framework; path = /System/Library/Frameworks/ScriptingBridge.framework; sourceTree = "<absolute>"; };
 		FA8A0C4E16FC78AE008A6779 /* IOKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = IOKit.framework; path = /System/Library/Frameworks/IOKit.framework; sourceTree = "<absolute>"; };
 		FA8E3A6B2804E2EA00449554 /* NSImage+averageColor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "NSImage+averageColor.swift"; sourceTree = "<group>"; };
+		FAA1B7EC280B72AF0011925A /* Constants.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Constants.swift; sourceTree = "<group>"; };
 		FABF53D016FE5EB0009AB8A7 /* FrontRowTunes.iconset */ = {isa = PBXFileReference; lastKnownFileType = folder.iconset; path = FrontRowTunes.iconset; sourceTree = "<group>"; };
 		FAED62AA27FDA23E0007E965 /* iTunesLibrary.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = iTunesLibrary.framework; path = System/Library/Frameworks/iTunesLibrary.framework; sourceTree = SDKROOT; };
 		FAED62AD27FE1F730007E965 /* FrontRowTunes-Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "FrontRowTunes-Bridging-Header.h"; sourceTree = "<group>"; };
@@ -173,6 +177,7 @@
 				FA1931001268CA410032A143 /* SongLayer.m */,
 				FA1931A41268D1B50032A143 /* CoverLayer.h */,
 				FA1931A51268D1B50032A143 /* CoverLayer.m */,
+				FA581B852800F55A0039EB2E /* AnalogClockLayer.swift */,
 			);
 			name = Layers;
 			sourceTree = "<group>";
@@ -192,6 +197,7 @@
 			children = (
 				FAF1DD3D280001AB00706C92 /* LastEventTracker.swift */,
 				FA8E3A6B2804E2EA00449554 /* NSImage+averageColor.swift */,
+				FAA1B7EC280B72AF0011925A /* Constants.swift */,
 			);
 			path = Helpers;
 			sourceTree = "<group>";
@@ -272,10 +278,12 @@
 				FA1930CD1268C4530032A143 /* MainWindow.m in Sources */,
 				FAF1DD3E280001AB00706C92 /* LastEventTracker.swift in Sources */,
 				FA1931011268CA410032A143 /* SongLayer.m in Sources */,
+				FA581B862800F55B0039EB2E /* AnalogClockLayer.swift in Sources */,
 				FA1931A61268D1B50032A143 /* CoverLayer.m in Sources */,
 				FAED62AF27FE1F740007E965 /* MusicBridge.swift in Sources */,
 				FA8E3A6C2804E2EA00449554 /* NSImage+averageColor.swift in Sources */,
 				FAED62B427FEBE260007E965 /* MusicTrack.swift in Sources */,
+				FAA1B7ED280B72AF0011925A /* Constants.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

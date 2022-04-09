@@ -56,7 +56,7 @@ import Foundation
         """)?.data
     }
     
-    //FIXME: rewrite and use
+    //TODO: rewrite and use
 //    func downloadMusicArtwork(){
 //            let editedSongArtist = currentSongArtist.replacingOccurrences(of: "&", with: "+", options: .literal, range: nil)
 //            let safeArtistURL = editedSongArtist.addingPercentEncoding(withAllowedCharacters: NSCharacterSet.urlQueryAllowed) ?? ""

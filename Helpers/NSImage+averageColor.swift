@@ -49,27 +49,3 @@ extension NSColor {
         }
     }
 }
-
-@objc extension NSColor {
-    @objc func colorWithMinimumBrightness(_ minBrightness: CGFloat) -> NSColor {
-        return self.adjustingHSBA { hue, saturation, brightness, alpha in
-            if brightness < minBrightness {
-                brightness = minBrightness
-                return true
-            } else {
-                return false
-            }
-        }
-    }
-    
-    @objc func colorWithMaximumBrightness(_ maxBrightness: CGFloat) -> NSColor {
-        return self.adjustingHSBA { hue, saturation, brightness, alpha in
-            if brightness > maxBrightness {
-                brightness = maxBrightness
-                return true
-            } else {
-                return false
-            }
-        }
-    }
-}

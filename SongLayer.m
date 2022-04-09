@@ -238,25 +238,8 @@
 		
 		clockLayer.fontSize = height * .05;
 		if (displayClock) {
-            NSImage *artworkImage;
-            if (track.artwork.bytes) {
-                artworkImage = [[NSImage alloc] initWithData:track.artwork];
-            } else {
-                artworkImage = MusicTrack.defaultArtwork;
-            }
-            
-            if (artworkImage && artworkImage.isValid) {
-                NSColor *color = [artworkImage averageColor];
-                if (whiteBackground) {
-                    color = [color colorWithMaximumBrightness:0.5];
-                } else {
-                    color = [color colorWithMinimumBrightness:0.5];
-                }
-                clockLayer.foregroundColor = [color CGColor];
-            } else {
-                clockLayer.foregroundColor = foregroundCGColor;
-            }
-			clockLayer.opacity = 1;
+            clockLayer.foregroundColor = [[track tintColorWithDarkMode:!whiteBackground strongAdjustment:false] CGColor];
+            clockLayer.opacity = 1;
 		} else {
 			clockLayer.opacity = 0;
 		}
@@ -294,7 +277,8 @@
 }
 
 - (void)setWhiteBackground:(BOOL)white {
-	[coverLayer setWhiteBackground:white];
+    whiteBackground = white;
+	coverLayer.whiteBackground = white;
 	if (white) {
 		backgroundColor = [NSColor whiteColor];
 		foregroundColor = [NSColor blackColor];
@@ -329,11 +313,11 @@
 - (void)updateClock {
 	NSDate *now = [NSDate date];
 	// ToDo: hier je nach Land anpassen
-	if (clockSeconds) {
-		clockLayer.string = [now descriptionWithCalendarFormat:@"%H:%M:%S" timeZone:nil locale:nil];
-	} else {
-		clockLayer.string = [now descriptionWithCalendarFormat:@"%H:%M" timeZone:nil locale:nil];
-	}
+    if (clockSeconds) {
+        clockLayer.string = [now descriptionWithCalendarFormat:@"%H:%M:%S" timeZone:nil locale:nil];
+    } else {
+        clockLayer.string = [now descriptionWithCalendarFormat:@"%H:%M" timeZone:nil locale:nil];
+    }
 }
 
 - (void)setPlayerPosition:(int)newPlayerPosition {
@@ -373,5 +357,6 @@
 - (void)drawInContext:(CGContextRef)ctx {
 	[self updateWithDuration:0.0];
 }
+
 
 @end

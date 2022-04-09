@@ -9,13 +9,13 @@
 #import "SongView.h"
 
 @implementation SongView {
-    NSString *currentSongID;
+    MusicTrack *currentTrack;
     
     CALayer *rootLayer;
-    CALayer *remoteEventLayer;
     CALayer *infoLayer;
     SongLayer *activeSongLayer;
     SongLayer *lastSongLayer;
+    AnalogClockLayer *clock;
     
     BOOL justChangedTrack;
     BOOL allowScreenChange;
@@ -33,7 +33,7 @@
     double playerPosition;
     NSTimer *updatePlayerPositionTimer;
     
-    BOOL displayPlayerPositionBar, displayPlayerPositionLabel, displayClock, clockSeconds;
+    BOOL displayPlayerPositionBar, displayPlayerPositionLabel, displayClock, clockSeconds, analogClock;
     
     LastEventTracker *systemInactivityTracker;
     LastEventTracker *mouseHideTracker;
@@ -50,14 +50,13 @@
 	displayPlayerPositionLabel = NO;
 	displayClock = NO;
 	clockSeconds = NO;
-	
+    
 
 	// make this view the first responder to get keystrokes
 	[self.window makeFirstResponder:self];
     [self.window setDelegate:self];
 
 	// initialize iTunes //TODO: update comments and method names to Music
-	currentSongID = @"";
 	playerPosition = [MusicBridge getPlayerPosition];
 	
 	[self setupLayers];
@@ -79,7 +78,6 @@
 
 - (void)setupLayers {
 	CGColorRef blackColor = CGColorCreateGenericRGB(0, 0, 0, 1);
-	CGColorRef whiteColor = CGColorCreateGenericRGB(1, 1, 1, 1);
 	
 	rootLayer = [CALayer layer];
 	[rootLayer setBackgroundColor:blackColor];
@@ -100,23 +98,41 @@
 	[activeSongLayer setAutoresizingMask:kCALayerWidthSizable | kCALayerHeightSizable];
 	[rootLayer addSublayer:activeSongLayer];
 	[activeSongLayer layoutIfNeeded];
-	
-	remoteEventLayer = [CALayer layer];
-	remoteEventLayer.frame = [self frame];
-	[activeSongLayer setAutoresizingMask:kCALayerWidthSizable | kCALayerHeightSizable];
-	remoteEventLayer.backgroundColor = whiteColor;
-	remoteEventLayer.opacity = 0;
-	remoteEventLayer.zPosition = 2;
-	[rootLayer addSublayer:remoteEventLayer];
-	
+    
 	// cleanup
 	CGColorRelease(blackColor);
-	CGColorRelease(whiteColor);
+    
+    if (analogClock) {
+        [self setUpAnalogClockIfNeeded];
+    }
+}
+
+- (void)setUpAnalogClockIfNeeded {
+    if (!clock) {
+        clock = [[AnalogClockLayer alloc] initWithDarkMode:!whiteBackground];
+        if (activeSongLayer.track) {
+            clock.tintColor = [activeSongLayer.track tintColorWithDarkMode:!whiteBackground strongAdjustment:true];
+        } else {
+            clock.tintColor = [NSColor defaultTintColor];
+        }
+        [clock setAnchorPoint:CGPointMake(1, 1)];
+        [rootLayer addSublayer:clock];
+        clock.position = CGPointMake(self.bounds.size.width - 16, self.bounds.size.height - 16);
+        [clock setAutoresizingMask:kCALayerMinXMargin | kCALayerMinYMargin];
+        [self updateClockScale];
+    }
+}
+
+- (void)removeAnalogClock {
+    if (clock) {
+        [clock removeFromSuperlayer];
+        clock = nil;
+    }
 }
 
 - (void)getTrack:(NSNotification *)notification {
     MusicTrack *track = [MusicBridge getCurrentTrack];
-    if (![track.id isEqualToString:currentSongID]) {
+    if (![track.id isEqualToString:currentTrack.id]) {
         // Lied wurde gewechselt!
         if (prevTrack) {
             // wenn das prevTrackEvent nicht länger als drei Sekunden her ist, wurde der Track gerade zurück gewechselt!
@@ -133,10 +149,12 @@
 }
 
 - (void)setTrack:(MusicTrack *)track prev:(BOOL)prev {
-    currentSongID = track.id;
+    currentTrack = track;
     if (firstSong || justChangedTrack) {
         [activeSongLayer setTrack:track];
 		firstSong = NO;
+        
+        [self updateClockColor];
 	} else {
         // generate new SongLayer
 		
@@ -154,10 +172,11 @@
 		
 		// inner transaction
 		[CATransaction begin];
-//		[CATransaction setAnimationTimingFunction:[CAMediaTimingFunction functionWithName:kCAMediaTimingFunctionEaseIn]];
 		[CATransaction setAnimationDuration:0.5f];
 		activeSongLayer.opacity = 0;
 		[CATransaction commit];
+        
+        [self updateClockColor];
 
 		[CATransaction commit];
 
@@ -189,7 +208,7 @@
 		
 		[rootLayer addSublayer:activeSongLayer];
 		[CATransaction commit];
-//		[nextSongLayer layoutIfNeeded];
+        
 		
 		[NSTimer scheduledTimerWithTimeInterval:0.6 target:self selector:@selector(activateNewLayer) userInfo:nil repeats:NO];
 		allowScreenChange = NO;
@@ -206,6 +225,32 @@
 		}*/
 		changeTrackTimer = [NSTimer scheduledTimerWithTimeInterval:1 target:self selector:@selector(resetJustChangedTrack) userInfo:nil repeats:NO];
 	}
+}
+
+- (void)updateClockColorWithDuration:(NSTimeInterval)duration {
+    if (clock) {
+        [CATransaction begin];
+        CATransaction.animationDuration = duration;
+        
+        [self updateClockColor];
+        
+        [CATransaction commit];
+    }
+}
+
+- (void)updateClockColor {
+    if (clock) {
+        clock.tintColor = [currentTrack tintColorWithDarkMode:!whiteBackground strongAdjustment:true];
+        NSLog(@"analog clock tint color: %@", clock.tintColor);
+        clock.darkMode = !whiteBackground;
+    }
+}
+
+- (void)updateClockScale {
+    if (clock) {
+        CGFloat clockScale = self.frame.size.height * 0.05 / [AnalogClockLayer radius];
+        [clock setTransform:CATransform3DMakeScale(clockScale, clockScale, 1)];
+    }
 }
 
 - (void)activateNewLayer {
@@ -247,19 +292,40 @@
 	} else if ([character isEqualToString:@" "]) {
         [MusicBridge playpause];
 	} else if ([character isEqualToString:@"t"]) {
-        displayClock = !displayClock;
-		activeSongLayer.displayClock = displayClock;
-		[activeSongLayer updateClock];
-		[activeSongLayer updateWithDuration:.5];
-	} else if ([character isEqualToString:@"T"]) {
-        clockSeconds = !clockSeconds;
-        activeSongLayer.clockSeconds = clockSeconds;
         if (!displayClock) {
             displayClock = true;
             activeSongLayer.displayClock = displayClock;
+        } else {
+            if (analogClock) {
+                analogClock = false;
+                clockSeconds = false;
+                [self removeAnalogClock];
+            } else if (!clockSeconds) {
+                clockSeconds = true;
+            } else {
+                analogClock = true;
+                [self setUpAnalogClockIfNeeded];
+            }
+            
+            //TODO: digital clock should not be part of the song layer
+            
+            activeSongLayer.displayClock = !analogClock;
+            activeSongLayer.clockSeconds = clockSeconds;
+            [activeSongLayer updateClock];
+            [activeSongLayer updateWithDuration:.5];
         }
-		[activeSongLayer updateClock];
+        [activeSongLayer updateClock];
 		[activeSongLayer updateWithDuration:.5];
+	} else if ([character isEqualToString:@"T"]) {
+        displayClock = !displayClock;
+        if (!displayClock) {
+            [self removeAnalogClock];
+        } else if (analogClock) {
+            [self setUpAnalogClockIfNeeded];
+        }
+        activeSongLayer.displayClock = displayClock && !analogClock;
+        [activeSongLayer updateClock];
+        [activeSongLayer updateWithDuration:.5];
 /*	} else if (keyCode == 123 || keyCode == 124) {
 		switchTrack = YES;*/
 		// ToDo: bei langem drücken spulen, ansonsten nextTrack bzw. backTrack
@@ -295,6 +361,7 @@
 		[rootLayer setBackgroundColor:whiteColor];
 		CGColorRelease(whiteColor);
 		[activeSongLayer updateWithDuration:0.5];
+        [self updateClockColorWithDuration:0.5];
 	} else if ([character isEqualToString:@"b"]) {
 		[CATransaction setValue:@0.5f forKey:kCATransactionAnimationDuration];
 		whiteBackground = NO;
@@ -303,6 +370,7 @@
 		[rootLayer setBackgroundColor:blackColor];
 		CGColorRelease(blackColor);
 		[activeSongLayer updateWithDuration:0.5];
+        [self updateClockColorWithDuration:0.5];
     } else if ([character isEqualToString:@"f"] || (keyCode == 53 && [self isWindowFullScreen])) {
         // esc quits out of fullscreen
         [self.window toggleFullScreen:self];
@@ -320,7 +388,7 @@
 	if (newPlayerPosition != playerPosition) {
 		if (newPlayerPosition == 0) {
 			NSString *songID = [MusicBridge getTrackID];
-			if ([songID isEqualToString:currentSongID]) {
+			if ([songID isEqualToString:currentTrack.id]) {
 				// current song started over
 				self.prevTrack = NO;
 			} else {
@@ -366,18 +434,6 @@
 	}
 }
 
-- (void)showRemoteEvent {
-	[CATransaction begin];
-	[CATransaction setAnimationDuration:0.0];
-	remoteEventLayer.opacity = whiteBackground ? .3 : 0.15;
-	[CATransaction commit];
-
-	[CATransaction begin];
-	[CATransaction setAnimationDuration:1.0];
-	remoteEventLayer.opacity = 0.0;
-	[CATransaction commit];
-}
-
 - (IBAction)toggleInfoPanel:(id)sender {
     infoLayerOn = _infoPanel.isVisible;
     if (infoLayerOn) {
@@ -400,7 +456,7 @@
 
 - (void)setFrame:(NSRect)frameRect {
     [super setFrame:frameRect];
-    remoteEventLayer.frame = frameRect;
+    [self updateClockScale];
 }
 
 - (void)windowWillClose:(NSNotification *)notification {
