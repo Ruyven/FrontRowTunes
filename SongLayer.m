@@ -8,7 +8,9 @@
 
 #import "SongLayer.h"
 
-@implementation SongLayer
+@implementation SongLayer {
+    CGFloat clockLayerWidth;
+}
 
 @synthesize track;
 @synthesize whiteBackground;
@@ -66,11 +68,12 @@
 		[pauseLayer addSublayer:[CALayer layer]];
 		[self addSublayer:pauseLayer];
 
+        clockLayerWidth = 500;
 		clockLayer = [CATextLayer layer];
-		clockLayer.alignmentMode = kCAAlignmentLeft;
-		clockLayer.font = CFBridgingRetain(@"Lucida-Grande");
+		clockLayer.alignmentMode = kCAAlignmentRight;
+		clockLayer.font = CFBridgingRetain(@"San-Francisco");
 		clockLayer.anchorPoint = CGPointMake(0, 1);
-		clockLayer.bounds = CGRectMake(0, 0, 500, 100);
+		clockLayer.bounds = CGRectMake(0, 0, clockLayerWidth, 100);
 		[self updateClock];
 		[self addSublayer:clockLayer];
 		
@@ -183,12 +186,8 @@
 		trackDuration = [track duration];
         playerPositionDiameter = layerDiameter;
         [self setPlayerPosition:playerPosition];
-		
-		if (clockSeconds) {
-			clockLayer.position = CGPointMake(width*.85, height);
-		} else {
-			clockLayer.position = CGPointMake(width*.9, height);
-		}
+        
+        clockLayer.position = CGPointMake(width * 0.995 - clockLayerWidth, height);
 
 		// pause icon
 		CALayer *pausePart1 = [pauseLayer sublayers][0];
