@@ -239,15 +239,29 @@
 		
 		clockLayer.fontSize = height * .05;
 		if (displayClock) {
-			clockLayer.foregroundColor = foregroundCGColor;
+            NSImage *artworkImage;
+            if (track.artwork.bytes) {
+                artworkImage = [[NSImage alloc] initWithData:track.artwork];
+            } else {
+                artworkImage = MusicTrack.defaultArtwork;
+            }
+            
+            if (artworkImage && artworkImage.isValid) {
+                NSColor *color = [artworkImage averageColor];
+                if (whiteBackground) {
+                    color = [color colorWithMaximumBrightness:0.5];
+                } else {
+                    color = [color colorWithMinimumBrightness:0.5];
+                }
+                clockLayer.foregroundColor = [color CGColor];
+            } else {
+                clockLayer.foregroundColor = foregroundCGColor;
+            }
 			clockLayer.opacity = 1;
 		} else {
 			clockLayer.opacity = 0;
 		}
 	}
-
-
-//	CGColorRelease(whiteColor);
 
 	[self layoutIfNeeded];
 }
@@ -259,7 +273,7 @@
     if (track.artwork.bytes) {
         artwork = track.artwork;
     } else {
-        artwork = [[NSImage imageNamed:@"FrontRowGradient"] TIFFRepresentation];
+        artwork = [MusicTrack.defaultArtwork TIFFRepresentation];
     }
 
     if (artwork) {

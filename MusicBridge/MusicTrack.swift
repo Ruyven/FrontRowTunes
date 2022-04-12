@@ -24,4 +24,8 @@ import AppKit
         self.artwork = artwork
         self.duration = duration
     }
+    
+    @objc static var defaultArtwork: NSImage? {
+        return NSImage(named: "FrontRowGradient")
+    }
 }
