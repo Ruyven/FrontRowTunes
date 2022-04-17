@@ -348,12 +348,28 @@
 /*	} else if ([character isEqualToString:@"h"]) {
 		[NSApp hide:self]; // doesn't seem to work.*/
 	} else if (keyCode == 36) {			// Return
-		displayPlayerPositionLabel = !displayPlayerPositionLabel;
+        if (!displayPlayerPositionBar && !displayPlayerPositionLabel) {
+            displayPlayerPositionBar = true;
+        } else if (displayPlayerPositionBar && !displayPlayerPositionLabel) {
+            displayPlayerPositionLabel = true;
+        } else if (displayPlayerPositionBar && displayPlayerPositionLabel) {
+            displayPlayerPositionBar = false;
+        } else {
+            displayPlayerPositionBar = true;
+            displayPlayerPositionLabel = false;
+        }
+        [activeSongLayer setDisplayPlayerPositionBar:displayPlayerPositionBar];
 		[activeSongLayer setDisplayPlayerPositionLabel:displayPlayerPositionLabel];
 		[activeSongLayer updateWithDuration:.5];
 	} else if (keyCode == 76) {			// fn+Return or Enter
-		displayPlayerPositionBar = !displayPlayerPositionBar;
-		[activeSongLayer setDisplayPlayerPositionBar:displayPlayerPositionBar];
+        if (!displayPlayerPositionBar && !displayPlayerPositionLabel) {
+            displayPlayerPositionBar = true;
+        } else {
+            displayPlayerPositionBar = false;
+            displayPlayerPositionLabel = false;
+        }
+        [activeSongLayer setDisplayPlayerPositionBar:displayPlayerPositionBar];
+        [activeSongLayer setDisplayPlayerPositionLabel:displayPlayerPositionLabel];
 		[activeSongLayer updateWithDuration:.5];
 	} else if ([character isEqualToString:@"w"]) {
 		[CATransaction setValue:@0.5f forKey:kCATransactionAnimationDuration];
