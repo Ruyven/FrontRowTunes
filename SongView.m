@@ -50,6 +50,7 @@
 	displayPlayerPositionLabel = NO;
 	displayClock = NO;
 	clockSeconds = NO;
+    analogClock = YES;
     
 
 	// make this view the first responder to get keystrokes
@@ -89,7 +90,7 @@
 	[activeSongLayer setPlayerState:[MusicBridge getPlayerState]];
 	activeSongLayer.displayPlayerPositionBar = displayPlayerPositionBar;
 	activeSongLayer.displayPlayerPositionLabel = displayPlayerPositionLabel;
-	activeSongLayer.displayClock = displayClock;
+	activeSongLayer.displayClock = displayClock && !analogClock;
 	activeSongLayer.clockSeconds = clockSeconds;
 	
 	
@@ -108,7 +109,7 @@
 }
 
 - (void)setUpAnalogClockIfNeeded {
-    if (!clock) {
+    if (!clock && analogClock && displayClock) {
         clock = [[AnalogClockLayer alloc] initWithDarkMode:!whiteBackground];
         if (activeSongLayer.track) {
             clock.tintColor = [activeSongLayer.track tintColorWithDarkMode:!whiteBackground strongAdjustment:true];
@@ -203,7 +204,7 @@
 		activeSongLayer.opacity = 0.0;
 		activeSongLayer.displayPlayerPositionBar = displayPlayerPositionBar;
 		activeSongLayer.displayPlayerPositionLabel = displayPlayerPositionLabel;
-		activeSongLayer.displayClock = displayClock;
+		activeSongLayer.displayClock = displayClock && !analogClock;
 		activeSongLayer.clockSeconds = clockSeconds;
 		
 		[rootLayer addSublayer:activeSongLayer];
@@ -294,7 +295,8 @@
 	} else if ([character isEqualToString:@"t"]) {
         if (!displayClock) {
             displayClock = true;
-            activeSongLayer.displayClock = displayClock;
+            activeSongLayer.displayClock = displayClock && !analogClock;
+            [self setUpAnalogClockIfNeeded];
         } else {
             if (analogClock) {
                 analogClock = false;
