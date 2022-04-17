@@ -159,20 +159,19 @@ class AnalogClockLayer: CALayer {
     }
     
     private func setTime(_ time: Double, animationDuration: TimeInterval, completion: @escaping () -> ()) {
+        CATransaction.flush()
+        
         CATransaction.begin()
         CATransaction.setAnimationTimingFunction(CAMediaTimingFunction(name: CAMediaTimingFunctionName.linear))
-        CATransaction.setCompletionBlock({
-//            NSLog("calling completion after animation duration \(animationDuration)")
-            completion()
-        })
-
+        
         if animationDuration > 0 {
-//            NSLog("set animation duration to \(animationDuration)")
             CATransaction.setAnimationDuration(animationDuration)
         } else {
             CATransaction.disableActions()
         }
         
+        CATransaction.setCompletionBlock(completion)
+
         let (hour, minute, second) = getHourMinuteSecond(time)
         
         setHourHandRotation(hourHand, hour)
@@ -184,7 +183,6 @@ class AnalogClockLayer: CALayer {
     
     private func setHandRotation(_ hand: CALayer, _ rotation: CGFloat) {
         let angle = -rotation * 2 * CGFloat.pi / 60
-//        NSLog("set hand to \(rotation)")
         hand.transform = CATransform3DMakeRotation(angle, 0, 0, 1)
     }
     
