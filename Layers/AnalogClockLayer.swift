@@ -53,9 +53,12 @@ class AnalogClockLayer: CALayer {
             CATransaction.begin()
             CATransaction.setAnimationDuration(0.5)
             secondHand.backgroundColor = tintColor?.cgColor
+            secondHingeOuter.backgroundColor = tintColor?.cgColor
             CATransaction.commit()
         }
     }
+    
+    // MARK: -
     
     private func setUpClockFace() {
         for minute in 0..<60 {
@@ -101,6 +104,14 @@ class AnalogClockLayer: CALayer {
         }
     }
     
+    private let secondHand = CALayer()
+    private let minuteHand = CALayer()
+    private let hourHand = CALayer()
+    
+    private let secondHingeBackground = CALayer()
+    private let secondHingeOuter = CALayer()
+    private let secondHingeInner = CALayer()
+    
     private func setUpClockHands() {
         let radius = Self.radius
         
@@ -121,10 +132,28 @@ class AnalogClockLayer: CALayer {
         self.addSublayer(minuteHand)
         minuteHand.position = CGPoint(x: radius, y: radius)
         
-        secondHand.bounds = CGRect(x: 0, y: 0, width: 2, height: Self.radius)
-        secondHand.anchorPoint = CGPoint(x: 0.5, y: 0)
+        self.addSublayer(secondHingeBackground)
+        
+        let secondHandOverhang = 1.15
+        secondHand.bounds = CGRect(x: 0, y: 0, width: 2, height: Self.radius * secondHandOverhang)
+        secondHand.anchorPoint = CGPoint(x: 0.5, y: 1 - 1 / secondHandOverhang)
         self.addSublayer(secondHand)
         secondHand.position = CGPoint(x: radius, y: radius)
+        
+        let hingeBackgroundDiameter = radius * 0.1
+        let hingeDiameter = radius * 0.06
+        let innerHingeDiameter = hingeDiameter * 0.4
+        secondHingeBackground.bounds = CGRect(x: 0, y: 0, width: hingeBackgroundDiameter, height: hingeBackgroundDiameter)
+        secondHingeOuter.bounds = CGRect(x: 0, y: 0, width: hingeDiameter, height: hingeDiameter)
+        secondHingeInner.bounds = CGRect(x: 0, y: 0, width: innerHingeDiameter, height: innerHingeDiameter)
+        secondHingeBackground.cornerRadius = hingeBackgroundDiameter / 2
+        secondHingeOuter.cornerRadius = hingeDiameter / 2
+        secondHingeInner.cornerRadius = innerHingeDiameter / 2
+        self.addSublayer(secondHingeOuter)
+        self.addSublayer(secondHingeInner)
+        secondHingeBackground.position = CGPoint(x: radius, y: radius)
+        secondHingeOuter.position = CGPoint(x: radius, y: radius)
+        secondHingeInner.position = CGPoint(x: radius, y: radius)
         
         let (hour, minute, second) = getHourMinuteSecond(getTime(timeIntervalSinceNow: 0))
         setHourHandRotation(hourHand, hour)
@@ -135,9 +164,12 @@ class AnalogClockLayer: CALayer {
     }
     
     private func updateClockHands() {
+        let backgroundColor = darkMode ? CGColor.black : CGColor.white
         let foregroundColor = darkMode ? CGColor.white : CGColor.black
         hourHand.backgroundColor = foregroundColor
         minuteHand.backgroundColor = foregroundColor
+        secondHingeBackground.backgroundColor = foregroundColor
+        secondHingeInner.backgroundColor = backgroundColor
     }
     
     // MARK: - Animations
@@ -145,10 +177,6 @@ class AnalogClockLayer: CALayer {
     func updateAnimations() {
         setTime(getTime(timeIntervalSinceNow: animationDuration), animationDuration: animationDuration) { [weak self] in self?.updateAnimations() }
     }
-    
-    private let secondHand = CALayer()
-    private let minuteHand = CALayer()
-    private let hourHand = CALayer()
     
     private func getHourMinuteSecond(_ time: Double) -> (Double, Double, Double) {
         var hour = time / 3600
