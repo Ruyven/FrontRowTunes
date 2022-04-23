@@ -72,7 +72,7 @@ class AnalogClockLayer: CALayer {
                     return radius * 0.05
                 }
             }()
-            let width = min(height / 2, Self.radius * 0.075)
+            let width = min(height / 2, Self.radius * 0.05)
             setUpFaceTick(
                 width: width,
                 height: height,
@@ -89,7 +89,7 @@ class AnalogClockLayer: CALayer {
         tickLayer.bounds = CGRect(x: 0, y: 0, width: width, height: height)
         tickLayer.cornerRadius = width / 2
         
-        tickLayer.anchorPoint = CGPoint(x: 0.5, y: -(Self.radius - height + width/2) / height)
+        tickLayer.anchorPoint = CGPoint(x: 0.5, y: -(Self.radius - height + width/4) / height)
         tickLayer.position = CGPoint(x: Self.radius, y: Self.radius)
         tickLayer.transform = CATransform3DMakeRotation(-rotation / 60 * 2 * .pi, 0, 0, 1)
         
@@ -118,7 +118,7 @@ class AnalogClockLayer: CALayer {
         let handWidth: CGFloat = Self.radius * 0.07
         let handCornerRadius = handWidth / 2
         
-        let hourHeight = radius * 0.6
+        let hourHeight = radius * 0.55
         hourHand.bounds = CGRect(x: 0, y: 0, width: handWidth, height: hourHeight + handCornerRadius)
         hourHand.cornerRadius = handCornerRadius
         hourHand.anchorPoint = CGPoint(x: 0.5, y: handCornerRadius / hourHeight)
@@ -140,8 +140,8 @@ class AnalogClockLayer: CALayer {
         self.addSublayer(secondHand)
         secondHand.position = CGPoint(x: radius, y: radius)
         
-        let hingeBackgroundDiameter = radius * 0.1
-        let hingeDiameter = radius * 0.06
+        let hingeBackgroundDiameter = radius * 0.09
+        let hingeDiameter = hingeBackgroundDiameter * 5/6
         let innerHingeDiameter = hingeDiameter * 0.4
         secondHingeBackground.bounds = CGRect(x: 0, y: 0, width: hingeBackgroundDiameter, height: hingeBackgroundDiameter)
         secondHingeOuter.bounds = CGRect(x: 0, y: 0, width: hingeDiameter, height: hingeDiameter)
