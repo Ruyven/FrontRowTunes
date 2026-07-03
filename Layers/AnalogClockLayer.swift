@@ -25,8 +25,6 @@ class AnalogClockLayer: CALayer {
         didSet {
             secondHand.isHidden = !showSeconds
             secondHingeOuter.isHidden = !showSeconds
-            secondHingeInner.isHidden = !showSeconds
-            secondHingeBackground.isHidden = !showSeconds
         }
     }
     
