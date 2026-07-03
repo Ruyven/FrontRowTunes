@@ -7,6 +7,7 @@
 //
 
 #import "SongView.h"
+#import "FrontRowTunes-Swift.h" // FIXME: needed?
 
 @implementation SongView {
     MusicTrack *currentTrack;
@@ -16,7 +17,7 @@
     SongLayer *activeSongLayer;
     SongLayer *lastSongLayer;
     AnalogClockLayer *clock;
-    CATextLayer *trackBannerLayer;
+    TrackBannerLayer *trackBannerLayer;
     
     BOOL justChangedTrack;
     BOOL allowScreenChange;
@@ -82,6 +83,7 @@
 }
 
 - (void)setupLayers {
+    NSLog(@"SongView: setupLayers called");
 	CGColorRef blackColor = CGColorCreateGenericRGB(0, 0, 0, 1);
 	
 	rootLayer = [CALayer layer];
@@ -107,12 +109,12 @@
 	// cleanup
 	CGColorRelease(blackColor);
     
-    trackBannerLayer = [CATextLayer layer];
-    [trackBannerLayer setFontSize:20];
-    [trackBannerLayer setForegroundColor:CGColorCreateGenericRGB(1, 1, 1, 0.5)];
-    [trackBannerLayer setAlignmentMode:kCAAlignmentCenter];
+    trackBannerLayer = [[TrackBannerLayer alloc] init];
     [rootLayer addSublayer:trackBannerLayer];
     trackBannerLayer.opacity = 0;
+    trackBannerLayer.zPosition = 1000;
+    trackBannerLayer.backgroundColor = CGColorCreateGenericRGB(1, 0, 0, 0.5);
+    NSLog(@"SongView: trackBannerLayer initialized and added, opacity: %f, zPosition: %f", trackBannerLayer.opacity, trackBannerLayer.zPosition);
     
     if (analogClock) {
         [self setUpAnalogClockIfNeeded];
@@ -168,11 +170,7 @@
 	} else {
         // generate new SongLayer
         
-        if (track) {
-            trackBannerLayer.string = [NSString stringWithFormat:@"%@ - %@", track.artist, track.name];
-        } else {
-            trackBannerLayer.string = @"";
-        }
+        [trackBannerLayer updateWith:track];
 		
 		activeSongLayer.zPosition = 1;
 		
@@ -282,6 +280,7 @@
         [clock setTransform:CATransform3DMakeScale(clockScale, clockScale, 1)];
         
         trackBannerLayer.frame = CGRectMake(0, 20, self.bounds.size.width, 30);
+        NSLog(@"SongView: updateAnalogClockLayout (fullscreen) banner frame: %@", NSStringFromRect(trackBannerLayer.frame));
     } else {
         // Compact mode
         CGFloat clockScale = self.bounds.size.height * 0.05 / [AnalogClockLayer radius];
@@ -293,6 +292,7 @@
         [clock setTransform:CATransform3DMakeScale(clockScale, clockScale, 1)];
         
         trackBannerLayer.frame = CGRectMake(0, -50, self.bounds.size.width, 30);
+        NSLog(@"SongView: updateAnalogClockLayout (compact) banner frame: %@", NSStringFromRect(trackBannerLayer.frame));
     }
 
     [CATransaction commit];
