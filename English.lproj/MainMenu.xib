@@ -128,29 +128,29 @@
             <rect key="contentRect" x="1060" y="152" width="528" height="325"/>
             <rect key="screenRect" x="0.0" y="0.0" width="2560" height="1415"/>
             <view key="contentView" misplaced="YES" id="537">
-                <rect key="frame" x="0.0" y="0.0" width="528" height="288"/>
+                <rect key="frame" x="0.0" y="0.0" width="528" height="325"/>
                 <autoresizingMask key="autoresizingMask"/>
                 <subviews>
                     <textField verticalHuggingPriority="750" horizontalCompressionResistancePriority="250" setsMaxLayoutWidthAtFirstLayout="YES" preferredMaxLayoutWidth="490" translatesAutoresizingMaskIntoConstraints="NO" id="540">
-                        <rect key="frame" x="17" y="16" width="323" height="256"/>
+                        <rect key="frame" x="17" y="16" width="365" height="256"/>
                         <textFieldCell key="cell" controlSize="mini" sendsActionOnEndEditing="YES" id="541">
                             <font key="font" metaFont="system"/>
                             <mutableString key="title">FrontRowTunes {{appVersion}}
-© 2013-2021 by Alex Decker. All rights reserved.
-
+Copyright © 2013-2026 by Alex Decker. All rights reserved.
 Shortcut Keys:
-• w		    white background
-• b		    black background
-• f		    full screen
-• 1,2,…	    show maximized on different screens
-• ←, →	    switch track
-• space	    play/pause
-• t		    toggle display clock
-• T		    toggle clock mode: with/without seconds
-• ↵		    toggle display track position as m:ss
-• fn+↵	    toggle display track position bar
-• i, h		    toggle display this info panel
-• q		    quit</mutableString>
+	w			white background
+	b			black background
+	f			full screen
+	1,2,…		show maximized on different screens
+	←, →		switch track
+	space		play/pause
+	t			cycle clock styles
+	T			toggle clock visibility
+	Option+t		toggle full-screen clock
+	↵			toggle display track position as m:ss
+	fn+↵		toggle display track position bar
+	i, h			toggle display this info panel
+	q			quit</mutableString>
                             <color key="textColor" red="1" green="1" blue="1" alpha="1" colorSpace="calibratedRGB"/>
                             <color key="backgroundColor" name="controlColor" catalog="System" colorSpace="catalog"/>
                         </textFieldCell>
