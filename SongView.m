@@ -292,7 +292,11 @@
 - (void)activateNewLayer {
 	[CATransaction setAnimationTimingFunction:[CAMediaTimingFunction functionWithName:kCAMediaTimingFunctionEaseOut]];
 	[CATransaction setValue:@0.5f forKey:kCATransactionAnimationDuration];
-	activeSongLayer.opacity = 1;
+	if (analogClockFullScreen) {
+		activeSongLayer.opacity = 0;
+	} else {
+		activeSongLayer.opacity = 1;
+	}
 	[activeSongLayer setAffineTransform:CGAffineTransformMake(1, 0, 0, 1, 0, 0)];
 	
 	allowScreenChange = YES;
@@ -388,6 +392,10 @@
         } else if ([character isEqualToString:@"T"]) {
             displayClock = !displayClock;
             if (!displayClock) {
+                if (analogClockFullScreen) {
+                    analogClockFullScreen = NO;
+                    activeSongLayer.opacity = 1;
+                }
                 [self removeAnalogClock];
             } else if (analogClock) {
                 [self setUpAnalogClockIfNeeded];
@@ -396,7 +404,13 @@
             [activeSongLayer updateClock];
             [activeSongLayer updateWithDuration:.5];
         } else if ([character isEqualToString:@"t"]) {
-            if (!displayClock) {
+            if (analogClockFullScreen) {
+                clockSeconds = !clockSeconds;
+                if (clock) {
+                    clock.showSeconds = clockSeconds;
+                }
+                activeSongLayer.clockSeconds = clockSeconds;
+            } else if (!displayClock) {
                 displayClock = true;
                 activeSongLayer.displayClock = displayClock && !analogClock;
                 [self setUpAnalogClockIfNeeded];
