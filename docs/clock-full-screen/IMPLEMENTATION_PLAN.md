@@ -276,5 +276,30 @@ This document details the step-by-step implementation plan for adding the full-s
 ## Phase 7: Finalise new version
 
 ### Step 7.1: Update Info panel to include correct hotkeys
+- **Goal**: Update the `Shortcut Keys` section in the `MainMenu.xib` info panel to accurately reflect the revised hotkeys, using the established tabbed formatting.
+- **Changes**:
+  - Open `English.lproj/MainMenu.xib` in Xcode.
+  - Locate the `About FrontRowTunes / Shortcut Keys` panel (ID `536`).
+  - Update the text in the `textField` (ID `540`, cell `541`) to the following:
+    ```
+    FrontRowTunes {{appVersion}}
+    Copyright © 2013-2026 by Alex Decker. All rights reserved.
+    Shortcut Keys:
+    	w			white background
+    	b			black background
+    	f			full screen
+    	1,2,…		show maximized on different screens
+    	←, →		switch track
+    	space		play/pause
+    	t			cycle clock styles
+    	T			toggle clock visibility
+    	Option+t	toggle full-screen clock
+    	↵			toggle display track position as m:ss
+    	fn+↵		toggle display track position bar
+    	i, h		toggle display this info panel
+    	q			quit
+    ```
+- **Verification**:
+  - Run the app, press `i` (or `h`), and verify that the Shortcut Keys section correctly lists `Option+t` and has updated, correctly formatted descriptions for `t` and `T`.
 
 ### Step 7.2: Update version to 0.4.0 ahead of merging
