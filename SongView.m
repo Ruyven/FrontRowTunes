@@ -413,20 +413,22 @@
                 activeSongLayer.displayClock = displayClock && !analogClock;
                 [self setUpAnalogClockIfNeeded];
             } else {
-                if (analogClock) {
-                    analogClock = false;
+                if (analogClock && clockSeconds) {
                     clockSeconds = false;
+                    if (clock) {
+                        clock.showSeconds = false;
+                    }
+                } else if (analogClock && !clockSeconds) {
+                    analogClock = false;
                     [self removeAnalogClock];
-                } else if (!clockSeconds) {
+                } else if (!analogClock && !clockSeconds) {
                     clockSeconds = true;
-                } else {
+                } else { // (!analogClock && clockSeconds)
                     analogClock = true;
                     [self setUpAnalogClockIfNeeded];
                 }
                 
-                //TODO: digital clock should not be part of the song layer
-                
-                activeSongLayer.displayClock = !analogClock;
+                activeSongLayer.displayClock = displayClock && !analogClock;
                 activeSongLayer.clockSeconds = clockSeconds;
                 [activeSongLayer updateClock];
                 [activeSongLayer updateWithDuration:.5];
