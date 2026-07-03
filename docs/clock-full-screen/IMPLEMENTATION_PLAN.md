@@ -200,6 +200,40 @@ This document details the step-by-step implementation plan for adding the full-s
 - **Verification**:
   - Enter full-screen clock. Let the track transition or change it in Apple Music. Verify the clock tint changes seamlessly, but the song details layer remains hidden.
 
+### Step 4.4: Fix Analog Clock Animation Path (Enter Full-Screen)
+- **Goal**: Ensure the clock animates from the top-right corner to the center, rather than appearing to move from the bottom-left.
+- **Changes**:
+  - In `updateAnalogClockLayoutWithDuration:`, when transitioning to full-screen, the anchor point change from `(1.0, 1.0)` to `(0.5, 0.5)` causes a jump in position.
+  - To fix this, update the `position` property relative to the new anchor point immediately before the animation begins, or use a `CATransaction` to coordinate the anchor point and position change so they offset each other.
+- **Verification**:
+  - Trigger full-screen mode; verify the clock slides from the top-right corner to the center of the screen.
+
+### Step 4.5: Fix Analog Clock Animation Path (Exit Full-Screen)
+- **Goal**: Ensure the clock animates from the center back to the top-right corner.
+- **Changes**:
+  - Similarly to Step 4.4, ensure the transition of the anchor point from `(0.5, 0.5)` back to `(1.0, 1.0)` is offset by a corresponding change in `position` so the animation path is a direct line from center to corner.
+- **Verification**:
+  - Exit full-screen mode; verify the clock slides from the center back to the top-right corner.
+
+### Step 4.6: Preserve Center Circle when Seconds are Hidden
+- **Goal**: Keep the central white decorative circle visible even when the second hand is hidden.
+- **Changes**:
+  - In `AnalogClockLayer.swift`, update the `didSet` for `showSeconds`.
+  - Ensure that the `secondHingeBackground` (or the specific layer responsible for the center white circle) is NOT hidden when `showSeconds` is false.
+- **Verification**:
+  - Cycle through clock styles to hide the second hand; verify that the white center circle remains visible while the second hand itself is hidden.
+
+### Step 4.7: Fix Full-Screen Clock Fitting in Windowed Mode
+- **Goal**: Ensure the full-screen analog clock correctly fits and centers within the window when the app is not in macOS native full-screen mode.
+- **Changes**:
+  - Review `updateAnalogClockLayoutWithDuration:` in `SongView.m`.
+  - Verify that `self.bounds` is providing the correct dimensions for the scale calculation in windowed mode.
+  - Ensure that the clock is centered and scaled based on the actual current window size, handling arbitrary aspect ratios.
+- **Verification**:
+  - Run the app in windowed mode.
+  - Toggle the full-screen analog clock and verify it fits perfectly within the window.
+  - Resize the window while the full-screen clock is active and verify it remains centered and fits the shorter dimension of the window.
+
 ---
 
 ## Phase 5: Update Compact Mode Clock Cycle
