@@ -20,6 +20,15 @@ class AnalogClockLayer: CALayer {
             updateClockHands()
         }
     }
+
+    @objc var showSeconds: Bool = true {
+        didSet {
+            secondHand.isHidden = !showSeconds
+            secondHingeOuter.isHidden = !showSeconds
+            secondHingeInner.isHidden = !showSeconds
+            secondHingeBackground.isHidden = !showSeconds
+        }
+    }
     
     @objc init(darkMode: Bool) {
         self.darkMode = darkMode

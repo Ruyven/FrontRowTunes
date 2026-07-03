@@ -33,7 +33,7 @@
     double playerPosition;
     NSTimer *updatePlayerPositionTimer;
     
-    BOOL displayPlayerPositionBar, displayPlayerPositionLabel, displayClock, clockSeconds, analogClock;
+    BOOL displayPlayerPositionBar, displayPlayerPositionLabel, displayClock, clockSeconds, analogClock, analogClockFullScreen;
     
     LastEventTracker *systemInactivityTracker;
     LastEventTracker *mouseHideTracker;
@@ -49,7 +49,7 @@
 	displayPlayerPositionBar = YES;
 	displayPlayerPositionLabel = NO;
 	displayClock = NO;
-	clockSeconds = NO;
+	clockSeconds = YES;
     analogClock = YES;
     
 
@@ -116,11 +116,9 @@
         } else {
             clock.tintColor = [NSColor defaultTintColor];
         }
-        [clock setAnchorPoint:CGPointMake(1, 1)];
         [rootLayer addSublayer:clock];
-        clock.position = CGPointMake(self.bounds.size.width - 16, self.bounds.size.height - 16);
-        [clock setAutoresizingMask:kCALayerMinXMargin | kCALayerMinYMargin];
-        [self updateClockScale];
+        clock.showSeconds = clockSeconds;
+        [self updateAnalogClockLayoutWithDuration:0];
     }
 }
 
@@ -245,6 +243,40 @@
         NSLog(@"analog clock tint color: %@", clock.tintColor);
         clock.darkMode = !whiteBackground;
     }
+}
+
+- (void)updateAnalogClockLayoutWithDuration:(NSTimeInterval)duration {
+    if (!clock) return;
+
+    [CATransaction begin];
+    if (duration > 0) {
+        CATransaction.animationDuration = duration;
+    } else {
+        [CATransaction setValue:(id)kCFBooleanTrue forKey:kCATransactionDisableActions];
+    }
+
+    if (analogClockFullScreen) {
+        // Full-screen clock mode
+        [clock setAnchorPoint:CGPointMake(0.5, 0.5)];
+        clock.position = CGPointMake(self.bounds.size.width / 2.0, self.bounds.size.height / 2.0);
+        [clock setAutoresizingMask:0];
+        clock.zPosition = 100;
+        
+        CGFloat availableDiameter = MIN(self.bounds.size.width, self.bounds.size.height) * 0.82;
+        CGFloat clockScale = availableDiameter / (2 * [AnalogClockLayer radius]);
+        [clock setTransform:CATransform3DMakeScale(clockScale, clockScale, 1)];
+    } else {
+        // Compact mode
+        [clock setAnchorPoint:CGPointMake(1.0, 1.0)];
+        clock.position = CGPointMake(self.bounds.size.width - 16, self.bounds.size.height - 16);
+        [clock setAutoresizingMask:kCALayerMinXMargin | kCALayerMinYMargin];
+        clock.zPosition = 0;
+        
+        CGFloat clockScale = self.bounds.size.height * 0.05 / [AnalogClockLayer radius];
+        [clock setTransform:CATransform3DMakeScale(clockScale, clockScale, 1)];
+    }
+
+    [CATransaction commit];
 }
 
 - (void)updateClockScale {
@@ -474,7 +506,7 @@
 
 - (void)setFrame:(NSRect)frameRect {
     [super setFrame:frameRect];
-    [self updateClockScale];
+    [self updateAnalogClockLayoutWithDuration:0];
 }
 
 - (void)windowWillClose:(NSNotification *)notification {
