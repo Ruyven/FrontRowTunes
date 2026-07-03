@@ -34,6 +34,9 @@
     NSTimer *updatePlayerPositionTimer;
     
     BOOL displayPlayerPositionBar, displayPlayerPositionLabel, displayClock, clockSeconds, analogClock, analogClockFullScreen;
+    BOOL priorDisplayClock;
+    BOOL priorAnalogClock;
+    BOOL priorClockSeconds;
     
     LastEventTracker *systemInactivityTracker;
     LastEventTracker *mouseHideTracker;
@@ -308,8 +311,63 @@
 	}
 }
 
+- (void)toggleAnalogClockFullScreen {
+    if (!analogClockFullScreen) {
+        // Entering Full-Screen
+        priorDisplayClock = displayClock;
+        priorAnalogClock = analogClock;
+        priorClockSeconds = clockSeconds;
+        
+        analogClockFullScreen = YES;
+        displayClock = YES;
+        analogClock = YES;
+        
+        [self setUpAnalogClockIfNeeded];
+        if (clock) {
+            clock.showSeconds = clockSeconds;
+        }
+        
+        [CATransaction begin];
+        [CATransaction setAnimationDuration:0.5f];
+        activeSongLayer.opacity = 0;
+        [CATransaction commit];
+        
+        activeSongLayer.displayClock = NO;
+        [self updateAnalogClockLayoutWithDuration:0.5];
+    } else {
+        // Leaving Full-Screen
+        analogClockFullScreen = NO;
+        displayClock = priorDisplayClock;
+        analogClock = priorAnalogClock;
+        clockSeconds = priorClockSeconds;
+        
+        activeSongLayer.displayClock = displayClock && !analogClock;
+        activeSongLayer.clockSeconds = clockSeconds;
+        
+        if (analogClock && displayClock) {
+            [self updateAnalogClockLayoutWithDuration:0.5];
+            if (clock) {
+                clock.showSeconds = clockSeconds;
+            }
+        } else {
+            [self removeAnalogClock];
+        }
+        
+        [CATransaction begin];
+        [CATransaction setAnimationDuration:0.5f];
+        activeSongLayer.opacity = 1;
+        [CATransaction commit];
+        
+        [activeSongLayer updateClock];
+        [self updateClockColorWithDuration:0.5];
+        [activeSongLayer updateWithDuration:0.5];
+    }
+}
+
 - (void)keyDown:(NSEvent *)event {
     NSString *character = [event characters];
+    NSString *charactersIgnoringModifiers = [event charactersIgnoringModifiers];
+    NSEventModifierFlags modifierFlags = [event modifierFlags];
 	int characterInt = [character intValue];
 	keyCode = [event keyCode];
 	
@@ -324,42 +382,46 @@
 		}
 	} else if ([character isEqualToString:@" "]) {
         [MusicBridge playpause];
-	} else if ([character isEqualToString:@"t"]) {
-        if (!displayClock) {
-            displayClock = true;
-            activeSongLayer.displayClock = displayClock && !analogClock;
-            [self setUpAnalogClockIfNeeded];
-        } else {
-            if (analogClock) {
-                analogClock = false;
-                clockSeconds = false;
+	} else if ([charactersIgnoringModifiers isEqualToString:@"t"] || [charactersIgnoringModifiers isEqualToString:@"T"]) {
+        if ((modifierFlags & NSEventModifierFlagOption) != 0) {
+            [self toggleAnalogClockFullScreen];
+        } else if ([character isEqualToString:@"T"]) {
+            displayClock = !displayClock;
+            if (!displayClock) {
                 [self removeAnalogClock];
-            } else if (!clockSeconds) {
-                clockSeconds = true;
-            } else {
-                analogClock = true;
+            } else if (analogClock) {
                 [self setUpAnalogClockIfNeeded];
             }
-            
-            //TODO: digital clock should not be part of the song layer
-            
-            activeSongLayer.displayClock = !analogClock;
-            activeSongLayer.clockSeconds = clockSeconds;
+            activeSongLayer.displayClock = displayClock && !analogClock;
+            [activeSongLayer updateClock];
+            [activeSongLayer updateWithDuration:.5];
+        } else if ([character isEqualToString:@"t"]) {
+            if (!displayClock) {
+                displayClock = true;
+                activeSongLayer.displayClock = displayClock && !analogClock;
+                [self setUpAnalogClockIfNeeded];
+            } else {
+                if (analogClock) {
+                    analogClock = false;
+                    clockSeconds = false;
+                    [self removeAnalogClock];
+                } else if (!clockSeconds) {
+                    clockSeconds = true;
+                } else {
+                    analogClock = true;
+                    [self setUpAnalogClockIfNeeded];
+                }
+                
+                //TODO: digital clock should not be part of the song layer
+                
+                activeSongLayer.displayClock = !analogClock;
+                activeSongLayer.clockSeconds = clockSeconds;
+                [activeSongLayer updateClock];
+                [activeSongLayer updateWithDuration:.5];
+            }
             [activeSongLayer updateClock];
             [activeSongLayer updateWithDuration:.5];
         }
-        [activeSongLayer updateClock];
-		[activeSongLayer updateWithDuration:.5];
-	} else if ([character isEqualToString:@"T"]) {
-        displayClock = !displayClock;
-        if (!displayClock) {
-            [self removeAnalogClock];
-        } else if (analogClock) {
-            [self setUpAnalogClockIfNeeded];
-        }
-        activeSongLayer.displayClock = displayClock && !analogClock;
-        [activeSongLayer updateClock];
-        [activeSongLayer updateWithDuration:.5];
 /*	} else if (keyCode == 123 || keyCode == 124) {
 		switchTrack = YES;*/
 		// ToDo: bei langem drücken spulen, ansonsten nextTrack bzw. backTrack
