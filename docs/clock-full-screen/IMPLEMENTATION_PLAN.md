@@ -223,7 +223,9 @@ This document details the step-by-step implementation plan for adding the full-s
 - **Verification**:
   - Cycle through clock styles to hide the second hand; verify that the white center circle remains visible while the second hand itself is hidden.
 
-### Step 4.7: Fix Full-Screen Clock Fitting in Windowed Mode
+### (Superseded) Step 4.7: Fix Full-Screen Clock Fitting in Windowed Mode
+**Works now!**
+
 - **Goal**: Ensure the full-screen analog clock correctly fits and centers within the window when the app is not in macOS native full-screen mode.
 - **Changes**:
   - Review `updateAnalogClockLayoutWithDuration:` in `SongView.m`.
@@ -268,3 +270,11 @@ This document details the step-by-step implementation plan for adding the full-s
   - Hide and set opacity of `trackBannerLayer` to `1` only when `analogClockFullScreen` is active and a track is playing, otherwise set its opacity to `0`.
 - **Verification**:
   - Enter full-screen clock and verify playing song is minimally displayed at the bottom of the screen.
+
+---
+
+## Phase 7: Finalise new version
+
+### Step 7.1: Update Info panel to include correct hotkeys
+
+### Step 7.2: Update version to 0.4.0 ahead of merging
