@@ -16,6 +16,7 @@
     SongLayer *activeSongLayer;
     SongLayer *lastSongLayer;
     AnalogClockLayer *clock;
+    CATextLayer *trackBannerLayer;
     
     BOOL justChangedTrack;
     BOOL allowScreenChange;
@@ -106,6 +107,13 @@
 	// cleanup
 	CGColorRelease(blackColor);
     
+    trackBannerLayer = [CATextLayer layer];
+    [trackBannerLayer setFontSize:20];
+    [trackBannerLayer setForegroundColor:CGColorCreateGenericRGB(1, 1, 1, 0.5)];
+    [trackBannerLayer setAlignmentMode:kCAAlignmentCenter];
+    [rootLayer addSublayer:trackBannerLayer];
+    trackBannerLayer.opacity = 0;
+    
     if (analogClock) {
         [self setUpAnalogClockIfNeeded];
     }
@@ -159,6 +167,12 @@
         [self updateClockColor];
 	} else {
         // generate new SongLayer
+        
+        if (track) {
+            trackBannerLayer.string = [NSString stringWithFormat:@"%@ - %@", track.artist, track.name];
+        } else {
+            trackBannerLayer.string = @"";
+        }
 		
 		activeSongLayer.zPosition = 1;
 		
@@ -266,6 +280,8 @@
         CGFloat availableDiameter = MIN(self.bounds.size.width, self.bounds.size.height) * 0.82;
         CGFloat clockScale = availableDiameter / (2 * [AnalogClockLayer radius]);
         [clock setTransform:CATransform3DMakeScale(clockScale, clockScale, 1)];
+        
+        trackBannerLayer.frame = CGRectMake(0, 20, self.bounds.size.width, 30);
     } else {
         // Compact mode
         CGFloat clockScale = self.bounds.size.height * 0.05 / [AnalogClockLayer radius];
@@ -275,6 +291,8 @@
         clock.zPosition = 0;
         
         [clock setTransform:CATransform3DMakeScale(clockScale, clockScale, 1)];
+        
+        trackBannerLayer.frame = CGRectMake(0, -50, self.bounds.size.width, 30);
     }
 
     [CATransaction commit];
@@ -336,12 +354,17 @@
         
         activeSongLayer.displayClock = NO;
         [self updateAnalogClockLayoutWithDuration:0.5];
+        if (currentTrack) {
+            trackBannerLayer.opacity = 1;
+        }
     } else {
         // Leaving Full-Screen
         analogClockFullScreen = NO;
         displayClock = priorDisplayClock;
         analogClock = priorAnalogClock;
         clockSeconds = priorClockSeconds;
+        
+        trackBannerLayer.opacity = 0;
         
         activeSongLayer.displayClock = displayClock && !analogClock;
         activeSongLayer.clockSeconds = clockSeconds;
