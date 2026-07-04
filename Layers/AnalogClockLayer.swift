@@ -20,6 +20,13 @@ class AnalogClockLayer: CALayer {
             updateClockHands()
         }
     }
+
+    @objc var showSeconds: Bool = true {
+        didSet {
+            secondHand.isHidden = !showSeconds
+            secondHingeOuter.isHidden = !showSeconds
+        }
+    }
     
     @objc init(darkMode: Bool) {
         self.darkMode = darkMode
@@ -35,12 +42,11 @@ class AnalogClockLayer: CALayer {
         }
     }
     
-    @objc override convenience init(layer: Any) {
-        if let clockLayer = layer as? AnalogClockLayer {
-            self.init(darkMode: clockLayer.darkMode)
-        } else {
-            self.init(darkMode: true)
-        }
+    @objc override init(layer: Any) {
+        let clockLayer = layer as? AnalogClockLayer
+        self.darkMode = clockLayer?.darkMode ?? true
+        self.showSeconds = clockLayer?.showSeconds ?? true
+        super.init(layer: layer)
     }
     
     required init?(coder: NSCoder) {
