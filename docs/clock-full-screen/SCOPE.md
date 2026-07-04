@@ -164,7 +164,7 @@ Build verification:
 - Build the Xcode target after implementation.
 - Confirm there are no new tracked Xcode user-state files.
 
-## Optional Goal
+## Optional Goal - Out of Scope
 
 Implement a separate, lower-priority feature that shows the currently playing track along the bottom of the screen, or nothing if nothing is playing.
 

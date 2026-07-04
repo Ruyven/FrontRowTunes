@@ -261,6 +261,8 @@ This document details the step-by-step implementation plan for adding the full-s
 
 ## Phase 6: Optional Goal - Track Banner (Isolated Feature)
 
+**Moved to PR #6** (`feat/clock-full-screen-track-with-album-art`)
+
 ### Step 6.1: Implement a Lightweight Bottom-Screen Track Overlay
 - **Goal**: Show basic playing track information in an unobtrusive bottom-screen strip.
 - **Changes**:
