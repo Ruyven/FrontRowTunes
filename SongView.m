@@ -36,7 +36,6 @@
     BOOL displayPlayerPositionBar, displayPlayerPositionLabel, displayClock, clockSeconds, analogClock, analogClockFullScreen;
     BOOL priorDisplayClock;
     BOOL priorAnalogClock;
-    BOOL priorClockSeconds;
     
     LastEventTracker *systemInactivityTracker;
     LastEventTracker *mouseHideTracker;
@@ -318,7 +317,6 @@
         // Entering Full-Screen
         priorDisplayClock = displayClock;
         priorAnalogClock = analogClock;
-        priorClockSeconds = clockSeconds;
         
         analogClockFullScreen = YES;
         displayClock = YES;
@@ -341,7 +339,6 @@
         analogClockFullScreen = NO;
         displayClock = priorDisplayClock;
         analogClock = priorAnalogClock;
-        clockSeconds = priorClockSeconds;
         
         activeSongLayer.displayClock = displayClock && !analogClock;
         activeSongLayer.clockSeconds = clockSeconds;
