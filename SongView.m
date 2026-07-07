@@ -59,15 +59,13 @@
 	[self.window makeFirstResponder:self];
     [self.window setDelegate:self];
 
-	// initialize iTunes //TODO: update comments and method names to Music
-	playerPosition = [MusicBridge getPlayerPosition];
-	
 	[self setupLayers];
-    [self setTrack:[MusicBridge getCurrentTrack] prev:nil];
 	
 	// bring the window to the front
 	[self.window makeKeyAndOrderFront:self];
     
+	[self updateInitialMusicState];
+	
 	[[NSDistributedNotificationCenter defaultCenter] addObserver:self selector:@selector(getTrack:) name:@"com.apple.Music.playerInfo" object:nil];
 
 	updatePlayerPositionTimer = [NSTimer scheduledTimerWithTimeInterval:UPDATEINTERVAL target:self selector:@selector(updatePlayerPosition) userInfo:nil repeats:YES];
@@ -89,7 +87,6 @@
 	
 	activeSongLayer = [[SongLayer alloc] initWithFrame:[self frame] whiteBackground:whiteBackground];
 	activeSongLayer.playerPosition = playerPosition;
-	[activeSongLayer setPlayerState:[MusicBridge getPlayerState]];
 	activeSongLayer.displayPlayerPositionBar = displayPlayerPositionBar;
 	activeSongLayer.displayPlayerPositionLabel = displayPlayerPositionLabel;
 	activeSongLayer.displayClock = displayClock && !analogClock;
@@ -108,6 +105,27 @@
     if (analogClock) {
         [self setUpAnalogClockIfNeeded];
     }
+}
+
+- (void)asyncMusicQuery:(void (^)(void))query {
+    dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), query);
+}
+
+- (void)updateInitialMusicState {
+    [self asyncMusicQuery:^{
+        double pos = [MusicBridge getPlayerPosition];
+        NSString *state = [MusicBridge getPlayerState];
+        MusicTrack *track = [MusicBridge getCurrentTrack];
+
+        dispatch_async(dispatch_get_main_queue(), ^{
+            self->playerPosition = pos;
+            if (self->activeSongLayer) {
+                [self->activeSongLayer setPlayerState:state];
+                self->activeSongLayer.playerPosition = pos;
+            }
+            [self setTrack:track prev:nil];
+        });
+    }];
 }
 
 - (void)setUpAnalogClockIfNeeded {
