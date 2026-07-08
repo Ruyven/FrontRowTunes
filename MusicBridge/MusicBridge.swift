@@ -6,6 +6,7 @@
 //
 
 import Foundation
+import AppKit
 
 @objc class MusicBridge: NSObject {
     @discardableResult
@@ -24,29 +25,39 @@ import Foundation
         return output
     }
     
+    private static func isMusicRunning() -> Bool {
+        return NSRunningApplication.runningApplications(withBundleIdentifier: "com.apple.Music").count > 0
+    }
+    
     private static func isTrackPlaying() -> Bool {
+        guard isMusicRunning() else { return false }
         let eventDescriptor = executeScript(source: "tell application \"Music\" to exists current track")
         return eventDescriptor?.booleanValue ?? false
     }
     
     @objc static func getTrackID() -> String? {
+        guard isMusicRunning() else { return nil }
         let eventDescriptor = executeScript(source: "tell application \"Music\" to get persistent ID of current track")
         return eventDescriptor?.stringValue
     }
     
     private static func getAlbum() -> String? {
+        guard isMusicRunning() else { return nil }
         return executeScript(source: "tell application \"Music\" to get album of current track")?.stringValue
     }
 
     private static func getArtist() -> String? {
+        guard isMusicRunning() else { return nil }
         return executeScript(source: "tell application \"Music\" to get artist of current track")?.stringValue
     }
 
     private static func getTrackName() -> String? {
+        guard isMusicRunning() else { return nil }
         return executeScript(source: "tell application \"Music\" to get name of current track")?.stringValue
     }
     
     private static func getArtwork() -> Data? {
+        guard isMusicRunning() else { return nil }
         return executeScript(source: """
             tell application \"Music\" to tell current track
                 if exists artworks then
@@ -98,6 +109,7 @@ import Foundation
 //        }
     
     private static func getDuration() -> Double? {
+        guard isMusicRunning() else { return nil }
         return executeScript(source: "tell application \"Music\" to get duration of current track")?.doubleValue
     }
 
@@ -123,10 +135,12 @@ import Foundation
     @objc static let PLAYER_STATE_REWINDING = "kPSR"
     
     @objc static func getPlayerState() -> String? {
+        guard isMusicRunning() else { return nil }
         return executeScript(source: "tell application \"Music\" to get player state")?.stringValue
     }
     
     @objc static func getPlayerPosition() -> Double {
+        guard isMusicRunning() else { return 0 }
         return executeScript(source: "tell application \"Music\" to get player position")?.doubleValue ?? 0
     }
     
