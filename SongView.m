@@ -89,16 +89,16 @@ static NSString * const kWhiteBackgroundKey = @"whiteBackground";
     [self setupLayers];
 
     // Restore settings from NSUserDefaults
+    [self setWhiteBackground:[[NSUserDefaults standardUserDefaults] boolForKey:kWhiteBackgroundKey] writeDefaults:NO];
     [self setClockSeconds:[[NSUserDefaults standardUserDefaults] boolForKey:kClockSecondsKey] writeDefaults:NO];
+    [self setDisplayClock:[[NSUserDefaults standardUserDefaults] boolForKey:kDisplayClockKey] writeDefaults:NO];
+    [self setAnalogClock:[[NSUserDefaults standardUserDefaults] boolForKey:kAnalogClockKey] writeDefaults:NO];
     [self setAnalogClockFullScreen:[[NSUserDefaults standardUserDefaults] boolForKey:kAnalogClockFullScreenKey] writeDefaults:NO];
 
     // FIXME: write setters that set up the expected layers etc
 	displayPlayerPositionBar = [[NSUserDefaults standardUserDefaults] boolForKey:kDisplayPlayerPositionBarKey];
 	displayPlayerPositionLabel = [[NSUserDefaults standardUserDefaults] boolForKey:kDisplayPlayerPositionLabelKey];
-	displayClock = [[NSUserDefaults standardUserDefaults] boolForKey:kDisplayClockKey];
-    analogClock = [[NSUserDefaults standardUserDefaults] boolForKey:kAnalogClockKey];
-    whiteBackground = [[NSUserDefaults standardUserDefaults] boolForKey:kWhiteBackgroundKey];
-
+    
 	// make this view the first responder to get keystrokes
 	[self.window makeFirstResponder:self];
     [self.window setDelegate:self];
@@ -123,10 +123,10 @@ static NSString * const kWhiteBackgroundKey = @"whiteBackground";
 }
 
 - (void)setupLayers {
-	CGColorRef blackColor = CGColorCreateGenericRGB(0, 0, 0, 1);
+	CGColorRef bgColor = whiteBackground ? CGColorCreateGenericRGB(1, 1, 1, 1) : CGColorCreateGenericRGB(0, 0, 0, 1);
 	
 	rootLayer = [CALayer layer];
-	[rootLayer setBackgroundColor:blackColor];
+	[rootLayer setBackgroundColor:bgColor];
 	[self setLayer:rootLayer];
 	[self setWantsLayer:YES];
 	
@@ -146,7 +146,7 @@ static NSString * const kWhiteBackgroundKey = @"whiteBackground";
 	[activeSongLayer layoutIfNeeded];
     
 	// cleanup
-	CGColorRelease(blackColor);
+	CGColorRelease(bgColor);
     
     if (analogClock) {
         [self setUpAnalogClockIfNeeded];
@@ -367,6 +367,101 @@ static NSString * const kWhiteBackgroundKey = @"whiteBackground";
 
 #pragma mark - Setters
 
+- (void)setAnalogClock:(BOOL)value writeDefaults:(BOOL)writeDefaults {
+    if (analogClock == value) return;
+
+    analogClock = value;
+    if (writeDefaults) {
+        [[NSUserDefaults standardUserDefaults] setBool:value forKey:kAnalogClockKey];
+    }
+
+    if (value) {
+        if (displayClock) {
+            [self setUpAnalogClockIfNeeded];
+        }
+        if (activeSongLayer) {
+            activeSongLayer.displayClock = NO;
+            [activeSongLayer updateClock];
+            [activeSongLayer updateWithDuration:0.5];
+        }
+    } else {
+        [self removeAnalogClock];
+        if (activeSongLayer) {
+            activeSongLayer.displayClock = displayClock;
+            [activeSongLayer updateClock];
+            [activeSongLayer updateWithDuration:0.5];
+        }
+    }
+}
+
+- (void)setAnalogClock:(BOOL)value {
+    [self setAnalogClock:value writeDefaults:true];
+}
+
+- (void)setDisplayClock:(BOOL)value writeDefaults:(BOOL)writeDefaults {
+    if (displayClock == value) return;
+
+    displayClock = value;
+    if (writeDefaults) {
+        [[NSUserDefaults standardUserDefaults] setBool:value forKey:kDisplayClockKey];
+    }
+
+    if (value) {
+        if (analogClock) {
+            [self setUpAnalogClockIfNeeded];
+        } else {
+            if (activeSongLayer) {
+                activeSongLayer.displayClock = YES;
+                [activeSongLayer updateClock];
+                [activeSongLayer updateWithDuration:0.5];
+            }
+        }
+    } else {
+        if (analogClockFullScreen) {
+            [self setAnalogClockFullScreen:NO];
+        }
+        [self removeAnalogClock];
+        if (activeSongLayer) {
+            activeSongLayer.displayClock = NO;
+            [activeSongLayer updateClock];
+            [activeSongLayer updateWithDuration:0.5];
+        }
+    }
+}
+
+- (void)setDisplayClock:(BOOL)value {
+    [self setDisplayClock:value writeDefaults:true];
+}
+
+- (void)setWhiteBackground:(BOOL)value writeDefaults:(BOOL)writeDefaults {
+    if (whiteBackground == value) return;
+
+    whiteBackground = value;
+    if (writeDefaults) {
+        [[NSUserDefaults standardUserDefaults] setBool:value forKey:kWhiteBackgroundKey];
+    }
+
+    [CATransaction begin];
+    [CATransaction setValue:@0.5f forKey:kCATransactionAnimationDuration];
+    
+    CGColorRef bgColor = value ? CGColorCreateGenericRGB(1, 1, 1, 1) : CGColorCreateGenericRGB(0, 0, 0, 1);
+    [rootLayer setBackgroundColor:bgColor];
+    CGColorRelease(bgColor);
+    
+    if (activeSongLayer) {
+        [activeSongLayer setWhiteBackground:value];
+        [activeSongLayer updateWithDuration:0.5];
+    }
+    
+    [self updateClockColorWithDuration:0.5];
+    
+    [CATransaction commit];
+}
+
+- (void)setWhiteBackground:(BOOL)value {
+    [self setWhiteBackground:value writeDefaults:true];
+}
+
 - (void)setAnalogClockFullScreen:(BOOL)value writeDefaults:(BOOL)writeDefaults {
     if (analogClockFullScreen == value) return;
 
@@ -476,37 +571,22 @@ static NSString * const kWhiteBackgroundKey = @"whiteBackground";
         if ((modifierFlags & NSEventModifierFlagOption) != 0) {
             [self toggleAnalogClockFullScreen];
         } else if ([character isEqualToString:@"T"]) {
-            displayClock = !displayClock;
-            if (!displayClock) {
-                if (analogClockFullScreen) {
-                    [self setAnalogClockFullScreen:NO];
-                    activeSongLayer.opacity = 1;
-                }
-                [self removeAnalogClock];
-            } else if (analogClock) {
-                [self setUpAnalogClockIfNeeded];
-            }
-            activeSongLayer.displayClock = displayClock && !analogClock;
-            [activeSongLayer updateClock];
-            [activeSongLayer updateWithDuration:.5];
+            [self setDisplayClock:!displayClock];
         } else if ([character isEqualToString:@"t"]) {
             if (analogClockFullScreen) {
                 [self setClockSeconds:!clockSeconds];
             } else if (!displayClock) {
-                displayClock = true;
-                activeSongLayer.displayClock = displayClock && !analogClock;
-                [self setUpAnalogClockIfNeeded];
+                [self setDisplayClock:true];
             } else {
+
                 if (analogClock && clockSeconds) {
                     [self setClockSeconds:false];
                 } else if (analogClock && !clockSeconds) {
-                    analogClock = false;
-                    [self removeAnalogClock];
+                    [self setAnalogClock:false];
                 } else if (!analogClock && !clockSeconds) {
                     [self setClockSeconds:true];
                 } else { // (!analogClock && clockSeconds)
-                    analogClock = true;
-                    [self setUpAnalogClockIfNeeded];
+                    [self setAnalogClock:true];
                 }
                 
                 activeSongLayer.displayClock = displayClock && !analogClock;
@@ -560,23 +640,9 @@ static NSString * const kWhiteBackgroundKey = @"whiteBackground";
         [activeSongLayer setDisplayPlayerPositionLabel:displayPlayerPositionLabel];
 		[activeSongLayer updateWithDuration:.5];
 	} else if ([character isEqualToString:@"w"]) {
-		[CATransaction setValue:@0.5f forKey:kCATransactionAnimationDuration];
-		whiteBackground = YES;
-		[activeSongLayer setWhiteBackground:YES];
-		CGColorRef whiteColor = CGColorCreateGenericRGB(1, 1, 1, 1);
-		[rootLayer setBackgroundColor:whiteColor];
-		CGColorRelease(whiteColor);
-		[activeSongLayer updateWithDuration:0.5];
-        [self updateClockColorWithDuration:0.5];
+		[self setWhiteBackground:YES];
 	} else if ([character isEqualToString:@"b"]) {
-		[CATransaction setValue:@0.5f forKey:kCATransactionAnimationDuration];
-		whiteBackground = NO;
-		[activeSongLayer setWhiteBackground:NO];
-		CGColorRef blackColor = CGColorCreateGenericRGB(0, 0, 0, 1);
-		[rootLayer setBackgroundColor:blackColor];
-		CGColorRelease(blackColor);
-		[activeSongLayer updateWithDuration:0.5];
-        [self updateClockColorWithDuration:0.5];
+		[self setWhiteBackground:NO];
     } else if ([character isEqualToString:@"f"] || (keyCode == 53 && [self isWindowFullScreen])) {
         // esc quits out of fullscreen
         [self.window toggleFullScreen:self];
