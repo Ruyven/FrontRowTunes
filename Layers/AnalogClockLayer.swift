@@ -17,7 +17,7 @@ class AnalogClockLayer: CALayer {
     @objc var darkMode: Bool {
         didSet {
             updateClockFace()
-            updateClockHands()
+            updateClockHandColours()
         }
     }
 
@@ -27,6 +27,8 @@ class AnalogClockLayer: CALayer {
             secondHingeOuter.isHidden = !showSeconds
         }
     }
+
+    @objc var isRunning: Bool = false
     
     @objc init(darkMode: Bool) {
         self.darkMode = darkMode
@@ -36,10 +38,6 @@ class AnalogClockLayer: CALayer {
         
         setUpClockFace()
         setUpClockHands()
-        
-        DispatchQueue.main.async {
-            self.updateAnimations()
-        }
     }
     
     @objc override init(layer: Any) {
@@ -161,15 +159,10 @@ class AnalogClockLayer: CALayer {
         secondHingeOuter.position = CGPoint(x: radius, y: radius)
         secondHingeInner.position = CGPoint(x: radius, y: radius)
         
-        let (hour, minute, second) = getHourMinuteSecond(getTime(timeIntervalSinceNow: 0))
-        setHourHandRotation(hourHand, hour)
-        setHandRotation(minuteHand, minute)
-        setHandRotation(secondHand, second)
-        
-        updateClockHands()
+        updateClockHandColours()
     }
     
-    private func updateClockHands() {
+    private func updateClockHandColours() {
         let backgroundColor = darkMode ? CGColor.black : CGColor.white
         let foregroundColor = darkMode ? CGColor.white : CGColor.black
         hourHand.backgroundColor = foregroundColor
@@ -180,8 +173,49 @@ class AnalogClockLayer: CALayer {
     
     // MARK: - Animations
     
-    func updateAnimations() {
-        setTime(getTime(timeIntervalSinceNow: animationDuration), animationDuration: animationDuration) { [weak self] in self?.updateAnimations() }
+    @objc func setHandsToCurrentTime() {
+        setTime(getTime(timeIntervalSinceNow: 0), animationDuration: 0)
+    }
+
+    @objc func start() {
+        if isRunning {
+            return
+        }
+
+        isRunning = true
+        setHandsToCurrentTime()
+        setUpAnimationsIfNeeded()
+    }
+
+    @objc func stop() {
+        isRunning = false
+        animationTimer?.invalidate()
+        animationTimer = nil
+        removeAllAnimations()
+    }
+
+    var animationTimer: Timer?
+
+    func setUpAnimationsIfNeeded() {
+        guard animationTimer == nil else {
+            return
+        }
+
+        // Animation only makes sense if the layer is attached to a window and has a presentation layer.
+        // If presentation() is nil, any animated setTime will just snap to the end state.
+        guard secondHand.presentation() != nil else {
+            // Retry
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.05) { [weak self] in
+                self?.setUpAnimationsIfNeeded()
+            }
+            return
+        }
+
+        animationTimer = Timer.scheduledTimer(withTimeInterval: animationDuration, repeats: true) { [weak self] _ in
+            NSLog("[Clock] timer fired")
+            self?.setTime(self!.getTime(timeIntervalSinceNow: animationDuration), animationDuration: animationDuration)
+        }
+        animationTimer?.fire()
     }
     
     private func getHourMinuteSecond(_ time: Double) -> (Double, Double, Double) {
@@ -192,9 +226,7 @@ class AnalogClockLayer: CALayer {
         return (hour, minute, second)
     }
     
-    private func setTime(_ time: Double, animationDuration: TimeInterval, completion: @escaping () -> ()) {
-        CATransaction.flush()
-        
+    private func setTime(_ time: Double, animationDuration: TimeInterval) {
         CATransaction.begin()
         CATransaction.setAnimationTimingFunction(CAMediaTimingFunction(name: CAMediaTimingFunctionName.linear))
         
@@ -204,8 +236,6 @@ class AnalogClockLayer: CALayer {
             CATransaction.disableActions()
         }
         
-        CATransaction.setCompletionBlock(completion)
-
         let (hour, minute, second) = getHourMinuteSecond(time)
         
         setHourHandRotation(hourHand, hour)

@@ -56,6 +56,18 @@ static NSString * const kWhiteBackgroundKey = @"whiteBackground";
     LastEventTracker *mouseHideTracker;
 }
 
+- (void)viewDidMoveToWindow {
+    [super viewDidMoveToWindow];
+
+    if (clock) {
+        if (self.window) {
+            [clock start];
+        } else {
+            [clock stop];
+        }
+    }
+}
+
 - (void)awakeFromNib {
     firstSong = YES;
 	switchTrack = NO;
@@ -152,6 +164,10 @@ static NSString * const kWhiteBackgroundKey = @"whiteBackground";
         [rootLayer addSublayer:clock];
         clock.showSeconds = clockSeconds;
         [self updateAnalogClockLayoutWithDuration:0];
+        
+        if (self.window) {
+            [clock start];
+        }
     }
 }
 
@@ -272,7 +288,9 @@ static NSString * const kWhiteBackgroundKey = @"whiteBackground";
 
 - (void)updateClockColor {
     if (clock) {
-        clock.tintColor = [currentTrack tintColorWithDarkMode:!whiteBackground strongAdjustment:true];
+        if (currentTrack != nil) {
+            clock.tintColor = [currentTrack tintColorWithDarkMode:!whiteBackground strongAdjustment:true];
+        }
         NSLog(@"analog clock tint color: %@", clock.tintColor);
         clock.darkMode = !whiteBackground;
     }
