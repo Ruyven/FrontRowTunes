@@ -8,6 +8,21 @@
 
 #import "SongView.h"
 
+static NSString * const kDisplayPlayerPositionBarKey = @"displayPlayerPositionBar";
+static NSString * const kDisplayPlayerPositionLabelKey = @"displayPlayerPositionLabel";
+static NSString * const kDisplayClockKey = @"displayClock";
+static NSString * const kClockSecondsKey = @"clockSeconds";
+static NSString * const kAnalogClockKey = @"analogClock";
+static NSString * const kAnalogClockFullScreenKey = @"analogClockFullScreen";
+static NSString * const kWhiteBackgroundKey = @"whiteBackground";
+
+@interface SongView ()
+- (void)setAnalogClockFullScreen:(BOOL)value;
+- (void)setAnalogClockFullScreen:(BOOL)value writeDefaults:(BOOL)writeDefaults;
+- (void)setClockSeconds:(BOOL)value;
+- (void)setClockSeconds:(BOOL)value writeDefaults:(BOOL)writeDefaults;
+@end
+
 @implementation SongView {
     MusicTrack *currentTrack;
     
@@ -46,14 +61,31 @@
 	switchTrack = NO;
 	justChangedTrack = NO;
 	allowScreenChange = YES;
-	
-	// ToDo: einstellbar machen, bzw. letzte Einstellung speichern
-	displayPlayerPositionBar = YES;
-	displayPlayerPositionLabel = NO;
-	displayClock = NO;
-	clockSeconds = YES;
-    analogClock = YES;
-    
+
+    // Register default settings
+    NSDictionary *defaults = @{
+        kDisplayPlayerPositionBarKey: @YES,
+        kDisplayPlayerPositionLabelKey: @NO,
+        kDisplayClockKey: @NO,
+        kClockSecondsKey: @YES,
+        kAnalogClockKey: @YES,
+        kAnalogClockFullScreenKey: @NO,
+        kWhiteBackgroundKey: @NO
+    };
+    [[NSUserDefaults standardUserDefaults] registerDefaults:defaults];
+
+    [self setupLayers];
+
+    // Restore settings from NSUserDefaults
+    [self setClockSeconds:[[NSUserDefaults standardUserDefaults] boolForKey:kClockSecondsKey] writeDefaults:NO];
+    [self setAnalogClockFullScreen:[[NSUserDefaults standardUserDefaults] boolForKey:kAnalogClockFullScreenKey] writeDefaults:NO];
+
+    // FIXME: write setters that set up the expected layers etc
+	displayPlayerPositionBar = [[NSUserDefaults standardUserDefaults] boolForKey:kDisplayPlayerPositionBarKey];
+	displayPlayerPositionLabel = [[NSUserDefaults standardUserDefaults] boolForKey:kDisplayPlayerPositionLabelKey];
+	displayClock = [[NSUserDefaults standardUserDefaults] boolForKey:kDisplayClockKey];
+    analogClock = [[NSUserDefaults standardUserDefaults] boolForKey:kAnalogClockKey];
+    whiteBackground = [[NSUserDefaults standardUserDefaults] boolForKey:kWhiteBackgroundKey];
 
 	// make this view the first responder to get keystrokes
 	[self.window makeFirstResponder:self];
@@ -62,8 +94,7 @@
 	// initialize iTunes //TODO: update comments and method names to Music
 	playerPosition = [MusicBridge getPlayerPosition];
 	
-	[self setupLayers];
-    [self setTrack:[MusicBridge getCurrentTrack] prev:nil];
+	[self setTrack:[MusicBridge getCurrentTrack] prev:nil];
 	
 	// bring the window to the front
 	[self.window makeKeyAndOrderFront:self];
@@ -313,12 +344,24 @@
 }
 
 - (void)toggleAnalogClockFullScreen {
-    if (!analogClockFullScreen) {
+    [self setAnalogClockFullScreen:!analogClockFullScreen];
+}
+
+#pragma mark - Setters
+
+- (void)setAnalogClockFullScreen:(BOOL)value writeDefaults:(BOOL)writeDefaults {
+    if (analogClockFullScreen == value) return;
+
+    analogClockFullScreen = value;
+    if (writeDefaults) {
+        [[NSUserDefaults standardUserDefaults] setBool:value forKey:kAnalogClockFullScreenKey];
+    }
+
+    if (value) {
         // Entering Full-Screen
         priorDisplayClock = displayClock;
         priorAnalogClock = analogClock;
         
-        analogClockFullScreen = YES;
         displayClock = YES;
         analogClock = YES;
         
@@ -327,21 +370,24 @@
             clock.showSeconds = clockSeconds;
         }
         
-        [CATransaction begin];
-        [CATransaction setAnimationDuration:0.5f];
-        activeSongLayer.opacity = 0;
-        [CATransaction commit];
-        
-        activeSongLayer.displayClock = NO;
+        if (activeSongLayer) {
+            [CATransaction begin];
+            [CATransaction setAnimationDuration:0.5f];
+            activeSongLayer.opacity = 0;
+            [CATransaction commit];
+            
+            activeSongLayer.displayClock = NO;
+        }
         [self updateAnalogClockLayoutWithDuration:0.5];
     } else {
         // Leaving Full-Screen
-        analogClockFullScreen = NO;
         displayClock = priorDisplayClock;
         analogClock = priorAnalogClock;
         
-        activeSongLayer.displayClock = displayClock && !analogClock;
-        activeSongLayer.clockSeconds = clockSeconds;
+        if (activeSongLayer) {
+            activeSongLayer.displayClock = displayClock && !analogClock;
+            activeSongLayer.clockSeconds = clockSeconds;
+        }
         
         if (analogClock && displayClock) {
             [self updateAnalogClockLayoutWithDuration:0.5];
@@ -352,15 +398,42 @@
             [self removeAnalogClock];
         }
         
-        [CATransaction begin];
-        [CATransaction setAnimationDuration:0.5f];
-        activeSongLayer.opacity = 1;
-        [CATransaction commit];
-        
-        [activeSongLayer updateClock];
-        [self updateClockColorWithDuration:0.5];
-        [activeSongLayer updateWithDuration:0.5];
+        if (activeSongLayer) {
+            [CATransaction begin];
+            [CATransaction setAnimationDuration:0.5f];
+            activeSongLayer.opacity = 1;
+            [CATransaction commit];
+            
+            [activeSongLayer updateClock];
+            [self updateClockColorWithDuration:0.5];
+            [activeSongLayer updateWithDuration:0.5];
+        }
     }
+}
+
+- (void)setAnalogClockFullScreen:(BOOL)value {
+    [self setAnalogClockFullScreen:value writeDefaults:true];
+}
+
+- (void)setClockSeconds:(BOOL)value writeDefaults:(BOOL)writeDefaults {
+    if (clockSeconds == value) return;
+
+    clockSeconds = value;
+    if (writeDefaults) {
+        [[NSUserDefaults standardUserDefaults] setBool:value forKey:kClockSecondsKey];
+    }
+
+    // FIXME: animation issue when starting out by displaying clock and seconds: initial second hand position is already about 20s ahead, it animates slowly until the real time catches up, then it's fixed.
+    if (clock) {
+        clock.showSeconds = value;
+    }
+    if (activeSongLayer) {
+        activeSongLayer.clockSeconds = value;
+    }
+}
+
+- (void)setClockSeconds:(BOOL)value {
+    [self setClockSeconds:value writeDefaults:true];
 }
 
 - (void)keyDown:(NSEvent *)event {
@@ -388,7 +461,7 @@
             displayClock = !displayClock;
             if (!displayClock) {
                 if (analogClockFullScreen) {
-                    analogClockFullScreen = NO;
+                    [self setAnalogClockFullScreen:NO];
                     activeSongLayer.opacity = 1;
                 }
                 [self removeAnalogClock];
@@ -400,33 +473,25 @@
             [activeSongLayer updateWithDuration:.5];
         } else if ([character isEqualToString:@"t"]) {
             if (analogClockFullScreen) {
-                clockSeconds = !clockSeconds;
-                if (clock) {
-                    clock.showSeconds = clockSeconds;
-                }
-                activeSongLayer.clockSeconds = clockSeconds;
+                [self setClockSeconds:!clockSeconds];
             } else if (!displayClock) {
                 displayClock = true;
                 activeSongLayer.displayClock = displayClock && !analogClock;
                 [self setUpAnalogClockIfNeeded];
             } else {
                 if (analogClock && clockSeconds) {
-                    clockSeconds = false;
-                    if (clock) {
-                        clock.showSeconds = false;
-                    }
+                    [self setClockSeconds:false];
                 } else if (analogClock && !clockSeconds) {
                     analogClock = false;
                     [self removeAnalogClock];
                 } else if (!analogClock && !clockSeconds) {
-                    clockSeconds = true;
+                    [self setClockSeconds:true];
                 } else { // (!analogClock && clockSeconds)
                     analogClock = true;
                     [self setUpAnalogClockIfNeeded];
                 }
                 
                 activeSongLayer.displayClock = displayClock && !analogClock;
-                activeSongLayer.clockSeconds = clockSeconds;
                 [activeSongLayer updateClock];
                 [activeSongLayer updateWithDuration:.5];
             }
