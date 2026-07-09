@@ -80,6 +80,7 @@
 		
 		[self setWhiteBackground:white];
 		[self updateWithDuration:0.1];
+        isFirstPlayerPositionSet = false;
 	}
 	return self;
 }
@@ -324,10 +325,21 @@
 	playerPosition = newPlayerPosition;
 	
 	if (trackDuration == 0) return;
+    
+    BOOL hasPresentationLayer = playerPositionLayer.presentationLayer != nil;
+    BOOL shouldAnimate = (isFirstPlayerPositionSet && hasPresentationLayer);
+    
+    if (hasPresentationLayer) {
+        isFirstPlayerPositionSet = true;
+    }
 	
-
 	[CATransaction begin];
-	[CATransaction setAnimationDuration:.4];
+    if (shouldAnimate) {
+        // hard-coded duration for player position bar advance animation
+        [CATransaction setAnimationDuration:.4];
+    } else {
+        [CATransaction setValue:(id)kCFBooleanTrue forKey:kCATransactionDisableActions];
+    }
 
     CGFloat padding = (durationLayerHeight - playerPositionDiameter) / 2;
 

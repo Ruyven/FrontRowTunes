@@ -48,9 +48,9 @@ static NSString * const kWhiteBackgroundKey = @"whiteBackground";
     double playerPosition;
     NSTimer *updatePlayerPositionTimer;
     
-    BOOL displayPlayerPositionBar, displayPlayerPositionLabel, displayClock, clockSeconds, analogClock, analogClockFullScreen;
-    BOOL priorDisplayClock;
-    BOOL priorAnalogClock;
+    BOOL displayPlayerPositionBar, displayPlayerPositionLabel;
+    BOOL displayClock, clockSeconds, analogClock, analogClockFullScreen;
+    BOOL priorDisplayClock, priorAnalogClock;
     
     LastEventTracker *systemInactivityTracker;
     LastEventTracker *mouseHideTracker;
@@ -86,6 +86,8 @@ static NSString * const kWhiteBackgroundKey = @"whiteBackground";
     };
     [[NSUserDefaults standardUserDefaults] registerDefaults:defaults];
 
+	playerPosition = [MusicBridge getPlayerPosition];
+
     [self setupLayers];
 
     // Restore settings from NSUserDefaults
@@ -94,18 +96,13 @@ static NSString * const kWhiteBackgroundKey = @"whiteBackground";
     [self setDisplayClock:[[NSUserDefaults standardUserDefaults] boolForKey:kDisplayClockKey] writeDefaults:NO];
     [self setAnalogClock:[[NSUserDefaults standardUserDefaults] boolForKey:kAnalogClockKey] writeDefaults:NO];
     [self setAnalogClockFullScreen:[[NSUserDefaults standardUserDefaults] boolForKey:kAnalogClockFullScreenKey] writeDefaults:NO];
-
-    // FIXME: write setters that set up the expected layers etc
-	displayPlayerPositionBar = [[NSUserDefaults standardUserDefaults] boolForKey:kDisplayPlayerPositionBarKey];
-	displayPlayerPositionLabel = [[NSUserDefaults standardUserDefaults] boolForKey:kDisplayPlayerPositionLabelKey];
+    [self setDisplayPlayerPositionBar:[[NSUserDefaults standardUserDefaults] boolForKey:kDisplayPlayerPositionBarKey] writeDefaults:NO];
+    [self setDisplayPlayerPositionLabel:[[NSUserDefaults standardUserDefaults] boolForKey:kDisplayPlayerPositionLabelKey] writeDefaults:NO];
     
 	// make this view the first responder to get keystrokes
 	[self.window makeFirstResponder:self];
     [self.window setDelegate:self];
 
-	// initialize iTunes //TODO: update comments and method names to Music
-	playerPosition = [MusicBridge getPlayerPosition];
-	
 	[self setTrack:[MusicBridge getCurrentTrack] prev:nil];
 	
 	// bring the window to the front
@@ -114,6 +111,7 @@ static NSString * const kWhiteBackgroundKey = @"whiteBackground";
 	[[NSDistributedNotificationCenter defaultCenter] addObserver:self selector:@selector(getTrack:) name:@"com.apple.Music.playerInfo" object:nil];
 
 	updatePlayerPositionTimer = [NSTimer scheduledTimerWithTimeInterval:UPDATEINTERVAL target:self selector:@selector(updatePlayerPosition) userInfo:nil repeats:YES];
+	[self updatePlayerPosition];
     
     systemInactivityTracker = [[LastEventTracker alloc] init];
     [systemInactivityTracker setDelegate:self eventType:kCGAnyInputEventType timeout:60];
@@ -367,6 +365,42 @@ static NSString * const kWhiteBackgroundKey = @"whiteBackground";
 
 #pragma mark - Setters
 
+- (void)setDisplayPlayerPositionBar:(BOOL)value writeDefaults:(BOOL)writeDefaults {
+    if (displayPlayerPositionBar == value) return;
+
+    displayPlayerPositionBar = value;
+    if (writeDefaults) {
+        [[NSUserDefaults standardUserDefaults] setBool:value forKey:kDisplayPlayerPositionBarKey];
+    }
+
+    if (activeSongLayer) {
+        activeSongLayer.displayPlayerPositionBar = value;
+        [activeSongLayer updateWithDuration:0.5];
+    }
+}
+
+- (void)setDisplayPlayerPositionBar:(BOOL)value {
+    [self setDisplayPlayerPositionBar:value writeDefaults:true];
+}
+
+- (void)setDisplayPlayerPositionLabel:(BOOL)value writeDefaults:(BOOL)writeDefaults {
+    if (displayPlayerPositionLabel == value) return;
+
+    displayPlayerPositionLabel = value;
+    if (writeDefaults) {
+        [[NSUserDefaults standardUserDefaults] setBool:value forKey:kDisplayPlayerPositionLabelKey];
+    }
+
+    if (activeSongLayer) {
+        activeSongLayer.displayPlayerPositionLabel = value;
+        [activeSongLayer updateWithDuration:0.5];
+    }
+}
+
+- (void)setDisplayPlayerPositionLabel:(BOOL)value {
+    [self setDisplayPlayerPositionLabel:value writeDefaults:true];
+}
+
 - (void)setAnalogClock:(BOOL)value writeDefaults:(BOOL)writeDefaults {
     if (analogClock == value) return;
 
@@ -536,7 +570,6 @@ static NSString * const kWhiteBackgroundKey = @"whiteBackground";
         [[NSUserDefaults standardUserDefaults] setBool:value forKey:kClockSecondsKey];
     }
 
-    // FIXME: animation issue when starting out by displaying clock and seconds: initial second hand position is already about 20s ahead, it animates slowly until the real time catches up, then it's fixed.
     if (clock) {
         clock.showSeconds = value;
     }
@@ -599,10 +632,10 @@ static NSString * const kWhiteBackgroundKey = @"whiteBackground";
 /*	} else if (keyCode == 123 || keyCode == 124) {
 		switchTrack = YES;*/
 		// ToDo: bei langem drücken spulen, ansonsten nextTrack bzw. backTrack
-		// oder einfach wie iTunes lassen: beim keyDown nextTrack bzw. backTrack
+		// oder einfach wie Music app lassen: beim keyDown nextTrack bzw. backTrack
 //		[NSTimer 
 		// 123 = previous, 124 = next
-//		[iTunes backTrack];
+//		[MusicBridge backTrack];
 	} else if (keyCode == 123) {
 		// links
 		self.prevTrack = YES;
@@ -617,27 +650,25 @@ static NSString * const kWhiteBackgroundKey = @"whiteBackground";
 		[NSApp hide:self]; // doesn't seem to work.*/
 	} else if (keyCode == 36) {			// Return
         if (!displayPlayerPositionBar && !displayPlayerPositionLabel) {
-            displayPlayerPositionBar = true;
+            [self setDisplayPlayerPositionBar:true];
         } else if (displayPlayerPositionBar && !displayPlayerPositionLabel) {
-            displayPlayerPositionLabel = true;
+            [self setDisplayPlayerPositionLabel:true];
         } else if (displayPlayerPositionBar && displayPlayerPositionLabel) {
-            displayPlayerPositionBar = false;
+            [self setDisplayPlayerPositionBar:false];
         } else {
-            displayPlayerPositionBar = true;
-            displayPlayerPositionLabel = false;
+            [self setDisplayPlayerPositionBar:true];
+            [self setDisplayPlayerPositionLabel:false];
         }
-        [activeSongLayer setDisplayPlayerPositionBar:displayPlayerPositionBar];
 		[activeSongLayer setDisplayPlayerPositionLabel:displayPlayerPositionLabel];
 		[activeSongLayer updateWithDuration:.5];
 	} else if (keyCode == 76) {			// fn+Return or Enter
         if (!displayPlayerPositionBar && !displayPlayerPositionLabel) {
-            displayPlayerPositionBar = true;
+            [self setDisplayPlayerPositionBar:true];
         } else {
-            displayPlayerPositionBar = false;
-            displayPlayerPositionLabel = false;
+            [self setDisplayPlayerPositionBar:false];
+            [self setDisplayPlayerPositionLabel:false];
         }
-        [activeSongLayer setDisplayPlayerPositionBar:displayPlayerPositionBar];
-        [activeSongLayer setDisplayPlayerPositionLabel:displayPlayerPositionLabel];
+		[activeSongLayer setDisplayPlayerPositionLabel:displayPlayerPositionLabel];
 		[activeSongLayer updateWithDuration:.5];
 	} else if ([character isEqualToString:@"w"]) {
 		[self setWhiteBackground:YES];
