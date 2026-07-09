@@ -15,6 +15,7 @@ static NSString * const kClockSecondsKey = @"clockSeconds";
 static NSString * const kAnalogClockKey = @"analogClock";
 static NSString * const kAnalogClockFullScreenKey = @"analogClockFullScreen";
 static NSString * const kWhiteBackgroundKey = @"whiteBackground";
+static NSString * const kHasShownTutorialKey = @"hasShownTutorial";
 
 @interface SongView ()
 - (void)setAnalogClockFullScreen:(BOOL)value;
@@ -42,6 +43,7 @@ static NSString * const kWhiteBackgroundKey = @"whiteBackground";
     NSDate *prevTrackTimeStamp;
     
     int keyCode;
+    int hasShownTutorial; // Use int in case we add more tutorial versions later
     BOOL whiteBackground;
     BOOL infoLayerOn;
     
@@ -99,6 +101,14 @@ static NSString * const kWhiteBackgroundKey = @"whiteBackground";
     [self setDisplayPlayerPositionBar:[[NSUserDefaults standardUserDefaults] boolForKey:kDisplayPlayerPositionBarKey] writeDefaults:NO];
     [self setDisplayPlayerPositionLabel:[[NSUserDefaults standardUserDefaults] boolForKey:kDisplayPlayerPositionLabelKey] writeDefaults:NO];
     
+    // Show tutorial on first launch
+    hasShownTutorial = [[NSUserDefaults standardUserDefaults] integerForKey:kHasShownTutorialKey];
+    if (hasShownTutorial == 0 && !_infoPanel.isVisible) {
+        [self toggleInfoPanel:nil];
+        [[NSUserDefaults standardUserDefaults] setInteger:1 forKey:kHasShownTutorialKey];
+        hasShownTutorial = 1;
+    }
+
 	// make this view the first responder to get keystrokes
 	[self.window makeFirstResponder:self];
     [self.window setDelegate:self];
