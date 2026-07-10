@@ -8,7 +8,7 @@
 import Foundation
 import Cocoa
 
-fileprivate let animationDuration: TimeInterval = 20
+fileprivate let animationDuration: TimeInterval = 1
 
 
 class AnalogClockLayer: CALayer {
@@ -16,7 +16,7 @@ class AnalogClockLayer: CALayer {
     
     @objc var darkMode: Bool {
         didSet {
-            updateClockFace()
+            updateClockFaceColour()
             updateClockHandColours()
         }
     }
@@ -83,7 +83,7 @@ class AnalogClockLayer: CALayer {
                 rotation: CGFloat(minute)
             )
         }
-        updateClockFace()
+        updateClockFaceColour()
     }
     
     private var tickLayers = [CALayer]()
@@ -101,7 +101,7 @@ class AnalogClockLayer: CALayer {
         self.tickLayers.append(tickLayer)
     }
     
-    private func updateClockFace() {
+    private func updateClockFaceColour() {
         let foregroundColor = darkMode ? CGColor.white : CGColor.black
         for tickLayer in tickLayers {
             tickLayer.backgroundColor = foregroundColor
@@ -174,6 +174,7 @@ class AnalogClockLayer: CALayer {
     // MARK: - Animations
     
     @objc func setHandsToCurrentTime() {
+        removeAllAnimations()
         setTime(getTime(timeIntervalSinceNow: 0), animationDuration: 0)
     }
 
@@ -212,8 +213,9 @@ class AnalogClockLayer: CALayer {
         }
 
         animationTimer = Timer.scheduledTimer(withTimeInterval: animationDuration, repeats: true) { [weak self] _ in
+            guard let self = self else { return }
             NSLog("[Clock] timer fired")
-            self?.setTime(self!.getTime(timeIntervalSinceNow: animationDuration), animationDuration: animationDuration)
+            self.setTime(self.getTime(timeIntervalSinceNow: animationDuration), animationDuration: animationDuration)
         }
         animationTimer?.fire()
     }
@@ -227,51 +229,55 @@ class AnalogClockLayer: CALayer {
     }
     
     private func setTime(_ time: Double, animationDuration: TimeInterval) {
-        CATransaction.begin()
-        CATransaction.setAnimationTimingFunction(CAMediaTimingFunction(name: CAMediaTimingFunctionName.linear))
-        
-        if animationDuration > 0 {
-            CATransaction.setAnimationDuration(animationDuration)
-        } else {
-            CATransaction.disableActions()
-        }
-        
         let (hour, minute, second) = getHourMinuteSecond(time)
         
-        setHourHandRotation(hourHand, hour)
-        setHandRotation(minuteHand, minute)
-        setHandRotation(secondHand, second)
-        
+        let hourTransform = CATransform3DMakeRotation(-hour * 2 * CGFloat.pi / 12, 0, 0, 1)
+        let minuteTransform = CATransform3DMakeRotation(-minute * 2 * CGFloat.pi / 60, 0, 0, 1)
+        let secondTransform = CATransform3DMakeRotation(-second * 2 * CGFloat.pi / 60, 0, 0, 1)
+
+        if animationDuration > 0 {
+            guard isRunning && (secondHand.presentation() != nil) else { return }
+
+            animateHand(hourHand, to: hourTransform, duration: animationDuration)
+            animateHand(minuteHand, to: minuteTransform, duration: animationDuration)
+            animateHand(secondHand, to: secondTransform, duration: animationDuration)
+        } else {
+            CATransaction.begin()
+            CATransaction.setDisableActions(true)
+            hourHand.transform = hourTransform
+            minuteHand.transform = minuteTransform
+            secondHand.transform = secondTransform
+            CATransaction.commit()
+        }
+    }
+    
+    private func animateHand(_ hand: CALayer, to targetTransform: CATransform3D, duration: TimeInterval) {
+        // prefer presentation transform, fall back to model transform
+        let currentTransform = hand.presentation()?.transform ?? hand.transform
+
+        CATransaction.begin()
+        CATransaction.setDisableActions(true)
+
+        hand.removeAnimation(forKey: "rotation")
+        hand.transform = currentTransform
+
+        let animation = CABasicAnimation(keyPath: "transform")
+        animation.fromValue = NSValue(caTransform3D: currentTransform)
+        animation.toValue = NSValue(caTransform3D: targetTransform)
+        animation.duration = duration
+        animation.timingFunction = CAMediaTimingFunction(name: .linear)
+        animation.fillMode = .removed
+        animation.isRemovedOnCompletion = true
+
+        hand.add(animation, forKey: "rotation")
+        hand.transform = targetTransform
+
         CATransaction.commit()
-    }
-    
-    private func setHandRotation(_ hand: CALayer, _ rotation: CGFloat) {
-        let angle = -rotation * 2 * CGFloat.pi / 60
-        hand.transform = CATransform3DMakeRotation(angle, 0, 0, 1)
-    }
-    
-    private func setHourHandRotation(_ hand: CALayer, _ rotation: CGFloat) {
-        let angle = -rotation * 2 * CGFloat.pi / 12
-        hand.transform = CATransform3DMakeRotation(angle, 0, 0, 1)
     }
     
     private func getTime(timeIntervalSinceNow: TimeInterval) -> Double {
         let date = Date(timeIntervalSinceNow: timeIntervalSinceNow)
-        let calendar = Calendar(identifier: .gregorian)
-        guard let midnight = DateComponents(
-            calendar: calendar,
-            timeZone: TimeZone.current,
-            era: nil,
-            year: calendar.component(.year, from: date),
-            month: calendar.component(.month, from: date),
-            day: calendar.component(.day, from: date),
-            hour: 0,
-            minute: 0,
-            second: 0,
-            nanosecond: calendar.component(.nanosecond, from: date)
-        ).date else {
-            return 0
-        }
+        let midnight = Calendar.current.startOfDay(for: date)
         return date.timeIntervalSince(midnight)
     }
     
