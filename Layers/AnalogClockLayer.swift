@@ -20,14 +20,14 @@ class AnalogClockLayer: CALayer {
             updateClockHandColours()
         }
     }
-
+    
     @objc var showSeconds: Bool = true {
         didSet {
             secondHand.isHidden = !showSeconds
             secondHingeOuter.isHidden = !showSeconds
         }
     }
-
+    
     @objc var isRunning: Bool = false
     
     @objc init(darkMode: Bool) {
@@ -177,31 +177,31 @@ class AnalogClockLayer: CALayer {
         removeAllAnimations()
         setTime(getTime(timeIntervalSinceNow: 0), animationDuration: 0)
     }
-
+    
     @objc func start() {
         if isRunning {
             return
         }
-
+        
         isRunning = true
         setHandsToCurrentTime()
         setUpAnimationsIfNeeded()
     }
-
+    
     @objc func stop() {
         isRunning = false
         animationTimer?.invalidate()
         animationTimer = nil
         removeAllAnimations()
     }
-
+    
     var animationTimer: Timer?
-
+    
     func setUpAnimationsIfNeeded() {
         guard animationTimer == nil else {
             return
         }
-
+        
         // Animation only makes sense if the layer is attached to a window and has a presentation layer.
         // If presentation() is nil, any animated setTime will just snap to the end state.
         guard secondHand.presentation() != nil else {
@@ -211,10 +211,9 @@ class AnalogClockLayer: CALayer {
             }
             return
         }
-
+        
         animationTimer = Timer.scheduledTimer(withTimeInterval: animationDuration, repeats: true) { [weak self] _ in
             guard let self = self else { return }
-            NSLog("[Clock] timer fired")
             self.setTime(self.getTime(timeIntervalSinceNow: animationDuration), animationDuration: animationDuration)
         }
         animationTimer?.fire()
@@ -234,10 +233,10 @@ class AnalogClockLayer: CALayer {
         let hourTransform = CATransform3DMakeRotation(-hour * 2 * CGFloat.pi / 12, 0, 0, 1)
         let minuteTransform = CATransform3DMakeRotation(-minute * 2 * CGFloat.pi / 60, 0, 0, 1)
         let secondTransform = CATransform3DMakeRotation(-second * 2 * CGFloat.pi / 60, 0, 0, 1)
-
+        
         if animationDuration > 0 {
             guard isRunning && (secondHand.presentation() != nil) else { return }
-
+            
             animateHand(hourHand, to: hourTransform, duration: animationDuration)
             animateHand(minuteHand, to: minuteTransform, duration: animationDuration)
             animateHand(secondHand, to: secondTransform, duration: animationDuration)
@@ -254,13 +253,13 @@ class AnalogClockLayer: CALayer {
     private func animateHand(_ hand: CALayer, to targetTransform: CATransform3D, duration: TimeInterval) {
         // prefer presentation transform, fall back to model transform
         let currentTransform = hand.presentation()?.transform ?? hand.transform
-
+        
         CATransaction.begin()
         CATransaction.setDisableActions(true)
-
+        
         hand.removeAnimation(forKey: "rotation")
         hand.transform = currentTransform
-
+        
         let animation = CABasicAnimation(keyPath: "transform")
         animation.fromValue = NSValue(caTransform3D: currentTransform)
         animation.toValue = NSValue(caTransform3D: targetTransform)
@@ -268,10 +267,10 @@ class AnalogClockLayer: CALayer {
         animation.timingFunction = CAMediaTimingFunction(name: .linear)
         animation.fillMode = .removed
         animation.isRemovedOnCompletion = true
-
+        
         hand.add(animation, forKey: "rotation")
         hand.transform = targetTransform
-
+        
         CATransaction.commit()
     }
     
