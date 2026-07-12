@@ -28,7 +28,9 @@ class AnalogClockLayer: CALayer {
         }
     }
     
+    var startRequested: Bool = false
     @objc var isRunning: Bool = false
+    var needsSync = false
     
     @objc init(darkMode: Bool) {
         self.darkMode = darkMode
@@ -183,13 +185,29 @@ class AnalogClockLayer: CALayer {
             return
         }
         
+        // Animation only makes sense if the layer is attached to a window and has a presentation layer.
+        // If presentation() is nil, any animated setTime will just snap to the end state.
+        guard secondHand.presentation() != nil else {
+            // Retry
+            NSLog("request start")
+            self.startRequested = true
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.01) { [weak self] in
+                guard let self = self, self.startRequested else { return }
+                self.start()
+            }
+            return
+        }
+        
         isRunning = true
+        startRequested = false
         setHandsToCurrentTime()
+        needsSync = true
         setUpAnimationsIfNeeded()
     }
     
     @objc func stop() {
         isRunning = false
+        startRequested = false
         animationTimer?.invalidate()
         animationTimer = nil
         removeAllAnimations()
@@ -199,16 +217,6 @@ class AnalogClockLayer: CALayer {
     
     func setUpAnimationsIfNeeded() {
         guard animationTimer == nil else {
-            return
-        }
-        
-        // Animation only makes sense if the layer is attached to a window and has a presentation layer.
-        // If presentation() is nil, any animated setTime will just snap to the end state.
-        guard secondHand.presentation() != nil else {
-            // Retry
-            DispatchQueue.main.asyncAfter(deadline: .now() + 0.05) { [weak self] in
-                self?.setUpAnimationsIfNeeded()
-            }
             return
         }
         
@@ -240,6 +248,7 @@ class AnalogClockLayer: CALayer {
             animateHand(hourHand, to: hourTransform, duration: animationDuration)
             animateHand(minuteHand, to: minuteTransform, duration: animationDuration)
             animateHand(secondHand, to: secondTransform, duration: animationDuration)
+            needsSync = false
         } else {
             CATransaction.begin()
             CATransaction.setDisableActions(true)
@@ -251,8 +260,14 @@ class AnalogClockLayer: CALayer {
     }
     
     private func animateHand(_ hand: CALayer, to targetTransform: CATransform3D, duration: TimeInterval) {
-        // prefer presentation transform, fall back to model transform
-        let currentTransform = hand.presentation()?.transform ?? hand.transform
+        var currentTransform: CATransform3D
+        if (needsSync) {
+            // always start from model transform
+            currentTransform = hand.transform
+        } else {
+            // prefer presentation transform
+            currentTransform = hand.presentation()?.transform ?? hand.transform
+        }
         
         CATransaction.begin()
         CATransaction.setDisableActions(true)

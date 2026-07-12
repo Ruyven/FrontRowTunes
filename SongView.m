@@ -22,6 +22,7 @@ static NSString * const kHasShownTutorialKey = @"hasShownTutorial";
 - (void)setAnalogClockFullScreen:(BOOL)value writeDefaults:(BOOL)writeDefaults;
 - (void)setClockSeconds:(BOOL)value;
 - (void)setClockSeconds:(BOOL)value writeDefaults:(BOOL)writeDefaults;
+- (BOOL)isWindowReady;
 @end
 
 @implementation SongView {
@@ -54,8 +55,14 @@ static NSString * const kHasShownTutorialKey = @"hasShownTutorial";
     BOOL displayClock, clockSeconds, analogClock, analogClockFullScreen;
     BOOL priorDisplayClock, priorAnalogClock;
     
+    BOOL analogClockRequested;
+    
     LastEventTracker *systemInactivityTracker;
     LastEventTracker *mouseHideTracker;
+}
+
+- (BOOL)isWindowReady {
+    return self.window.isKeyWindow && self.window.isVisible;
 }
 
 - (void)viewDidMoveToWindow {
@@ -156,8 +163,12 @@ static NSString * const kHasShownTutorialKey = @"hasShownTutorial";
     // cleanup
     CGColorRelease(bgColor);
     
-    if (analogClock) {
-        [self setUpAnalogClockIfNeeded];
+    if (analogClock && displayClock) {
+        if ([self isWindowReady]) {
+            [self setUpAnalogClockIfNeeded];
+        } else {
+            analogClockRequested = YES;
+        }
     }
 }
 
@@ -421,7 +432,11 @@ static NSString * const kHasShownTutorialKey = @"hasShownTutorial";
     
     if (value) {
         if (displayClock) {
-            [self setUpAnalogClockIfNeeded];
+            if ([self isWindowReady]) {
+                [self setUpAnalogClockIfNeeded];
+            } else {
+                analogClockRequested = YES;
+            }
         }
         if (activeSongLayer) {
             activeSongLayer.displayClock = NO;
@@ -452,7 +467,11 @@ static NSString * const kHasShownTutorialKey = @"hasShownTutorial";
     
     if (value) {
         if (analogClock) {
-            [self setUpAnalogClockIfNeeded];
+            if ([self isWindowReady]) {
+                [self setUpAnalogClockIfNeeded];
+            } else {
+                analogClockRequested = YES;
+            }
         } else {
             if (activeSongLayer) {
                 activeSongLayer.displayClock = YES;
@@ -522,7 +541,11 @@ static NSString * const kHasShownTutorialKey = @"hasShownTutorial";
         displayClock = YES;
         analogClock = YES;
         
-        [self setUpAnalogClockIfNeeded];
+        if ([self isWindowReady]) {
+            [self setUpAnalogClockIfNeeded];
+        } else {
+            analogClockRequested = YES;
+        }
         if (clock) {
             clock.showSeconds = clockSeconds;
         }
@@ -765,6 +788,15 @@ static NSString * const kHasShownTutorialKey = @"hasShownTutorial";
 
 - (void)windowDidBecomeKey:(NSNotification *)notification {
     [mouseHideTracker resetTrigger];
+    
+    if (analogClockRequested) {
+        if (clock) {
+            [clock start];
+        } else {
+            [self setUpAnalogClockIfNeeded];
+        }
+        analogClockRequested = NO;
+    }
 }
 
 - (void)setFrame:(NSRect)frameRect {
