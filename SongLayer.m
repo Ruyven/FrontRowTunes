@@ -93,8 +93,6 @@
         [CATransaction setValue:@(duration) forKey:kCATransactionAnimationDuration];
     }
     
-    
-    
     CGFloat width = self.bounds.size.width;
     CGFloat height = self.bounds.size.height;
     
@@ -103,147 +101,143 @@
     songnameAttributes[NSForegroundColorAttributeName] = foregroundColor;
     //	[songnameAttributes setObject:[NSColor whiteColor] forKey:NSBoldFontMask];
     
-    
     NSMutableDictionary *artistAttributes = [[NSMutableDictionary alloc] init];
     artistAttributes[NSFontAttributeName] = [NSFont fontWithName:@"Lucida Grande" size:height * .04];
     artistAttributes[NSForegroundColorAttributeName] = lightForegroundColor;
-    
-    NSMutableDictionary *ratingAttributes = [[NSMutableDictionary alloc] init];
-    ratingAttributes[NSFontAttributeName] = [NSFont fontWithName:@"Lucida Grande" size:height * .04];
-    ratingAttributes[NSForegroundColorAttributeName] = foregroundColor;
     
     //	songnameAttributes = [[NSDictionary alloc] initWithObjectsAndKeys:NSFontAttributeName, [NSFont fontWithName:@"Lucida Grande" size:height*0.05], NSForegroundColorAttributeName, [NSColor whiteColor], nil];
     //	artistAttributes = [[NSDictionary alloc] initWithObjectsAndKeys:NSFontAttributeName, [NSFont fontWithName:@"Lucida Grande" size:height*0.04], NSForegroundColorAttributeName, [NSColor colorWithCalibratedHue:0 saturation:0 brightness:.9 alpha:0], nil];
     
     //	CGColorRef whiteColor = CGColorCreateGenericRGB(1, 1, 1, 1);
     
-    if ([track name] == nil) {
-        // no track playing! (is there a better way to check that?)
-        NSMutableAttributedString *string = [[NSMutableAttributedString alloc] initWithString:@"Playback stopped." attributes:songnameAttributes];
-        songInfoTextLayer.bounds = CGRectMake(0, 0, width * .8, height / 2);
-        songInfoTextLayer.position = CGPointMake(width * .1, height * .53); // adjust y-position if the fontSize is changed
-        songInfoTextLayer.alignmentMode = kCAAlignmentCenter;
-        songInfoTextLayer.string = string;
+    BOOL isSplashScreen = ([track name] == nil);
+    NSString *trackTitle = isSplashScreen ? @"FrontRowTunes" : [track name];
+    NSString *artistName = isSplashScreen ? @"Playback stopped" : [track artist];
+    NSString *albumName = isSplashScreen ? @"" : [track album];
+    BOOL effectiveCoverExists = isSplashScreen || coverExists;
+    
+    if (effectiveCoverExists) {
+        songInfoTextLayer.bounds = CGRectMake(0, 0, width * .5, height / 2);
+        songInfoTextLayer.position = CGPointMake(width * .48, height * .7);
+        songInfoTextLayer.alignmentMode = kCAAlignmentNatural;
     }
-    else if (track != nil) {
-        // display track info
-        if (coverExists) {
-            songInfoTextLayer.bounds = CGRectMake(0, 0, width * .5, height / 2);
-            songInfoTextLayer.position = CGPointMake(width * .48, height * .7);
-            songInfoTextLayer.alignmentMode = kCAAlignmentNatural;
-        }
-        else {
-            songInfoTextLayer.bounds = CGRectMake(0, 0, width * .9, height / 2);
-            songInfoTextLayer.position = CGPointMake(width * .05, height * .7);
-            songInfoTextLayer.alignmentMode = kCAAlignmentCenter;
-        }
-        NSAttributedString *doubleLinebreak = [[NSAttributedString alloc] initWithString:@"\n\n"];
-        //		NSAttributedString *tripleLinebreak = [[NSAttributedString alloc] initWithString:@"\n\n\n"];
-        NSMutableAttributedString *string = [[NSMutableAttributedString alloc] initWithString:[track name] attributes:songnameAttributes];
+    else {
+        songInfoTextLayer.bounds = CGRectMake(0, 0, width * .9, height / 2);
+        songInfoTextLayer.position = CGPointMake(width * .05, height * .7);
+        songInfoTextLayer.alignmentMode = kCAAlignmentCenter;
+    }
+    
+    NSAttributedString *doubleLinebreak = [[NSAttributedString alloc] initWithString:@"\n\n"];
+    NSMutableAttributedString *string = [[NSMutableAttributedString alloc] initWithString:trackTitle attributes:songnameAttributes];
+    [string appendAttributedString:doubleLinebreak];
+    [string appendAttributedString:[[NSAttributedString alloc] initWithString:artistName attributes:artistAttributes]];
+    
+    if (!isSplashScreen && albumName.length > 0) {
         [string appendAttributedString:doubleLinebreak];
-        //[string appendAttributedString:doubleLinebreak];
-        [string appendAttributedString:[[NSAttributedString alloc] initWithString:[track artist] attributes:artistAttributes]];
-        [string appendAttributedString:doubleLinebreak];
-        [string appendAttributedString:[[NSAttributedString alloc] initWithString:[track album] attributes:artistAttributes]];
-        [string appendAttributedString:doubleLinebreak];
-        [string appendAttributedString:doubleLinebreak];
+        [string appendAttributedString:[[NSAttributedString alloc] initWithString:albumName attributes:artistAttributes]];
+    }
+    [string appendAttributedString:doubleLinebreak];
+    [string appendAttributedString:doubleLinebreak];
+    
+//    NSMutableDictionary *ratingAttributes = [[NSMutableDictionary alloc] init];
+//    ratingAttributes[NSFontAttributeName] = [NSFont fontWithName:@"Lucida Grande" size:height * .04];
+//    ratingAttributes[NSForegroundColorAttributeName] = foregroundColor;
+//
+//    NSMutableString *ratingString = [[NSMutableString alloc] init];
+//
+//    for (int i = 0; i < 100; i+=20) {
+//        if (i < track.rating) {
+//            [ratingString appendString:@"★"];
+//        } else {
+//            [ratingString appendString:@"☆"];
+//        }
+//    }
+//    [string appendAttributedString:[[NSAttributedString alloc] initWithString:ratingString attributes:ratingAttributes]];
+
+    songInfoTextLayer.string = string;
+    
+    CGFloat coverWidth = width * .35;
+    
+    coverLayer.bounds = CGRectMake(0, -coverWidth, coverWidth, 3 * coverWidth);
+    coverLayer.anchorPoint = CGPointMake(.5, .5);
+    coverLayer.position = CGPointMake(width * .25, height * .5);
+    [coverLayer setNeedsDisplay];
+    
+    durationLayerHeight = height * .04;
+    durationLayerYPosition = height * .05;
+    if (displayPlayerPositionLabel) durationLayerYPosition = height * .08;
+    trackDurationLayer.borderWidth = durationLayerHeight * 0.1;
+    CGFloat layerWidth = width * .9;
+    trackDurationLayer.bounds = CGRectMake(0, 0, layerWidth, durationLayerHeight);
+    trackDurationLayer.position = CGPointMake(width / 2, durationLayerYPosition);
+    trackDurationLayer.cornerRadius = durationLayerHeight / 2.;
+    trackDurationLayer.borderColor = foregroundCGColor;
+    
+    CGFloat layerDiameter = durationLayerHeight * 0.6;
+    playerPositionLayer.bounds = CGRectMake(0, 0, layerDiameter, layerDiameter);
+    playerPositionLayer.cornerRadius = layerDiameter / 2.;
+    playerPositionLayer.backgroundColor = foregroundCGColor;
+    
+    // update the position of playerPositionLayer
+    trackDuration = isSplashScreen ? 0 : [track duration];
+    playerPositionDiameter = layerDiameter;
+    [self setPlayerPosition:isSplashScreen ? 0 : playerPosition];
+    
+    clockLayer.position = CGPointMake(width * 0.995 - clockLayerWidth, height);
+    
+    // pause icon
+    CALayer *pausePart1 = [pauseLayer sublayers][0];
+    CALayer *pausePart2 = [pauseLayer sublayers][1];
+    pausePart1.backgroundColor = foregroundCGColor;
+    pausePart2.backgroundColor = foregroundCGColor;
+    pausePart1.bounds = CGRectMake(0, 0, layerDiameter * .4, layerDiameter);
+    pausePart2.bounds = CGRectMake(0, 0, layerDiameter * .4, layerDiameter);
+    pausePart1.position = CGPointMake(0, 0);
+    pausePart2.position = CGPointMake(layerDiameter * .6, 0);
+    pauseLayer.frame = CGRectMake(trackDurationLayer.frame.origin.x, durationLayerYPosition, layerDiameter, layerDiameter);
+    
+    if (!isSplashScreen && (playerState == MusicBridge.PLAYER_STATE_PAUSED || playerState == MusicBridge.PLAYER_STATE_STOPPED)) {
+        pauseLayer.opacity = 1;
+        CGRect old = trackDurationLayer.frame;
+        CGFloat moveBy = layerDiameter * 1.2;
+        trackDurationLayer.frame = CGRectMake(old.origin.x + moveBy, old.origin.y, old.size.width - moveBy, old.size.height);
+    }
+    else {
+        pauseLayer.opacity = 0;
+    }
+    
+    
+    if (!isSplashScreen && trackDuration != 0 &&
+        (displayPlayerPositionBar || 
+         (!displayPlayerPositionLabel && (playerState == MusicBridge.PLAYER_STATE_FAST_FORWARDING || playerState == MusicBridge.PLAYER_STATE_REWINDING)))) {
         
-        //        NSMutableString *ratingString = [[NSMutableString alloc] init];
-        //
-        //        for (int i = 0; i < 100; i+=20) {
-        //            if (i < track.rating) {
-        //                [ratingString appendString:@"★"];
-        //            } else {
-        //                [ratingString appendString:@"☆"];
-        //            }
-        //        }
-        //        [string appendAttributedString:[[NSAttributedString alloc] initWithString:ratingString attributes:ratingAttributes]];
+        trackDurationLayer.opacity = 1;
         
-        songInfoTextLayer.string = string;
+        timePassedLayer.position = CGPointMake(trackDurationLayer.frame.origin.x + width*.01, height*.05);
+        timeRemainingLayer.position = CGPointMake(width * .94, height * .05);
+    }
+    else {
+        trackDurationLayer.opacity = 0;
+        timePassedLayer.position = CGPointMake(height*.05, height*.05);
+        timeRemainingLayer.position = CGPointMake(width * 0.98, height * .05);
+    }
+    
+    if (!isSplashScreen && trackDuration != 0 && displayPlayerPositionLabel) {
+        timePassedLayer.foregroundColor = timeRemainingLayer.foregroundColor = foregroundCGColor;
+        timePassedLayer.fontSize = timeRemainingLayer.fontSize = height * .03;
         
-        CGFloat coverWidth = width * .35;
-        
-        coverLayer.bounds = CGRectMake(0, -coverWidth, coverWidth, 3 * coverWidth);
-        coverLayer.anchorPoint = CGPointMake(.5, .5);
-        coverLayer.position = CGPointMake(width * .25, height * .5);
-        [coverLayer setNeedsDisplay];
-        
-        durationLayerHeight = height * .04;
-        durationLayerYPosition = height * .05;
-        if (displayPlayerPositionLabel) durationLayerYPosition = height * .08;
-        trackDurationLayer.borderWidth = durationLayerHeight * 0.1;
-        CGFloat layerWidth = width * .9;
-        trackDurationLayer.bounds = CGRectMake(0, 0, layerWidth, durationLayerHeight);
-        trackDurationLayer.position = CGPointMake(width / 2, durationLayerYPosition);
-        trackDurationLayer.cornerRadius = durationLayerHeight / 2.;
-        trackDurationLayer.borderColor = foregroundCGColor;
-        
-        CGFloat layerDiameter = durationLayerHeight * 0.6;
-        playerPositionLayer.bounds = CGRectMake(0, 0, layerDiameter, layerDiameter);
-        playerPositionLayer.cornerRadius = layerDiameter / 2.;
-        playerPositionLayer.backgroundColor = foregroundCGColor;
-        
-        // update the position of playerPositionLayer
-        trackDuration = [track duration];
-        playerPositionDiameter = layerDiameter;
-        [self setPlayerPosition:playerPosition];
-        
-        clockLayer.position = CGPointMake(width * 0.995 - clockLayerWidth, height);
-        
-        // pause icon
-        CALayer *pausePart1 = [pauseLayer sublayers][0];
-        CALayer *pausePart2 = [pauseLayer sublayers][1];
-        pausePart1.backgroundColor = foregroundCGColor;
-        pausePart2.backgroundColor = foregroundCGColor;
-        pausePart1.bounds = CGRectMake(0, 0, layerDiameter * .4, layerDiameter);
-        pausePart2.bounds = CGRectMake(0, 0, layerDiameter * .4, layerDiameter);
-        pausePart1.position = CGPointMake(0, 0);
-        pausePart2.position = CGPointMake(layerDiameter * .6, 0);
-        pauseLayer.frame = CGRectMake(trackDurationLayer.frame.origin.x, durationLayerYPosition, layerDiameter, layerDiameter);
-        
-        if (playerState == MusicBridge.PLAYER_STATE_PAUSED || playerState == MusicBridge.PLAYER_STATE_STOPPED) {
-            pauseLayer.opacity = 1;
-            CGRect old = trackDurationLayer.frame;
-            CGFloat moveBy = layerDiameter * 1.2;
-            trackDurationLayer.frame = CGRectMake(old.origin.x + moveBy, old.origin.y, old.size.width - moveBy, old.size.height);
-        }
-        else {
-            pauseLayer.opacity = 0;
-            // I have better things to do now than to find out why it doesn't work otherwise
-        }
-        
-        
-        if (trackDuration != 0 &&
-            (displayPlayerPositionBar ||
-             (!displayPlayerPositionLabel && (playerState == MusicBridge.PLAYER_STATE_FAST_FORWARDING || playerState == MusicBridge.PLAYER_STATE_REWINDING)))) {
-            
-            trackDurationLayer.opacity = 1;
-            
-            timePassedLayer.position = CGPointMake(trackDurationLayer.frame.origin.x + width*.01, height*.05);
-            timeRemainingLayer.position = CGPointMake(width * .94, height * .05);
-        }
-        else {
-            trackDurationLayer.opacity = 0;
-            timePassedLayer.position = CGPointMake(height*.05, height*.05);
-            timeRemainingLayer.position = CGPointMake(width * 0.98, height * .05);
-        }
-        
-        if (trackDuration != 0 && displayPlayerPositionLabel) {
-            timePassedLayer.foregroundColor = timeRemainingLayer.foregroundColor = foregroundCGColor;
-            timePassedLayer.fontSize = timeRemainingLayer.fontSize = height * .03;
-            
-            timePassedLayer.opacity = timeRemainingLayer.opacity = 1;
-        } else {
-            timePassedLayer.opacity = timeRemainingLayer.opacity = 0;
-        }
-        
-        clockLayer.fontSize = height * .05;
-        if (displayClock) {
-            clockLayer.foregroundColor = [[track tintColorWithDarkMode:!whiteBackground strongAdjustment:false] CGColor];
-            clockLayer.opacity = 1;
-        } else {
-            clockLayer.opacity = 0;
-        }
+        timePassedLayer.opacity = timeRemainingLayer.opacity = 1;
+    } else {
+        timePassedLayer.opacity = timeRemainingLayer.opacity = 0;
+    }
+    
+    clockLayer.fontSize = height * .05;
+    if (displayClock) {
+        NSColor *tintColor = track ? [track tintColorWithDarkMode:!whiteBackground strongAdjustment:false] : [NSColor defaultTintColor];
+        clockLayer.foregroundColor = [tintColor CGColor];
+        clockLayer.opacity = 1;
+    } else {
+        clockLayer.opacity = 0;
     }
     
     [self layoutIfNeeded];
