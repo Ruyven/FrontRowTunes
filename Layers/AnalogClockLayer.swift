@@ -8,7 +8,7 @@
 import Foundation
 import Cocoa
 
-fileprivate let animationDuration: TimeInterval = 20
+fileprivate let animationDuration: TimeInterval = 1
 
 
 class AnalogClockLayer: CALayer {
@@ -16,17 +16,21 @@ class AnalogClockLayer: CALayer {
     
     @objc var darkMode: Bool {
         didSet {
-            updateClockFace()
-            updateClockHands()
+            updateClockFaceColour()
+            updateClockHandColours()
         }
     }
-
+    
     @objc var showSeconds: Bool = true {
         didSet {
             secondHand.isHidden = !showSeconds
             secondHingeOuter.isHidden = !showSeconds
         }
     }
+    
+    var startRequested: Bool = false
+    @objc var isRunning: Bool = false
+    var needsSync = false
     
     @objc init(darkMode: Bool) {
         self.darkMode = darkMode
@@ -36,10 +40,6 @@ class AnalogClockLayer: CALayer {
         
         setUpClockFace()
         setUpClockHands()
-        
-        DispatchQueue.main.async {
-            self.updateAnimations()
-        }
     }
     
     @objc override init(layer: Any) {
@@ -85,7 +85,7 @@ class AnalogClockLayer: CALayer {
                 rotation: CGFloat(minute)
             )
         }
-        updateClockFace()
+        updateClockFaceColour()
     }
     
     private var tickLayers = [CALayer]()
@@ -103,7 +103,7 @@ class AnalogClockLayer: CALayer {
         self.tickLayers.append(tickLayer)
     }
     
-    private func updateClockFace() {
+    private func updateClockFaceColour() {
         let foregroundColor = darkMode ? CGColor.white : CGColor.black
         for tickLayer in tickLayers {
             tickLayer.backgroundColor = foregroundColor
@@ -161,15 +161,10 @@ class AnalogClockLayer: CALayer {
         secondHingeOuter.position = CGPoint(x: radius, y: radius)
         secondHingeInner.position = CGPoint(x: radius, y: radius)
         
-        let (hour, minute, second) = getHourMinuteSecond(getTime(timeIntervalSinceNow: 0))
-        setHourHandRotation(hourHand, hour)
-        setHandRotation(minuteHand, minute)
-        setHandRotation(secondHand, second)
-        
-        updateClockHands()
+        updateClockHandColours()
     }
     
-    private func updateClockHands() {
+    private func updateClockHandColours() {
         let backgroundColor = darkMode ? CGColor.black : CGColor.white
         let foregroundColor = darkMode ? CGColor.white : CGColor.black
         hourHand.backgroundColor = foregroundColor
@@ -180,8 +175,56 @@ class AnalogClockLayer: CALayer {
     
     // MARK: - Animations
     
-    func updateAnimations() {
-        setTime(getTime(timeIntervalSinceNow: animationDuration), animationDuration: animationDuration) { [weak self] in self?.updateAnimations() }
+    @objc func setHandsToCurrentTime() {
+        removeAllAnimations()
+        setTime(getTime(timeIntervalSinceNow: 0), animationDuration: 0)
+    }
+    
+    @objc func start() {
+        if isRunning {
+            return
+        }
+        
+        // Animation only makes sense if the layer is attached to a window and has a presentation layer.
+        // If presentation() is nil, any animated setTime will just snap to the end state.
+        guard secondHand.presentation() != nil else {
+            // Retry
+            NSLog("request start")
+            self.startRequested = true
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.01) { [weak self] in
+                guard let self = self, self.startRequested else { return }
+                self.start()
+            }
+            return
+        }
+        
+        isRunning = true
+        startRequested = false
+        setHandsToCurrentTime()
+        needsSync = true
+        setUpAnimationsIfNeeded()
+    }
+    
+    @objc func stop() {
+        isRunning = false
+        startRequested = false
+        animationTimer?.invalidate()
+        animationTimer = nil
+        removeAllAnimations()
+    }
+    
+    var animationTimer: Timer?
+    
+    func setUpAnimationsIfNeeded() {
+        guard animationTimer == nil else {
+            return
+        }
+        
+        animationTimer = Timer.scheduledTimer(withTimeInterval: animationDuration, repeats: true) { [weak self] _ in
+            guard let self = self else { return }
+            self.setTime(self.getTime(timeIntervalSinceNow: animationDuration), animationDuration: animationDuration)
+        }
+        animationTimer?.fire()
     }
     
     private func getHourMinuteSecond(_ time: Double) -> (Double, Double, Double) {
@@ -192,56 +235,63 @@ class AnalogClockLayer: CALayer {
         return (hour, minute, second)
     }
     
-    private func setTime(_ time: Double, animationDuration: TimeInterval, completion: @escaping () -> ()) {
-        CATransaction.flush()
-        
-        CATransaction.begin()
-        CATransaction.setAnimationTimingFunction(CAMediaTimingFunction(name: CAMediaTimingFunctionName.linear))
-        
-        if animationDuration > 0 {
-            CATransaction.setAnimationDuration(animationDuration)
-        } else {
-            CATransaction.disableActions()
-        }
-        
-        CATransaction.setCompletionBlock(completion)
-
+    private func setTime(_ time: Double, animationDuration: TimeInterval) {
         let (hour, minute, second) = getHourMinuteSecond(time)
         
-        setHourHandRotation(hourHand, hour)
-        setHandRotation(minuteHand, minute)
-        setHandRotation(secondHand, second)
+        let hourTransform = CATransform3DMakeRotation(-hour * 2 * CGFloat.pi / 12, 0, 0, 1)
+        let minuteTransform = CATransform3DMakeRotation(-minute * 2 * CGFloat.pi / 60, 0, 0, 1)
+        let secondTransform = CATransform3DMakeRotation(-second * 2 * CGFloat.pi / 60, 0, 0, 1)
+        
+        if animationDuration > 0 {
+            guard isRunning && (secondHand.presentation() != nil) else { return }
+            
+            animateHand(hourHand, to: hourTransform, duration: animationDuration)
+            animateHand(minuteHand, to: minuteTransform, duration: animationDuration)
+            animateHand(secondHand, to: secondTransform, duration: animationDuration)
+            needsSync = false
+        } else {
+            CATransaction.begin()
+            CATransaction.setDisableActions(true)
+            hourHand.transform = hourTransform
+            minuteHand.transform = minuteTransform
+            secondHand.transform = secondTransform
+            CATransaction.commit()
+        }
+    }
+    
+    private func animateHand(_ hand: CALayer, to targetTransform: CATransform3D, duration: TimeInterval) {
+        var currentTransform: CATransform3D
+        if (needsSync) {
+            // always start from model transform
+            currentTransform = hand.transform
+        } else {
+            // prefer presentation transform
+            currentTransform = hand.presentation()?.transform ?? hand.transform
+        }
+        
+        CATransaction.begin()
+        CATransaction.setDisableActions(true)
+        
+        hand.removeAnimation(forKey: "rotation")
+        hand.transform = currentTransform
+        
+        let animation = CABasicAnimation(keyPath: "transform")
+        animation.fromValue = NSValue(caTransform3D: currentTransform)
+        animation.toValue = NSValue(caTransform3D: targetTransform)
+        animation.duration = duration
+        animation.timingFunction = CAMediaTimingFunction(name: .linear)
+        animation.fillMode = .removed
+        animation.isRemovedOnCompletion = true
+        
+        hand.add(animation, forKey: "rotation")
+        hand.transform = targetTransform
         
         CATransaction.commit()
     }
     
-    private func setHandRotation(_ hand: CALayer, _ rotation: CGFloat) {
-        let angle = -rotation * 2 * CGFloat.pi / 60
-        hand.transform = CATransform3DMakeRotation(angle, 0, 0, 1)
-    }
-    
-    private func setHourHandRotation(_ hand: CALayer, _ rotation: CGFloat) {
-        let angle = -rotation * 2 * CGFloat.pi / 12
-        hand.transform = CATransform3DMakeRotation(angle, 0, 0, 1)
-    }
-    
     private func getTime(timeIntervalSinceNow: TimeInterval) -> Double {
         let date = Date(timeIntervalSinceNow: timeIntervalSinceNow)
-        let calendar = Calendar(identifier: .gregorian)
-        guard let midnight = DateComponents(
-            calendar: calendar,
-            timeZone: TimeZone.current,
-            era: nil,
-            year: calendar.component(.year, from: date),
-            month: calendar.component(.month, from: date),
-            day: calendar.component(.day, from: date),
-            hour: 0,
-            minute: 0,
-            second: 0,
-            nanosecond: calendar.component(.nanosecond, from: date)
-        ).date else {
-            return 0
-        }
+        let midnight = Calendar.current.startOfDay(for: date)
         return date.timeIntervalSince(midnight)
     }
     
