@@ -112,7 +112,7 @@
     
     BOOL isSplashScreen = ([track name] == nil);
     NSString *trackTitle = isSplashScreen ? @"FrontRowTunes" : [track name];
-    NSString *artistName = isSplashScreen ? @"Playback stopped" : [track artist];
+    NSString *artistName = isSplashScreen ? (_loadingMessage ? _loadingMessage : @"Playback stopped") : [track artist];
     NSString *albumName = isSplashScreen ? @"" : [track album];
     BOOL effectiveCoverExists = isSplashScreen || coverExists;
     

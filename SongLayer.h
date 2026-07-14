@@ -52,6 +52,7 @@
 - (void)updateClock;
 
 @property (nonatomic, strong) MusicTrack *track;
+@property (nonatomic, strong) NSString *loadingMessage;
 @property (nonatomic) BOOL whiteBackground;
 @property (nonatomic) int playerPosition;
 @property (nonatomic) NSString *playerState;

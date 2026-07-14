@@ -65,6 +65,7 @@ static const NSTimeInterval kDefaultClockScreensaverDelay = 60.0;
     LastEventTracker *musicInactivityTracker;
     LastEventTracker *clockInactivityTracker;
     LastEventTracker *mouseHideTracker;
+    BOOL playbackRequested;
 }
 
 - (BOOL)isWindowReady {
@@ -628,25 +629,65 @@ static const NSTimeInterval kDefaultClockScreensaverDelay = 60.0;
     [self setClockSeconds:value writeDefaults:true];
 }
 
+- (void)handlePlaybackRequest {
+    playbackRequested = YES;
+    
+    __weak typeof(self) weakSelf = self;
+    [MusicBridge playInBackgroundWithCompletion:^{
+        [weakSelf retryPlayback];
+    }];
+}
+
+- (void)retryPlayback {
+    if (playbackRequested) {
+        if ([MusicBridge isMusicRunning] && [MusicBridge isMusicPlaying]) {
+            playbackRequested = NO;
+        } else {
+            __weak typeof(self) weakSelf = self;
+            if ([MusicBridge getCurrentTrack] == nil) {
+                // Workaround: if Music was just launched and isn't active,
+                // telling it to play isn't working - but we can tell it to
+                // select a track, then play.
+                [MusicBridge nextTrack];
+            }
+            [MusicBridge playInBackgroundWithCompletion:^{
+                __strong typeof(weakSelf) self = weakSelf;
+                if (!self) {
+                    return;
+                }
+                self->playbackRequested = NO;
+            }];
+        }
+    }
+}
+
 - (void)keyDown:(NSEvent *)event {
     NSString *character = [event characters];
     NSString *charactersIgnoringModifiers = [event charactersIgnoringModifiers];
     NSEventModifierFlags modifierFlags = [event modifierFlags];
-    int characterInt = [character intValue];
-    keyCode = [event keyCode];
-    
-    if (characterInt >= 1 && characterInt <= 9) {
-        int screen = characterInt - 1;
-        NSArray *screenArray = [NSScreen screens];
-        if (allowScreenChange && screen < [screenArray count]) {
-            // screen change is not allowed when the song is changed, otherwise the new songLayer would be too small
-            
-            // if animate is YES, you can see the window resize over to the other display
-            [self.window setFrame:[screenArray[screen] frame] display:YES animate:YES];
+	int characterInt = [character intValue];
+	keyCode = [event keyCode];
+	
+	if (characterInt >= 1 && characterInt <= 9) {
+		int screen = characterInt - 1;
+		NSArray *screenArray = [NSScreen screens];
+		if (allowScreenChange && screen < [screenArray count]) {
+			// screen change is not allowed when the song is changed, otherwise the new songLayer would be too small
+			
+			// if animate is YES, you can see the window resize over to the other display
+			[self.window setFrame:[screenArray[screen] frame] display:YES animate:YES];
+		}
+	} else if ([character isEqualToString:@" "]) {
+        if (activeSongLayer.track == nil) {
+            activeSongLayer.loadingMessage = @"Starting playback...";
+            [activeSongLayer updateWithDuration:.2];
         }
-    } else if ([character isEqualToString:@" "]) {
-        [MusicBridge playpause];
-    } else if ([charactersIgnoringModifiers isEqualToString:@"t"] || [charactersIgnoringModifiers isEqualToString:@"T"]) {
+        if ([MusicBridge isMusicRunning]) {
+            [MusicBridge playpause];
+        } else {
+            [self handlePlaybackRequest];
+        }
+	} else if ([charactersIgnoringModifiers isEqualToString:@"t"] || [charactersIgnoringModifiers isEqualToString:@"T"]) {
         if ((modifierFlags & NSEventModifierFlagOption) != 0) {
             [self toggleAnalogClockFullScreen];
         } else if ([character isEqualToString:@"T"]) {
@@ -675,26 +716,36 @@ static const NSTimeInterval kDefaultClockScreensaverDelay = 60.0;
             [activeSongLayer updateClock];
             [activeSongLayer updateWithDuration:.5];
         }
-        /*	} else if (keyCode == 123 || keyCode == 124) {
-         switchTrack = YES;*/
-        // ToDo: bei langem drücken spulen, ansonsten nextTrack bzw. backTrack
-        // oder einfach wie Music app lassen: beim keyDown nextTrack bzw. backTrack
-        //		[NSTimer
-        // 123 = previous, 124 = next
-        //		[MusicBridge backTrack];
-    } else if (keyCode == 123) {
-        // links
-        self.prevTrack = YES;
-        [MusicBridge backTrack];
-    } else if (keyCode == 124) {
-        // rechts
+/*	} else if (keyCode == 123 || keyCode == 124) {
+		switchTrack = YES;*/
+		// ToDo: bei langem drücken spulen, ansonsten nextTrack bzw. backTrack
+		// oder einfach wie iTunes lassen: beim keyDown nextTrack bzw. backTrack
+//		[NSTimer 
+		// 123 = previous, 124 = next
+//		[iTunes backTrack];
+	} else if (keyCode == 123) {
+        // left arrow
+		if (activeSongLayer.track == nil) {
+            activeSongLayer.loadingMessage = @"No previous track";
+            [activeSongLayer updateWithDuration:.2];
+            [NSTimer scheduledTimerWithTimeInterval:2.0 target:self selector:@selector(resetLoadingMessage) userInfo:nil repeats:NO];
+        } else {
+            self.prevTrack = YES;
+            [MusicBridge backTrack];
+        }
+	} else if (keyCode == 124) {
+        // right arrow
+		if (activeSongLayer.track == nil) {
+            activeSongLayer.loadingMessage = @"Loading next track...";
+            [activeSongLayer updateWithDuration:.2];
+        }
         self.prevTrack = NO;
-        [MusicBridge nextTrack];
-    } else if ([character isEqualToString:@"q"] || [character isEqualToString:@"Q"]) {
-        [NSApp terminate:self];
-        /*	} else if ([character isEqualToString:@"h"]) {
-         [NSApp hide:self]; // doesn't seem to work.*/
-    } else if (keyCode == 36) {			// Return
+        [MusicBridge nextTrackInBackgroundWithCompletion:nil];
+	} else if ([character isEqualToString:@"q"] || [character isEqualToString:@"Q"]) {
+		[NSApp terminate:self];
+/*	} else if ([character isEqualToString:@"h"]) {
+		[NSApp hide:self]; // doesn't seem to work.*/
+	} else if (keyCode == 36) {			// Return
         if (!displayPlayerPositionBar && !displayPlayerPositionLabel) {
             [self setDisplayPlayerPositionBar:true];
         } else if (displayPlayerPositionBar && !displayPlayerPositionLabel) {
@@ -781,6 +832,11 @@ static const NSTimeInterval kDefaultClockScreensaverDelay = 60.0;
     if (prevTrack) {
         prevTrackTimeStamp = [NSDate date];
     }
+}
+
+- (void)resetLoadingMessage {
+    activeSongLayer.loadingMessage = nil;
+    [activeSongLayer updateWithDuration:.2];
 }
 
 - (IBAction)toggleInfoPanel:(id)sender {
