@@ -17,6 +17,9 @@ static NSString * const kAnalogClockFullScreenKey = @"analogClockFullScreen";
 static NSString * const kWhiteBackgroundKey = @"whiteBackground";
 static NSString * const kHasShownTutorialKey = @"hasShownTutorial";
 
+static NSString * const kMusicScreensaverDelayKey = @"musicScreensaverDelay";
+static const NSTimeInterval kDefaultMusicScreensaverDelay = 60.0;
+
 @interface SongView ()
 - (void)setAnalogClockFullScreen:(BOOL)value;
 - (void)setAnalogClockFullScreen:(BOOL)value writeDefaults:(BOOL)writeDefaults;
@@ -91,7 +94,8 @@ static NSString * const kHasShownTutorialKey = @"hasShownTutorial";
         kClockSecondsKey: @YES,
         kAnalogClockKey: @YES,
         kAnalogClockFullScreenKey: @NO,
-        kWhiteBackgroundKey: @NO
+        kWhiteBackgroundKey: @NO,
+        kMusicScreensaverDelayKey: @(kDefaultMusicScreensaverDelay)
     };
     [[NSUserDefaults standardUserDefaults] registerDefaults:defaults];
     
@@ -130,8 +134,9 @@ static NSString * const kHasShownTutorialKey = @"hasShownTutorial";
     updatePlayerPositionTimer = [NSTimer scheduledTimerWithTimeInterval:UPDATEINTERVAL target:self selector:@selector(updatePlayerPosition) userInfo:nil repeats:YES];
     [self updatePlayerPosition];
     
+    double delay = [[NSUserDefaults standardUserDefaults] doubleForKey:kMusicScreensaverDelayKey];
     systemInactivityTracker = [[LastEventTracker alloc] init];
-    [systemInactivityTracker setDelegate:self eventType:kCGAnyInputEventType timeout:60];
+    [systemInactivityTracker setDelegate:self eventType:kCGAnyInputEventType timeout:delay];
     
     mouseHideTracker = [[LastEventTracker alloc] init];
     [mouseHideTracker setDelegate:self eventType:kCGEventMouseMoved timeout:2];
