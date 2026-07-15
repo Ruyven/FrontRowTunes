@@ -327,7 +327,7 @@
 				INSTALL_PATH = "$(HOME)/Applications";
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks";
 				MACOSX_DEPLOYMENT_TARGET = 10.15;
-				MARKETING_VERSION = 0.4.1;
+				MARKETING_VERSION = 0.4.2;
 				PRODUCT_BUNDLE_IDENTIFIER = "com.ruyven.${PRODUCT_NAME:rfc1034identifier}";
 				PRODUCT_NAME = FrontRowTunes;
 				SDKROOT = macosx;
@@ -353,7 +353,7 @@
 				INSTALL_PATH = "$(HOME)/Applications";
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks";
 				MACOSX_DEPLOYMENT_TARGET = 10.15;
-				MARKETING_VERSION = 0.4.1;
+				MARKETING_VERSION = 0.4.2;
 				PRODUCT_BUNDLE_IDENTIFIER = "com.ruyven.${PRODUCT_NAME:rfc1034identifier}";
 				PRODUCT_NAME = FrontRowTunes;
 				SDKROOT = macosx;
