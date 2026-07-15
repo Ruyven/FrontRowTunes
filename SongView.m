@@ -19,6 +19,8 @@ static NSString * const kHasShownTutorialKey = @"hasShownTutorial";
 
 static NSString * const kMusicScreensaverDelayKey = @"musicScreensaverDelay";
 static const NSTimeInterval kDefaultMusicScreensaverDelay = 60.0;
+static NSString * const kClockScreensaverDelayKey = @"clockScreensaverDelay";
+static const NSTimeInterval kDefaultClockScreensaverDelay = 60.0;
 
 @interface SongView ()
 - (void)setAnalogClockFullScreen:(BOOL)value;
@@ -60,7 +62,8 @@ static const NSTimeInterval kDefaultMusicScreensaverDelay = 60.0;
     
     BOOL analogClockRequested;
     
-    LastEventTracker *systemInactivityTracker;
+    LastEventTracker *musicInactivityTracker;
+    LastEventTracker *clockInactivityTracker;
     LastEventTracker *mouseHideTracker;
 }
 
@@ -95,7 +98,8 @@ static const NSTimeInterval kDefaultMusicScreensaverDelay = 60.0;
         kAnalogClockKey: @YES,
         kAnalogClockFullScreenKey: @NO,
         kWhiteBackgroundKey: @NO,
-        kMusicScreensaverDelayKey: @(kDefaultMusicScreensaverDelay)
+        kMusicScreensaverDelayKey: @(kDefaultMusicScreensaverDelay),
+        kClockScreensaverDelayKey: @(kDefaultClockScreensaverDelay)
     };
     [[NSUserDefaults standardUserDefaults] registerDefaults:defaults];
     
@@ -135,8 +139,12 @@ static const NSTimeInterval kDefaultMusicScreensaverDelay = 60.0;
     [self updatePlayerPosition];
     
     double delay = [[NSUserDefaults standardUserDefaults] doubleForKey:kMusicScreensaverDelayKey];
-    systemInactivityTracker = [[LastEventTracker alloc] init];
-    [systemInactivityTracker setDelegate:self eventType:kCGAnyInputEventType timeout:delay];
+    musicInactivityTracker = [[LastEventTracker alloc] init];
+    [musicInactivityTracker setDelegate:self eventType:kCGAnyInputEventType timeout:delay];
+    
+    delay = [[NSUserDefaults standardUserDefaults] doubleForKey:kClockScreensaverDelayKey];
+    clockInactivityTracker = [[LastEventTracker alloc] init];
+    [clockInactivityTracker setDelegate:self eventType:kCGAnyInputEventType timeout:delay];
     
     mouseHideTracker = [[LastEventTracker alloc] init];
     [mouseHideTracker setDelegate:self eventType:kCGEventMouseMoved timeout:2];
@@ -820,23 +828,35 @@ static const NSTimeInterval kDefaultMusicScreensaverDelay = 60.0;
 }
 
 - (void)lastEventTracker:(LastEventTracker *)lastEventTracker timeoutPassed:(NSTimeInterval)timeoutPassed {
-    if (lastEventTracker == systemInactivityTracker) {
-        [self handleEventTimeout];
+    if (lastEventTracker == musicInactivityTracker) {
+        [self handleMusicInactivityTimeout];
+    } else if (lastEventTracker == clockInactivityTracker) {
+        [self handleClockInactivityTimeout];
     } else if (lastEventTracker == mouseHideTracker) {
         [self handleMouseInactivity];
     }
 }
 
-- (void)handleEventTimeout {
+- (void)handleMusicInactivityTimeout {
     if ([MusicBridge getPlayerState] == MusicBridge.PLAYER_STATE_PLAYING) {
-        if ([self isWindowFullScreen]) {
-            if (![NSApp isActive]) {
-                [NSApp activateIgnoringOtherApps:true];
-                [self.window makeKeyAndOrderFront:self];
-            }
-        } else {
-            [self.window toggleFullScreen:self];
+        [self enterScreensaverIfRequired];
+    }
+}
+
+- (void)handleClockInactivityTimeout {
+    if (analogClockFullScreen) {
+        [self enterScreensaverIfRequired];
+    }
+}
+
+- (void)enterScreensaverIfRequired {
+    if ([self isWindowFullScreen]) {
+        if (![NSApp isActive]) {
+            [NSApp activateIgnoringOtherApps:true];
+            [self.window makeKeyAndOrderFront:self];
         }
+    } else {
+        [self.window toggleFullScreen:self];
     }
 }
 
