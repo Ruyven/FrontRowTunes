@@ -17,6 +17,11 @@ static NSString * const kAnalogClockFullScreenKey = @"analogClockFullScreen";
 static NSString * const kWhiteBackgroundKey = @"whiteBackground";
 static NSString * const kHasShownTutorialKey = @"hasShownTutorial";
 
+static NSString * const kMusicScreensaverDelayKey = @"musicScreensaverDelay";
+static const NSTimeInterval kDefaultMusicScreensaverDelay = 60.0;
+static NSString * const kClockScreensaverDelayKey = @"clockScreensaverDelay";
+static const NSTimeInterval kDefaultClockScreensaverDelay = 60.0;
+
 @interface SongView ()
 - (void)setAnalogClockFullScreen:(BOOL)value;
 - (void)setAnalogClockFullScreen:(BOOL)value writeDefaults:(BOOL)writeDefaults;
@@ -57,7 +62,8 @@ static NSString * const kHasShownTutorialKey = @"hasShownTutorial";
     
     BOOL analogClockRequested;
     
-    LastEventTracker *systemInactivityTracker;
+    LastEventTracker *musicInactivityTracker;
+    LastEventTracker *clockInactivityTracker;
     LastEventTracker *mouseHideTracker;
 }
 
@@ -91,7 +97,9 @@ static NSString * const kHasShownTutorialKey = @"hasShownTutorial";
         kClockSecondsKey: @YES,
         kAnalogClockKey: @YES,
         kAnalogClockFullScreenKey: @NO,
-        kWhiteBackgroundKey: @NO
+        kWhiteBackgroundKey: @NO,
+        kMusicScreensaverDelayKey: @(kDefaultMusicScreensaverDelay),
+        kClockScreensaverDelayKey: @(kDefaultClockScreensaverDelay)
     };
     [[NSUserDefaults standardUserDefaults] registerDefaults:defaults];
     
@@ -130,8 +138,13 @@ static NSString * const kHasShownTutorialKey = @"hasShownTutorial";
     updatePlayerPositionTimer = [NSTimer scheduledTimerWithTimeInterval:UPDATEINTERVAL target:self selector:@selector(updatePlayerPosition) userInfo:nil repeats:YES];
     [self updatePlayerPosition];
     
-    systemInactivityTracker = [[LastEventTracker alloc] init];
-    [systemInactivityTracker setDelegate:self eventType:kCGAnyInputEventType timeout:60];
+    double delay = [[NSUserDefaults standardUserDefaults] doubleForKey:kMusicScreensaverDelayKey];
+    musicInactivityTracker = [[LastEventTracker alloc] init];
+    [musicInactivityTracker setDelegate:self eventType:kCGAnyInputEventType timeout:delay];
+    
+    delay = [[NSUserDefaults standardUserDefaults] doubleForKey:kClockScreensaverDelayKey];
+    clockInactivityTracker = [[LastEventTracker alloc] init];
+    [clockInactivityTracker setDelegate:self eventType:kCGAnyInputEventType timeout:delay];
     
     mouseHideTracker = [[LastEventTracker alloc] init];
     [mouseHideTracker setDelegate:self eventType:kCGEventMouseMoved timeout:2];
@@ -815,23 +828,35 @@ static NSString * const kHasShownTutorialKey = @"hasShownTutorial";
 }
 
 - (void)lastEventTracker:(LastEventTracker *)lastEventTracker timeoutPassed:(NSTimeInterval)timeoutPassed {
-    if (lastEventTracker == systemInactivityTracker) {
-        [self handleEventTimeout];
+    if (lastEventTracker == musicInactivityTracker) {
+        [self handleMusicInactivityTimeout];
+    } else if (lastEventTracker == clockInactivityTracker) {
+        [self handleClockInactivityTimeout];
     } else if (lastEventTracker == mouseHideTracker) {
         [self handleMouseInactivity];
     }
 }
 
-- (void)handleEventTimeout {
+- (void)handleMusicInactivityTimeout {
     if ([MusicBridge getPlayerState] == MusicBridge.PLAYER_STATE_PLAYING) {
-        if ([self isWindowFullScreen]) {
-            if (![NSApp isActive]) {
-                [NSApp activateIgnoringOtherApps:true];
-                [self.window makeKeyAndOrderFront:self];
-            }
-        } else {
-            [self.window toggleFullScreen:self];
+        [self enterScreensaverIfRequired];
+    }
+}
+
+- (void)handleClockInactivityTimeout {
+    if (analogClockFullScreen) {
+        [self enterScreensaverIfRequired];
+    }
+}
+
+- (void)enterScreensaverIfRequired {
+    if ([self isWindowFullScreen]) {
+        if (![NSApp isActive]) {
+            [NSApp activateIgnoringOtherApps:true];
+            [self.window makeKeyAndOrderFront:self];
         }
+    } else {
+        [self.window toggleFullScreen:self];
     }
 }
 
