@@ -25,7 +25,7 @@ import AppKit
         return output
     }
     
-    private static func isMusicRunning() -> Bool {
+    @objc static func isMusicRunning() -> Bool {
         return NSRunningApplication.runningApplications(withBundleIdentifier: "com.apple.Music").count > 0
     }
     
@@ -139,6 +139,10 @@ import AppKit
         return executeScript(source: "tell application \"Music\" to get player state")?.stringValue
     }
     
+    @objc static func isMusicPlaying() -> Bool {
+        return getPlayerState() == PLAYER_STATE_PLAYING
+    }
+    
     @objc static func getPlayerPosition() -> Double {
         guard isMusicRunning() else { return 0 }
         return executeScript(source: "tell application \"Music\" to get player position")?.doubleValue ?? 0
@@ -150,11 +154,35 @@ import AppKit
         executeScript(source: "tell application \"Music\" to tell current track to playpause");
     }
     
+    @objc static func playInBackgroundWithCompletion(_ completion: (() -> Void)?) {
+        DispatchQueue.global(qos: .userInitiated).async {
+            executeScript(source: "tell application \"Music\" to play")
+            
+            if let completion = completion {
+                DispatchQueue.main.async {
+                    completion()
+                }
+            }
+        }
+    }
+    
     @objc static func backTrack() {
         executeScript(source: "tell application \"Music\" to tell current track to back track");
     }
     
     @objc static func nextTrack() {
         executeScript(source: "tell application \"Music\" to tell current track to next track");
+    }
+    
+    @objc static func nextTrackInBackgroundWithCompletion(_ completion: (() -> Void)?) {
+        DispatchQueue.global(qos: .userInitiated).async {
+            nextTrack()
+            
+            if let completion = completion {
+                DispatchQueue.main.async {
+                    completion()
+                }
+            }
+        }
     }
 }

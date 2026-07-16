@@ -48,10 +48,12 @@
 
 - (id)initWithFrame:(CGRect)frame whiteBackground:(BOOL)white;
 
+- (BOOL)isSplashScreen;
 - (void)updateWithDuration:(CGFloat)duration;
 - (void)updateClock;
 
 @property (nonatomic, strong) MusicTrack *track;
+@property (nonatomic, strong) NSString *loadingMessage;
 @property (nonatomic) BOOL whiteBackground;
 @property (nonatomic) int playerPosition;
 @property (nonatomic) NSString *playerState;
