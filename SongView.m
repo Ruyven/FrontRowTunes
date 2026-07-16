@@ -641,30 +641,47 @@ static const NSTimeInterval kDefaultClockScreensaverDelay = 60.0;
 }
 
 - (void)retryPlayback {
-    if (playbackRequested) {
-        if ([MusicBridge isMusicRunning] && [MusicBridge isMusicPlaying]) {
-            playbackRequested = NO;
-        } else {
-            __weak typeof(self) weakSelf = self;
-            if ([MusicBridge getCurrentTrack] == nil) {
-                // Workaround: if Music was just launched and isn't active,
-                // telling it to play isn't working - but we can tell it to
-                // select a track, then play.
-                [MusicBridge nextTrack];
-            }
-            [MusicBridge playInBackgroundWithCompletion:^{
-                __strong typeof(weakSelf) self = weakSelf;
-                if (!self) {
-                    return;
-                }
-                self->playbackRequested = NO;
-            }];
-        }
+    if (!playbackRequested) {
+        return;
     }
+    if ([MusicBridge isMusicRunning] && [MusicBridge isMusicPlaying]) {
+        playbackRequested = NO;
+        return;
+    }
+    
+    __weak typeof(self) weakSelf = self;
+    if ([MusicBridge getCurrentTrack] == nil) {
+        // Workaround: if Music was just launched and isn't active,
+        // telling it to play isn't working - but we can tell it to
+        // select a track, then play.
+        [MusicBridge nextTrack];
+    }
+    [MusicBridge playInBackgroundWithCompletion:^{
+        __strong typeof(weakSelf) self = weakSelf;
+        if (!self) {
+            return;
+        }
+        self->playbackRequested = NO;
+    }];
 }
 
 - (void)handleNextTrackRequest {
     nextTrackRequested = YES;
+    __weak typeof(self) weakSelf = self;
+    [MusicBridge nextTrackInBackgroundWithCompletion:^{
+        [weakSelf retryNextTrack];
+    }];
+}
+
+- (void)retryNextTrack {
+    if (!nextTrackRequested) {
+        return;
+    }
+    if ([MusicBridge getCurrentTrack] != nil) {
+        nextTrackRequested = NO;
+        return;
+    }
+    
     __weak typeof(self) weakSelf = self;
     [MusicBridge nextTrackInBackgroundWithCompletion:^{
         __strong typeof(weakSelf) self = weakSelf;
@@ -754,7 +771,11 @@ static const NSTimeInterval kDefaultClockScreensaverDelay = 60.0;
             [activeSongLayer updateWithDuration:.2];
         }
         self.prevTrack = NO;
-        [self handleNextTrackRequest];
+        if ([MusicBridge isMusicRunning]) {
+            [MusicBridge nextTrack];
+        } else {
+            [self handleNextTrackRequest];
+        }
 	} else if ([character isEqualToString:@"q"] || [character isEqualToString:@"Q"]) {
 		[NSApp terminate:self];
 /*	} else if ([character isEqualToString:@"h"]) {
