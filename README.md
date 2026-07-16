@@ -1,6 +1,6 @@
 # FrontRowTunes
 
-<img src="docs/images/FrontRowTunes-splash.png" alt="splash screen" height="100" />
+<img src="docs/images/FrontRowTunes-splash.png" alt="splash screen" />
 
 After FrontRow was removed in Mac OS X 10.7 Lion, in 2013 I decided to build a little app that brings back a FrontRow-like music experience, but for music playing in iTunes. Later updated to support the Music app instead.
 
