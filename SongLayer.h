@@ -48,6 +48,7 @@
 
 - (id)initWithFrame:(CGRect)frame whiteBackground:(BOOL)white;
 
+- (BOOL)isSplashScreen;
 - (void)updateWithDuration:(CGFloat)duration;
 - (void)updateClock;
 

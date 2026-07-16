@@ -85,6 +85,12 @@
     return self;
 }
 
+- (BOOL)isSplashScreen {
+    // When setting a track, we check if Music app is running and playing
+    // -> nil track means it's not playing and we show a splash screen
+    return track == nil;
+}
+
 - (void)updateWithDuration:(CGFloat)duration {
     if (duration == 0.0) {
         [CATransaction setValue:(id) kCFBooleanTrue forKey:kCATransactionDisableActions];
@@ -110,7 +116,7 @@
     
     //	CGColorRef whiteColor = CGColorCreateGenericRGB(1, 1, 1, 1);
     
-    BOOL isSplashScreen = ([track name] == nil);
+    BOOL isSplashScreen = [self isSplashScreen];
     NSString *trackTitle = isSplashScreen ? @"FrontRowTunes" : [track name];
     NSString *artistName = isSplashScreen ? (_loadingMessage ? _loadingMessage : @"Playback stopped") : [track artist];
     NSString *albumName = isSplashScreen ? @"" : [track album];

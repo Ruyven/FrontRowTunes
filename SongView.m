@@ -61,11 +61,11 @@ static const NSTimeInterval kDefaultClockScreensaverDelay = 60.0;
     BOOL priorDisplayClock, priorAnalogClock;
     
     BOOL analogClockRequested;
-    
+    BOOL playbackRequested, nextTrackRequested;
+
     LastEventTracker *musicInactivityTracker;
     LastEventTracker *clockInactivityTracker;
     LastEventTracker *mouseHideTracker;
-    BOOL playbackRequested;
 }
 
 - (BOOL)isWindowReady {
@@ -634,6 +634,8 @@ static const NSTimeInterval kDefaultClockScreensaverDelay = 60.0;
     
     __weak typeof(self) weakSelf = self;
     [MusicBridge playInBackgroundWithCompletion:^{
+        // Once Music app is running, this returns - but for some reason,
+        // Music app doesn't automatically start playback, so we retry once.
         [weakSelf retryPlayback];
     }];
 }
@@ -661,6 +663,18 @@ static const NSTimeInterval kDefaultClockScreensaverDelay = 60.0;
     }
 }
 
+- (void)handleNextTrackRequest {
+    nextTrackRequested = YES;
+    __weak typeof(self) weakSelf = self;
+    [MusicBridge nextTrackInBackgroundWithCompletion:^{
+        __strong typeof(weakSelf) self = weakSelf;
+        if (!self) {
+            return;
+        }
+        self->nextTrackRequested = NO;
+    }];
+}
+
 - (void)keyDown:(NSEvent *)event {
     NSString *character = [event characters];
     NSString *charactersIgnoringModifiers = [event charactersIgnoringModifiers];
@@ -678,7 +692,7 @@ static const NSTimeInterval kDefaultClockScreensaverDelay = 60.0;
 			[self.window setFrame:[screenArray[screen] frame] display:YES animate:YES];
 		}
 	} else if ([character isEqualToString:@" "]) {
-        if (activeSongLayer.track == nil) {
+        if (activeSongLayer.isSplashScreen) {
             activeSongLayer.loadingMessage = @"Starting playback...";
             [activeSongLayer updateWithDuration:.2];
         }
@@ -719,13 +733,13 @@ static const NSTimeInterval kDefaultClockScreensaverDelay = 60.0;
 /*	} else if (keyCode == 123 || keyCode == 124) {
 		switchTrack = YES;*/
 		// ToDo: bei langem drücken spulen, ansonsten nextTrack bzw. backTrack
-		// oder einfach wie iTunes lassen: beim keyDown nextTrack bzw. backTrack
+		// oder einfach wie Music app lassen: beim keyDown nextTrack bzw. backTrack
 //		[NSTimer 
 		// 123 = previous, 124 = next
-//		[iTunes backTrack];
+//		[MusicBridge backTrack];
 	} else if (keyCode == 123) {
         // left arrow
-		if (activeSongLayer.track == nil) {
+		if (activeSongLayer.isSplashScreen) {
             activeSongLayer.loadingMessage = @"No previous track";
             [activeSongLayer updateWithDuration:.2];
             [NSTimer scheduledTimerWithTimeInterval:2.0 target:self selector:@selector(resetLoadingMessage) userInfo:nil repeats:NO];
@@ -735,12 +749,12 @@ static const NSTimeInterval kDefaultClockScreensaverDelay = 60.0;
         }
 	} else if (keyCode == 124) {
         // right arrow
-		if (activeSongLayer.track == nil) {
+		if (activeSongLayer.isSplashScreen) {
             activeSongLayer.loadingMessage = @"Loading next track...";
             [activeSongLayer updateWithDuration:.2];
         }
         self.prevTrack = NO;
-        [MusicBridge nextTrackInBackgroundWithCompletion:nil];
+        [self handleNextTrackRequest];
 	} else if ([character isEqualToString:@"q"] || [character isEqualToString:@"Q"]) {
 		[NSApp terminate:self];
 /*	} else if ([character isEqualToString:@"h"]) {
@@ -835,6 +849,9 @@ static const NSTimeInterval kDefaultClockScreensaverDelay = 60.0;
 }
 
 - (void)resetLoadingMessage {
+    if (playbackRequested || nextTrackRequested) {
+        return;
+    }
     activeSongLayer.loadingMessage = nil;
     [activeSongLayer updateWithDuration:.2];
 }

@@ -176,7 +176,7 @@ import AppKit
     
     @objc static func nextTrackInBackgroundWithCompletion(_ completion: (() -> Void)?) {
         DispatchQueue.global(qos: .userInitiated).async {
-            executeScript(source: "tell application \"Music\" to tell current track to next track")
+            nextTrack()
             
             if let completion = completion {
                 DispatchQueue.main.async {
