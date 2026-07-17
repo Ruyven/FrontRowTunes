@@ -36,4 +36,8 @@
     }
 }
 
+- (IBAction)showPreferences:(id)sender {
+    [[PreferencesWindowController shared] show];
+}
+
 @end

@@ -11,3 +11,9 @@ import AppKit
 @objc extension NSColor {
     @objc static let defaultTintColor = NSColor.orange
 }
+
+@objc class PrefKeys: NSObject {
+    @objc static let musicScreensaverDelay = "musicScreensaverDelay"
+    @objc static let clockScreensaverDelay = "clockScreensaverDelay"
+}
+

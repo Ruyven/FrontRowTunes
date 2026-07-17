@@ -17,10 +17,11 @@ static NSString * const kAnalogClockFullScreenKey = @"analogClockFullScreen";
 static NSString * const kWhiteBackgroundKey = @"whiteBackground";
 static NSString * const kHasShownTutorialKey = @"hasShownTutorial";
 
-static NSString * const kMusicScreensaverDelayKey = @"musicScreensaverDelay";
 static const NSTimeInterval kDefaultMusicScreensaverDelay = 60.0;
-static NSString * const kClockScreensaverDelayKey = @"clockScreensaverDelay";
 static const NSTimeInterval kDefaultClockScreensaverDelay = 60.0;
+
+#define kMusicScreensaverDelayKey [PrefKeys musicScreensaverDelay]
+#define kClockScreensaverDelayKey [PrefKeys clockScreensaverDelay]
 
 @interface SongView ()
 - (void)setAnalogClockFullScreen:(BOOL)value;

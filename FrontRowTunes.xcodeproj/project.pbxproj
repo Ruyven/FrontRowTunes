@@ -16,6 +16,8 @@
 		FA1930CD1268C4530032A143 /* MainWindow.m in Sources */ = {isa = PBXBuildFile; fileRef = FA1930CC1268C4530032A143 /* MainWindow.m */; };
 		FA1931011268CA410032A143 /* SongLayer.m in Sources */ = {isa = PBXBuildFile; fileRef = FA1931001268CA410032A143 /* SongLayer.m */; };
 		FA1931A61268D1B50032A143 /* CoverLayer.m in Sources */ = {isa = PBXBuildFile; fileRef = FA1931A51268D1B50032A143 /* CoverLayer.m */; };
+		FA4F1209300986F900689587 /* PreferencesView.swift in Sources */ = {isa = PBXBuildFile; fileRef = FA4F1208300986F900689587 /* PreferencesView.swift */; };
+		FA4F120B3009A45800689587 /* PreferencesWindowController.swift in Sources */ = {isa = PBXBuildFile; fileRef = FA4F120A3009A45800689587 /* PreferencesWindowController.swift */; };
 		FA581B862800F55B0039EB2E /* AnalogClockLayer.swift in Sources */ = {isa = PBXBuildFile; fileRef = FA581B852800F55A0039EB2E /* AnalogClockLayer.swift */; };
 		FA8A0C4B16FC7886008A6779 /* QuartzCore.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = FA8A0C4A16FC7886008A6779 /* QuartzCore.framework */; };
 		FA8A0C4D16FC78A7008A6779 /* ScriptingBridge.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = FA8A0C4C16FC78A7008A6779 /* ScriptingBridge.framework */; };
@@ -51,6 +53,8 @@
 		FA1931001268CA410032A143 /* SongLayer.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SongLayer.m; sourceTree = "<group>"; };
 		FA1931A41268D1B50032A143 /* CoverLayer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CoverLayer.h; sourceTree = "<group>"; };
 		FA1931A51268D1B50032A143 /* CoverLayer.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CoverLayer.m; sourceTree = "<group>"; };
+		FA4F1208300986F900689587 /* PreferencesView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = PreferencesView.swift; path = Views/PreferencesView.swift; sourceTree = "<group>"; };
+		FA4F120A3009A45800689587 /* PreferencesWindowController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = PreferencesWindowController.swift; path = Controllers/PreferencesWindowController.swift; sourceTree = "<group>"; };
 		FA581B852800F55A0039EB2E /* AnalogClockLayer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = AnalogClockLayer.swift; path = Layers/AnalogClockLayer.swift; sourceTree = "<group>"; };
 		FA8A0C4A16FC7886008A6779 /* QuartzCore.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = QuartzCore.framework; path = /System/Library/Frameworks/QuartzCore.framework; sourceTree = "<absolute>"; };
 		FA8A0C4C16FC78A7008A6779 /* ScriptingBridge.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = ScriptingBridge.framework; path = /System/Library/Frameworks/ScriptingBridge.framework; sourceTree = "<absolute>"; };
@@ -91,6 +95,8 @@
 				256AC3D90F4B6AC300CF3369 /* FrontRowTunesAppDelegate.m */,
 				FA1930A11268BE4B0032A143 /* SongView.h */,
 				FA1930A21268BE4B0032A143 /* SongView.m */,
+				FA4F1208300986F900689587 /* PreferencesView.swift */,
+				FA4F120A3009A45800689587 /* PreferencesWindowController.swift */,
 			);
 			name = Classes;
 			sourceTree = "<group>";
@@ -275,6 +281,8 @@
 				8D11072D0486CEB800E47090 /* main.m in Sources */,
 				256AC3DA0F4B6AC300CF3369 /* FrontRowTunesAppDelegate.m in Sources */,
 				FA1930A31268BE4B0032A143 /* SongView.m in Sources */,
+				FA4F1209300986F900689587 /* PreferencesView.swift in Sources */,
+				FA4F120B3009A45800689587 /* PreferencesWindowController.swift in Sources */,
 				FA1930CD1268C4530032A143 /* MainWindow.m in Sources */,
 				FAF1DD3E280001AB00706C92 /* LastEventTracker.swift in Sources */,
 				FA1931011268CA410032A143 /* SongLayer.m in Sources */,
@@ -326,11 +334,13 @@
 				INFOPLIST_FILE = "FrontRowTunes-Info.plist";
 				INSTALL_PATH = "$(HOME)/Applications";
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks";
-				MACOSX_DEPLOYMENT_TARGET = 10.15;
-				MARKETING_VERSION = 0.5.1;
+				MACOSX_DEPLOYMENT_TARGET = 11.0;
+				MARKETING_VERSION = 0.6.0;
 				PRODUCT_BUNDLE_IDENTIFIER = "com.ruyven.${PRODUCT_NAME:rfc1034identifier}";
 				PRODUCT_NAME = FrontRowTunes;
 				SDKROOT = macosx;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
+				"SWIFT_ACTIVE_COMPILATION_CONDITIONS[arch=*]" = DEBUG;
 				SWIFT_OBJC_BRIDGING_HEADER = "MusicBridge/FrontRowTunes-Bridging-Header.h";
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
 				SWIFT_VERSION = 5.0;
@@ -352,8 +362,8 @@
 				INFOPLIST_FILE = "FrontRowTunes-Info.plist";
 				INSTALL_PATH = "$(HOME)/Applications";
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks";
-				MACOSX_DEPLOYMENT_TARGET = 10.15;
-				MARKETING_VERSION = 0.5.1;
+				MACOSX_DEPLOYMENT_TARGET = 11.0;
+				MARKETING_VERSION = 0.6.0;
 				PRODUCT_BUNDLE_IDENTIFIER = "com.ruyven.${PRODUCT_NAME:rfc1034identifier}";
 				PRODUCT_NAME = FrontRowTunes;
 				SDKROOT = macosx;

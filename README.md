@@ -20,7 +20,7 @@ After FrontRow was removed in Mac OS X 10.7 Lion, in 2013 I decided to build a l
 
 By default, FrontRowTunes enters "screensaver mode" - entering full-screen and/or activating itself after 1&nbsp;minute of inactivity - when either music is playing, or the full-screen clock is enabled.
 
-This can be adjusted via user defaults. Examples:
+This can be adjusted via Preferences or by editing user defaults directly:
 
 - When music is playing, and clock is not full-screen, enter screensaver mode after 2&nbsp;minutes  
 
@@ -38,3 +38,8 @@ This can be adjusted via user defaults. Examples:
 
         defaults write com.ruyven.FrontRowTunes clockScreensaverDelay -float 0
 
+## Minimum supported macOS version
+
+- Pre 0.1: macOS 10.8 Mountain Lion
+- 0.1 - 0.5.0: macOS 10.15 Catalina
+- 0.5.1 onwards: macOS 11 Big Sur
