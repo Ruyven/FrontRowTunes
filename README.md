@@ -41,5 +41,5 @@ This can be adjusted via Preferences or by editing user defaults directly:
 ## Minimum supported macOS version
 
 - Pre 0.1: macOS 10.8 Mountain Lion
-- 0.1 - 0.5.0: macOS 10.15 Catalina
-- 0.5.1 onwards: macOS 11 Big Sur
+- 0.1 - 0.5.1: macOS 10.15 Catalina
+- 0.6.0 onwards: macOS 11 Big Sur

@@ -11,3 +11,10 @@ build/
 *.perspectivev3
 
 xcuserdata
+
+*_BACKUP*
+*_BASE*
+*_LOCAL*
+*_REMOTE*
+
+.aider.*
