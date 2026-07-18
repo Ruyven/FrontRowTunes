@@ -149,6 +149,8 @@ static const NSTimeInterval kDefaultClockScreensaverDelay = 60.0;
     
     mouseHideTracker = [[LastEventTracker alloc] init];
     [mouseHideTracker setDelegate:self eventType:kCGEventMouseMoved timeout:2];
+    
+    [self observeUserDefaultsChanges:defaults.allKeys];
 }
 
 - (void)setupLayers {
@@ -957,6 +959,77 @@ static const NSTimeInterval kDefaultClockScreensaverDelay = 60.0;
 - (void)handleMouseInactivity {
     if ([self isWindowFullScreen]) {
         [NSCursor setHiddenUntilMouseMoves:true];
+    }
+}
+
+#pragma mark -
+
+- (void)observeUserDefaultsChanges:(NSArray *)keys {
+    for (NSString *key in keys) {
+        [[NSUserDefaults standardUserDefaults] addObserver:self
+                                                forKeyPath:key
+                                                   options:NSKeyValueObservingOptionNew
+                                                   context:NULL];
+    }
+}
+
+- (void)observeValueForKeyPath:(NSString *)keyPath
+                      ofObject:(id)object
+                        change:(NSDictionary<NSKeyValueChangeKey,id> *)change
+                       context:(void *)context {
+    
+    // Simulate switch-case for NSString (not supported in Objective C)
+    NSDictionary *cases = @{
+        kMusicScreensaverDelayKey: ^{
+            // Calling setDelegate again safely resets the timeout
+            // Note: the `change` dictionary is unreliable due to how user defaults are cached.
+            double musicDelay = [[NSUserDefaults standardUserDefaults] doubleForKey:kMusicScreensaverDelayKey];
+            [musicInactivityTracker setDelegate:self eventType:kCGAnyInputEventType timeout:musicDelay];
+        },
+        kClockScreensaverDelayKey: ^{
+            double clockDelay = [[NSUserDefaults standardUserDefaults] doubleForKey:kClockScreensaverDelayKey];
+            [clockInactivityTracker setDelegate:self eventType:kCGAnyInputEventType timeout:clockDelay];
+        },
+        kDisplayPlayerPositionBarKey: ^{
+            BOOL value = [[NSUserDefaults standardUserDefaults] boolForKey:kDisplayPlayerPositionBarKey];
+            [self setDisplayPlayerPositionBar:value writeDefaults:NO];
+        },
+        kDisplayPlayerPositionLabelKey: ^{
+            BOOL value = [[NSUserDefaults standardUserDefaults] boolForKey:kDisplayPlayerPositionLabelKey];
+            [self setDisplayPlayerPositionLabel:value writeDefaults:NO];
+        },
+        kDisplayClockKey: ^{
+            BOOL value = [[NSUserDefaults standardUserDefaults] boolForKey:kDisplayClockKey];
+            [self setDisplayClock:value writeDefaults:NO];
+        },
+        kClockSecondsKey: ^{
+            BOOL value = [[NSUserDefaults standardUserDefaults] boolForKey:kClockSecondsKey];
+            [self setClockSeconds:value writeDefaults:NO];
+        },
+        kAnalogClockKey: ^{
+            BOOL value = [[NSUserDefaults standardUserDefaults] boolForKey:kAnalogClockKey];
+            [self setAnalogClock:value writeDefaults:NO];
+        },
+        kAnalogClockFullScreenKey: ^{
+            BOOL value = [[NSUserDefaults standardUserDefaults] boolForKey:kAnalogClockFullScreenKey];
+            [self setAnalogClockFullScreen:value writeDefaults:NO];
+        },
+        kWhiteBackgroundKey: ^{
+            BOOL value = [[NSUserDefaults standardUserDefaults] boolForKey:kWhiteBackgroundKey];
+            [self setWhiteBackground:value writeDefaults:NO];
+        }
+    };
+    
+    // Execute the corresponding block
+    void (^selectedBlock)(void) = cases[keyPath];
+    if (selectedBlock) {
+        if ([NSThread isMainThread]) {
+            selectedBlock();
+        } else {
+            dispatch_async(dispatch_get_main_queue(), ^{
+                selectedBlock();
+            });
+        }
     }
 }
 
