@@ -13,8 +13,8 @@ struct PreferencesView: View {
 
     var body: some View {
         VStack {
-            Section(header: Text("Screensaver Activation").font(.title)) {
-                Text("Delay before FrontRowTunes activates itself full-screen on inactivity.\nSet delay to 0 to disable automatic full-screen / activation.")
+            Section(header: Text("Screensaver Mode").font(.title)) {
+                Text("In screensaver mode, FrontRowTunes activates itself full-screen on inactivity.\nSet either delay to 0 to disable that screensaver mode condition.")
                     .font(.callout)
                 
                 Form {
@@ -22,7 +22,7 @@ struct PreferencesView: View {
                         Slider(value: $musicDelay, in: 0...300, step: 5) {
                             Text("Music Playback Delay: \(Int(musicDelay))s")
                         }
-                        Text("Time to wait while music is playing before entering full-screen.")
+                        Text("Time to wait while music is playing before entering screensaver mode.")
                             .font(.caption)
                             .foregroundColor(.secondary)
                     }
@@ -31,7 +31,7 @@ struct PreferencesView: View {
                         Slider(value: $clockDelay, in: 0...300, step: 5) {
                             Text("Clock Mode Delay: \(Int(clockDelay))s")
                         }
-                        Text("Time to wait in clock mode before entering full-screen.")
+                        Text("Time to wait in clock mode before entering screensaver mode.")
                             .font(.caption)
                             .foregroundColor(.secondary)
                     }
@@ -39,7 +39,7 @@ struct PreferencesView: View {
             }
         }
         .padding()
-        .frame(width: 450)
+        .frame(width: 480)
     }
 }
 
