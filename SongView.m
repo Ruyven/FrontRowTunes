@@ -29,6 +29,7 @@ static const NSTimeInterval kDefaultClockScreensaverDelay = 60.0;
 - (void)setClockSeconds:(BOOL)value;
 - (void)setClockSeconds:(BOOL)value writeDefaults:(BOOL)writeDefaults;
 - (BOOL)isWindowReady;
+- (void)applyDebouncedUserDefaultsUpdate:(NSString *)keyPath;
 @end
 
 @implementation SongView {
@@ -981,17 +982,9 @@ static const NSTimeInterval kDefaultClockScreensaverDelay = 60.0;
     
     // Simulate switch-case for NSString (not supported in Objective C)
     NSDictionary *cases = @{
-        kMusicScreensaverDelayKey: ^{
-            // Calling setDelegate again safely resets the timeout
-            // Note: the `change` dictionary is unreliable due to how user defaults are cached.
-            double musicDelay = [[NSUserDefaults standardUserDefaults] doubleForKey:kMusicScreensaverDelayKey];
-            [musicInactivityTracker setDelegate:self eventType:kCGAnyInputEventType timeout:musicDelay];
-        },
-        kClockScreensaverDelayKey: ^{
-            double clockDelay = [[NSUserDefaults standardUserDefaults] doubleForKey:kClockScreensaverDelayKey];
-            [clockInactivityTracker setDelegate:self eventType:kCGAnyInputEventType timeout:clockDelay];
-        },
         kDisplayPlayerPositionBarKey: ^{
+            // Note: the `change` dictionary is unreliable due to how user defaults are cached,
+            // so we read the value by key path instead.
             BOOL value = [[NSUserDefaults standardUserDefaults] boolForKey:kDisplayPlayerPositionBarKey];
             [self setDisplayPlayerPositionBar:value writeDefaults:NO];
         },
@@ -1031,6 +1024,29 @@ static const NSTimeInterval kDefaultClockScreensaverDelay = 60.0;
                 selectedBlock();
             });
         }
+        return;
+    }
+    
+    NSArray *debouncedCases = @[kMusicScreensaverDelayKey, kClockScreensaverDelayKey];
+
+    if ([debouncedCases containsObject:keyPath]) {
+        [NSObject cancelPreviousPerformRequestsWithTarget:self
+                                                 selector:@selector(applyDebouncedUserDefaultsUpdate:)
+                                                   object:keyPath];
+        [self performSelector:@selector(applyDebouncedUserDefaultsUpdate:)
+                   withObject:keyPath
+                   afterDelay:0.2];
+    }
+}
+
+- (void)applyDebouncedUserDefaultsUpdate:(NSString *)keyPath {
+    if ([keyPath isEqualToString:kMusicScreensaverDelayKey]) {
+        // Calling setDelegate again safely resets the timeout
+        double musicDelay = [[NSUserDefaults standardUserDefaults] doubleForKey:kMusicScreensaverDelayKey];
+        [musicInactivityTracker setDelegate:self eventType:kCGAnyInputEventType timeout:musicDelay];
+    } else if ([keyPath isEqualToString:kClockScreensaverDelayKey]) {
+        double clockDelay = [[NSUserDefaults standardUserDefaults] doubleForKey:kClockScreensaverDelayKey];
+        [clockInactivityTracker setDelegate:self eventType:kCGAnyInputEventType timeout:clockDelay];
     }
 }
 
