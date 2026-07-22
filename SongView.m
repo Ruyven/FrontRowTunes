@@ -138,7 +138,8 @@ static const NSTimeInterval kDefaultClockScreensaverDelay = 60.0;
     
     [[NSDistributedNotificationCenter defaultCenter] addObserver:self selector:@selector(getTrack:) name:@"com.apple.Music.playerInfo" object:nil];
     
-    updatePlayerPositionTimer = [NSTimer scheduledTimerWithTimeInterval:UPDATEINTERVAL target:self selector:@selector(updatePlayerPosition) userInfo:nil repeats:YES];
+    updatePlayerPositionTimer = [NSTimer timerWithTimeInterval:UPDATEINTERVAL target:self selector:@selector(updatePlayerPosition) userInfo:nil repeats:YES];
+    [[NSRunLoop mainRunLoop] addTimer:updatePlayerPositionTimer forMode:NSRunLoopCommonModes];
     [self updatePlayerPosition];
     
     double delay = [[NSUserDefaults standardUserDefaults] doubleForKey:kMusicScreensaverDelayKey];
@@ -295,7 +296,8 @@ static const NSTimeInterval kDefaultClockScreensaverDelay = 60.0;
         [CATransaction commit];
         
         
-        [NSTimer scheduledTimerWithTimeInterval:0.6 target:self selector:@selector(activateNewLayer) userInfo:nil repeats:NO];
+        NSTimer *activateNewLayerTimer = [NSTimer timerWithTimeInterval:0.6 target:self selector:@selector(activateNewLayer) userInfo:nil repeats:NO];
+        [[NSRunLoop mainRunLoop] addTimer:activateNewLayerTimer forMode:NSRunLoopCommonModes];
         allowScreenChange = NO;
         
         justChangedTrack = YES;
@@ -308,7 +310,8 @@ static const NSTimeInterval kDefaultClockScreensaverDelay = 60.0;
          NSLog(@"release");
          [changeTrackTimer release];
          }*/
-        changeTrackTimer = [NSTimer scheduledTimerWithTimeInterval:1 target:self selector:@selector(resetJustChangedTrack) userInfo:nil repeats:NO];
+        changeTrackTimer = [NSTimer timerWithTimeInterval:1 target:self selector:@selector(resetJustChangedTrack) userInfo:nil repeats:NO];
+        [[NSRunLoop mainRunLoop] addTimer:changeTrackTimer forMode:NSRunLoopCommonModes];
     }
 }
 
