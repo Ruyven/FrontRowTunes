@@ -220,11 +220,13 @@ class AnalogClockLayer: CALayer {
             return
         }
         
-        animationTimer = Timer.scheduledTimer(withTimeInterval: animationDuration, repeats: true) { [weak self] _ in
+        let timer = Timer(timeInterval: animationDuration, repeats: true) { [weak self] _ in
             guard let self = self else { return }
             self.setTime(self.getTime(timeIntervalSinceNow: animationDuration), animationDuration: animationDuration)
         }
-        animationTimer?.fire()
+        RunLoop.main.add(timer, forMode: .common)
+        timer.fire()
+        animationTimer = timer
     }
     
     private func getHourMinuteSecond(_ time: Double) -> (Double, Double, Double) {

@@ -17,10 +17,11 @@ static NSString * const kAnalogClockFullScreenKey = @"analogClockFullScreen";
 static NSString * const kWhiteBackgroundKey = @"whiteBackground";
 static NSString * const kHasShownTutorialKey = @"hasShownTutorial";
 
-static NSString * const kMusicScreensaverDelayKey = @"musicScreensaverDelay";
 static const NSTimeInterval kDefaultMusicScreensaverDelay = 60.0;
-static NSString * const kClockScreensaverDelayKey = @"clockScreensaverDelay";
 static const NSTimeInterval kDefaultClockScreensaverDelay = 60.0;
+
+#define kMusicScreensaverDelayKey [PrefKeys musicScreensaverDelay]
+#define kClockScreensaverDelayKey [PrefKeys clockScreensaverDelay]
 
 @interface SongView ()
 - (void)setAnalogClockFullScreen:(BOOL)value;
@@ -28,6 +29,7 @@ static const NSTimeInterval kDefaultClockScreensaverDelay = 60.0;
 - (void)setClockSeconds:(BOOL)value;
 - (void)setClockSeconds:(BOOL)value writeDefaults:(BOOL)writeDefaults;
 - (BOOL)isWindowReady;
+- (void)applyDebouncedUserDefaultsUpdate:(NSString *)keyPath;
 @end
 
 @implementation SongView {
@@ -136,7 +138,8 @@ static const NSTimeInterval kDefaultClockScreensaverDelay = 60.0;
     
     [[NSDistributedNotificationCenter defaultCenter] addObserver:self selector:@selector(getTrack:) name:@"com.apple.Music.playerInfo" object:nil];
     
-    updatePlayerPositionTimer = [NSTimer scheduledTimerWithTimeInterval:UPDATEINTERVAL target:self selector:@selector(updatePlayerPosition) userInfo:nil repeats:YES];
+    updatePlayerPositionTimer = [NSTimer timerWithTimeInterval:UPDATEINTERVAL target:self selector:@selector(updatePlayerPosition) userInfo:nil repeats:YES];
+    [[NSRunLoop mainRunLoop] addTimer:updatePlayerPositionTimer forMode:NSRunLoopCommonModes];
     [self updatePlayerPosition];
     
     double delay = [[NSUserDefaults standardUserDefaults] doubleForKey:kMusicScreensaverDelayKey];
@@ -293,7 +296,8 @@ static const NSTimeInterval kDefaultClockScreensaverDelay = 60.0;
         [CATransaction commit];
         
         
-        [NSTimer scheduledTimerWithTimeInterval:0.6 target:self selector:@selector(activateNewLayer) userInfo:nil repeats:NO];
+        NSTimer *activateNewLayerTimer = [NSTimer timerWithTimeInterval:0.6 target:self selector:@selector(activateNewLayer) userInfo:nil repeats:NO];
+        [[NSRunLoop mainRunLoop] addTimer:activateNewLayerTimer forMode:NSRunLoopCommonModes];
         allowScreenChange = NO;
         
         justChangedTrack = YES;
@@ -306,7 +310,8 @@ static const NSTimeInterval kDefaultClockScreensaverDelay = 60.0;
          NSLog(@"release");
          [changeTrackTimer release];
          }*/
-        changeTrackTimer = [NSTimer scheduledTimerWithTimeInterval:1 target:self selector:@selector(resetJustChangedTrack) userInfo:nil repeats:NO];
+        changeTrackTimer = [NSTimer timerWithTimeInterval:1 target:self selector:@selector(resetJustChangedTrack) userInfo:nil repeats:NO];
+        [[NSRunLoop mainRunLoop] addTimer:changeTrackTimer forMode:NSRunLoopCommonModes];
     }
 }
 
@@ -980,17 +985,9 @@ static const NSTimeInterval kDefaultClockScreensaverDelay = 60.0;
     
     // Simulate switch-case for NSString (not supported in Objective C)
     NSDictionary *cases = @{
-        kMusicScreensaverDelayKey: ^{
-            // Calling setDelegate again safely resets the timeout
-            // Note: the `change` dictionary is unreliable due to how user defaults are cached.
-            double musicDelay = [[NSUserDefaults standardUserDefaults] doubleForKey:kMusicScreensaverDelayKey];
-            [musicInactivityTracker setDelegate:self eventType:kCGAnyInputEventType timeout:musicDelay];
-        },
-        kClockScreensaverDelayKey: ^{
-            double clockDelay = [[NSUserDefaults standardUserDefaults] doubleForKey:kClockScreensaverDelayKey];
-            [clockInactivityTracker setDelegate:self eventType:kCGAnyInputEventType timeout:clockDelay];
-        },
         kDisplayPlayerPositionBarKey: ^{
+            // Note: the `change` dictionary is unreliable due to how user defaults are cached,
+            // so we read the value by key path instead.
             BOOL value = [[NSUserDefaults standardUserDefaults] boolForKey:kDisplayPlayerPositionBarKey];
             [self setDisplayPlayerPositionBar:value writeDefaults:NO];
         },
@@ -1030,6 +1027,29 @@ static const NSTimeInterval kDefaultClockScreensaverDelay = 60.0;
                 selectedBlock();
             });
         }
+        return;
+    }
+    
+    NSArray *debouncedCases = @[kMusicScreensaverDelayKey, kClockScreensaverDelayKey];
+
+    if ([debouncedCases containsObject:keyPath]) {
+        [NSObject cancelPreviousPerformRequestsWithTarget:self
+                                                 selector:@selector(applyDebouncedUserDefaultsUpdate:)
+                                                   object:keyPath];
+        [self performSelector:@selector(applyDebouncedUserDefaultsUpdate:)
+                   withObject:keyPath
+                   afterDelay:0.2];
+    }
+}
+
+- (void)applyDebouncedUserDefaultsUpdate:(NSString *)keyPath {
+    if ([keyPath isEqualToString:kMusicScreensaverDelayKey]) {
+        // Calling setDelegate again safely resets the timeout
+        double musicDelay = [[NSUserDefaults standardUserDefaults] doubleForKey:kMusicScreensaverDelayKey];
+        [musicInactivityTracker setDelegate:self eventType:kCGAnyInputEventType timeout:musicDelay];
+    } else if ([keyPath isEqualToString:kClockScreensaverDelayKey]) {
+        double clockDelay = [[NSUserDefaults standardUserDefaults] doubleForKey:kClockScreensaverDelayKey];
+        [clockInactivityTracker setDelegate:self eventType:kCGAnyInputEventType timeout:clockDelay];
     }
 }
 
