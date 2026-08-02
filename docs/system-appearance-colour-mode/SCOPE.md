@@ -53,16 +53,13 @@ This makes it possible to develop and test the new behavior without requiring th
 
 The final default can be reconsidered separately if necessary.
 
-### Migration
+### State Refactor Only
 
-Identify all existing uses of the current white-background Boolean and migrate them to the new enum.
+Identify all in-memory and rendering uses of the current white-background Boolean and replace them with the new enum/effective-appearance model.
 
-Existing behavior should map as follows:
+Step 1 should not read, write, migrate, or otherwise change user defaults. Persisted preference migration from the legacy `whiteBackground` key belongs to Step 3.
 
-- Existing `whiteBackground == true` → `light`
-- Existing `whiteBackground == false` → `dark`
-
-Avoid introducing separate Boolean state for System mode. There should be one authoritative appearance-mode value.
+Avoid introducing separate Boolean state for System mode. There should be one authoritative selected appearance-mode value.
 
 ### Important distinction
 
@@ -140,7 +137,12 @@ Ensure that observers do not accumulate if the relevant object is recreated or r
 
 Update user defaults: instead of storing a single boolean for `whiteBackground`, store the enum as an int.
 
-If `whiteBackground` is already set as true, default the new value to light mode (white background). Otherwise, set the new default value to dark mode (black background).
+If a legacy `whiteBackground` value exists, migrate it as follows:
+
+- `true` -> light mode (white background)
+- `false` -> dark mode (black background)
+
+If no legacy value exists, default the new value to System mode as specified in Step 1.
 
 ---
 

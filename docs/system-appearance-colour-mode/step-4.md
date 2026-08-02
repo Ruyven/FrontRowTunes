@@ -16,11 +16,11 @@ Modify the `keyDown:` method in `SongView.m` to detect the `S` key.
     // ... existing logic ...
     
     } else if ([character isEqualToString:@"w"]) {
-        [self setAppearanceMode:AppearanceModeLight];
+        [self setAppearanceMode:AppearanceModeLight writeDefaults:YES];
     } else if ([character isEqualToString:@"b"]) {
-        [self setAppearanceMode:AppearanceModeDark];
+        [self setAppearanceMode:AppearanceModeDark writeDefaults:YES];
     } else if ([character isEqualToString:@"s"]) {
-        [self setAppearanceMode:AppearanceModeSystem];
+        [self setAppearanceMode:AppearanceModeSystem writeDefaults:YES];
     }
     
     // ... existing logic ...
@@ -35,7 +35,7 @@ When the `S` hotkey is pressed, the app should:
 3. Re-calculate the `effectiveAppearance` based on the current system appearance.
 4. Update the UI if the `effectiveAppearance` changed.
 
-This behavior is already handled by the `setAppearanceMode:writeDefaults:` and `updateEffectiveAppearance` methods designed in Step 1 and Step 2.
+This behavior is already handled by the `setAppearanceMode:writeDefaults:` method added in Step 3 and the `updateEffectiveAppearance` method designed in Step 1 and Step 2.
 
 ## Verification Plan
 

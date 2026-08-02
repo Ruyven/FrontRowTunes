@@ -63,7 +63,7 @@ Replace `BOOL whiteBackground` with `EffectiveAppearance effectiveAppearance` in
 
 ### Initialization and Logic
 - In `awakeFromNib` (or `setupLayers`):
-    - Initialize `selectedAppearanceMode` to `AppearanceModeSystem` (hardcoded for this step; persistence will be added in Step 4).
+    - Initialize `selectedAppearanceMode` to `AppearanceModeSystem` in memory only (hardcoded for this step; persistence will be added in Step 3).
     - Call `updateEffectiveAppearance`.
 - Implementation of `updateEffectiveAppearance`:
     - If `selectedAppearanceMode` is `light` -> `effectiveAppearance = light`.
@@ -85,5 +85,4 @@ Replace `BOOL whiteBackground` with `EffectiveAppearance effectiveAppearance` in
 - [ ] Verify that the app defaults to Dark mode (as `AppearanceModeSystem` currently fallbacks to Dark).
 - [ ] Verify that pressing `W` switches the app to Light mode immediately.
 - [ ] Verify that pressing `B` switches the app to Dark mode immediately.
-- [ ] **Note:** Persistence and migration will be verified in Step 4.
-
+- [ ] **Note:** Step 1 should not read, write, or migrate user defaults. Persistence and migration will be verified in Step 3.

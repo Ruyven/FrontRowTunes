@@ -58,8 +58,43 @@ Update the initialization flow to call the migration and then load the authorita
 
 ```objc
 [self migrateAppearanceDefaults];
-AppearanceMode savedMode = (AppearanceMode)[[NSUserDefaults standardUserDefaults] integerValueForKey:kAppearanceModeKey];
+AppearanceMode savedMode = (AppearanceMode)[[NSUserDefaults standardUserDefaults] integerForKey:kAppearanceModeKey];
 [self setAppearanceMode:savedMode writeDefaults:NO];
+```
+
+## 4. Persist Explicit User Changes
+
+Update the appearance setter so callers can choose whether the selected mode should be written to `NSUserDefaults`.
+
+### Changes in SongView.h
+
+```objc
+- (void)setAppearanceMode:(AppearanceMode)mode writeDefaults:(BOOL)writeDefaults;
+```
+
+### Changes in SongView.m
+
+Rename the Step 1 implementation of `setAppearanceMode:` to `setAppearanceMode:writeDefaults:` and write the selected mode only when requested.
+
+```objc
+- (void)setAppearanceMode:(AppearanceMode)mode writeDefaults:(BOOL)writeDefaults {
+    selectedAppearanceMode = mode;
+    
+    if (writeDefaults) {
+        [[NSUserDefaults standardUserDefaults] setInteger:mode forKey:kAppearanceModeKey];
+    }
+    
+    [self updateEffectiveAppearance];
+}
+```
+
+Use `writeDefaults:NO` when loading persisted state during initialization or responding to defaults observation. User-initiated changes, such as hotkeys added in later steps, should use `writeDefaults:YES`.
+
+Update any existing direct calls from Step 1 to use the new signature. The `W` and `B` hotkeys are user-initiated changes, so they should persist:
+
+```objc
+[self setAppearanceMode:AppearanceModeLight writeDefaults:YES];
+[self setAppearanceMode:AppearanceModeDark writeDefaults:YES];
 ```
 
 ## Verification Plan
