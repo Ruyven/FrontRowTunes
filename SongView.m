@@ -29,6 +29,8 @@ static const NSTimeInterval kDefaultClockScreensaverDelay = 60.0;
 - (void)setClockSeconds:(BOOL)value writeDefaults:(BOOL)writeDefaults;
 - (BOOL)isWindowReady;
 - (void)applyDebouncedUserDefaultsUpdate:(NSString *)keyPath;
+- (EffectiveAppearance)currentSystemAppearance;
+- (void)updateEffectiveAppearance;
 @end
 
 @implementation SongView {
@@ -52,6 +54,7 @@ static const NSTimeInterval kDefaultClockScreensaverDelay = 60.0;
     int keyCode;
     int hasShownTutorial; // Use int in case we add more tutorial versions later
     AppearanceMode selectedAppearanceMode;
+    // FIXME: this shadows the view's public `effectiveAppearance` property and creates a dangerous inconsistency
     EffectiveAppearance effectiveAppearance;
     BOOL infoLayerOn;
     
@@ -106,7 +109,7 @@ static const NSTimeInterval kDefaultClockScreensaverDelay = 60.0;
     [[NSUserDefaults standardUserDefaults] registerDefaults:defaults];
     
     selectedAppearanceMode = AppearanceModeSystem;
-    effectiveAppearance = EffectiveAppearanceDark;
+    effectiveAppearance = [self currentSystemAppearance];
     
     playerPosition = [MusicBridge getPlayerPosition];
     
@@ -545,6 +548,18 @@ static const NSTimeInterval kDefaultClockScreensaverDelay = 60.0;
     }
 }
 
+- (EffectiveAppearance)currentSystemAppearance {
+    // System dark mode was introduced in 10.14 - currently we will always hit this path,
+    // because the minimum deployment target is macOS 11.
+    if (@available(macOS 10.14, *)) {
+        NSAppearanceName appearance = [NSApp.effectiveAppearance bestMatchFromAppearancesWithNames:@[NSAppearanceNameAqua, NSAppearanceNameDarkAqua]];
+        if ([appearance isEqualToString:NSAppearanceNameDarkAqua]) {
+            return EffectiveAppearanceDark;
+        }
+    }
+    return EffectiveAppearanceLight;
+}
+
 - (void)updateEffectiveAppearance {
     EffectiveAppearance newEffectiveAppearance;
     
@@ -557,13 +572,21 @@ static const NSTimeInterval kDefaultClockScreensaverDelay = 60.0;
             break;
         case AppearanceModeSystem:
         default:
-            newEffectiveAppearance = EffectiveAppearanceDark;
+            newEffectiveAppearance = [self currentSystemAppearance];
             break;
     }
     
     if (effectiveAppearance != newEffectiveAppearance) {
         effectiveAppearance = newEffectiveAppearance;
         [self applyAppearanceChanges];
+    }
+}
+
+- (void)viewDidChangeEffectiveAppearance {
+    [super viewDidChangeEffectiveAppearance];
+    
+    if (selectedAppearanceMode == AppearanceModeSystem) {
+        [self updateEffectiveAppearance];
     }
 }
 
