@@ -7,15 +7,16 @@
 //
 
 #import <Cocoa/Cocoa.h>
+#import "FrontRowTunes-Swift.h"
 
 @interface CoverLayer : CALayer {
-	CIImage *coverImage;
-	BOOL whiteBackground;
+    CIImage *coverImage;
+    EffectiveAppearance effectiveAppearance;
     CGColorSpaceRef colorSpace;
 }
 
 - (void)setCoverImageWithData:(NSData *)data;
 
-@property BOOL whiteBackground;
+@property EffectiveAppearance effectiveAppearance;
 
 @end

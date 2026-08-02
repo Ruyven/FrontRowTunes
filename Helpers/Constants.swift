@@ -17,3 +17,13 @@ import AppKit
     @objc static let clockScreensaverDelay = "clockScreensaverDelay"
 }
 
+@objc public enum AppearanceMode: Int {
+    case light = 0
+    case dark = 1
+    case system = 2
+}
+
+@objc public enum EffectiveAppearance: Int {
+    case light = 0
+    case dark = 1
+}

@@ -30,7 +30,7 @@
     MusicTrack *track;
     BOOL coverExists;
     
-    BOOL whiteBackground;
+    EffectiveAppearance effectiveAppearance;
     NSColor *backgroundColor;
     NSColor *foregroundColor;
     NSColor *lightForegroundColor;
@@ -46,7 +46,7 @@
     BOOL displayPlayerPositionBar, displayPlayerPositionLabel, displayClock, clockSeconds;
 }
 
-- (id)initWithFrame:(CGRect)frame whiteBackground:(BOOL)white;
+- (id)initWithFrame:(CGRect)frame effectiveAppearance:(EffectiveAppearance)appearance;
 
 - (BOOL)isSplashScreen;
 - (void)updateWithDuration:(CGFloat)duration;
@@ -54,7 +54,7 @@
 
 @property (nonatomic, strong) MusicTrack *track;
 @property (nonatomic, strong) NSString *loadingMessage;
-@property (nonatomic) BOOL whiteBackground;
+@property (nonatomic) EffectiveAppearance effectiveAppearance;
 @property (nonatomic) int playerPosition;
 @property (nonatomic) NSString *playerState;
 @property BOOL displayPlayerPositionBar, displayPlayerPositionLabel, displayClock, clockSeconds;

@@ -14,7 +14,6 @@ static NSString * const kDisplayClockKey = @"displayClock";
 static NSString * const kClockSecondsKey = @"clockSeconds";
 static NSString * const kAnalogClockKey = @"analogClock";
 static NSString * const kAnalogClockFullScreenKey = @"analogClockFullScreen";
-static NSString * const kWhiteBackgroundKey = @"whiteBackground";
 static NSString * const kHasShownTutorialKey = @"hasShownTutorial";
 
 static const NSTimeInterval kDefaultMusicScreensaverDelay = 60.0;
@@ -52,7 +51,8 @@ static const NSTimeInterval kDefaultClockScreensaverDelay = 60.0;
     
     int keyCode;
     int hasShownTutorial; // Use int in case we add more tutorial versions later
-    BOOL whiteBackground;
+    AppearanceMode selectedAppearanceMode;
+    EffectiveAppearance effectiveAppearance;
     BOOL infoLayerOn;
     
     double playerPosition;
@@ -64,7 +64,7 @@ static const NSTimeInterval kDefaultClockScreensaverDelay = 60.0;
     
     BOOL analogClockRequested;
     BOOL playbackRequested, nextTrackRequested;
-
+    
     LastEventTracker *musicInactivityTracker;
     LastEventTracker *clockInactivityTracker;
     LastEventTracker *mouseHideTracker;
@@ -100,18 +100,19 @@ static const NSTimeInterval kDefaultClockScreensaverDelay = 60.0;
         kClockSecondsKey: @YES,
         kAnalogClockKey: @YES,
         kAnalogClockFullScreenKey: @NO,
-        kWhiteBackgroundKey: @NO,
         kMusicScreensaverDelayKey: @(kDefaultMusicScreensaverDelay),
         kClockScreensaverDelayKey: @(kDefaultClockScreensaverDelay)
     };
     [[NSUserDefaults standardUserDefaults] registerDefaults:defaults];
     
+    selectedAppearanceMode = AppearanceModeSystem;
+    effectiveAppearance = EffectiveAppearanceDark;
+    
     playerPosition = [MusicBridge getPlayerPosition];
     
     [self setupLayers];
+    [self applyAppearanceChanges];
     
-    // Restore settings from NSUserDefaults
-    [self setWhiteBackground:[[NSUserDefaults standardUserDefaults] boolForKey:kWhiteBackgroundKey] writeDefaults:NO];
     [self setClockSeconds:[[NSUserDefaults standardUserDefaults] boolForKey:kClockSecondsKey] writeDefaults:NO];
     [self setDisplayClock:[[NSUserDefaults standardUserDefaults] boolForKey:kDisplayClockKey] writeDefaults:NO];
     [self setAnalogClock:[[NSUserDefaults standardUserDefaults] boolForKey:kAnalogClockKey] writeDefaults:NO];
@@ -157,14 +158,15 @@ static const NSTimeInterval kDefaultClockScreensaverDelay = 60.0;
 }
 
 - (void)setupLayers {
-    CGColorRef bgColor = whiteBackground ? CGColorCreateGenericRGB(1, 1, 1, 1) : CGColorCreateGenericRGB(0, 0, 0, 1);
+    BOOL darkMode = (effectiveAppearance == EffectiveAppearanceDark);
+    CGColorRef bgColor = darkMode ? CGColorCreateGenericRGB(0, 0, 0, 1) : CGColorCreateGenericRGB(1, 1, 1, 1);
     
     rootLayer = [CALayer layer];
     [rootLayer setBackgroundColor:bgColor];
     [self setLayer:rootLayer];
     [self setWantsLayer:YES];
     
-    activeSongLayer = [[SongLayer alloc] initWithFrame:[self frame] whiteBackground:whiteBackground];
+    activeSongLayer = [[SongLayer alloc] initWithFrame:[self frame] effectiveAppearance:effectiveAppearance];
     activeSongLayer.playerPosition = playerPosition;
     [activeSongLayer setPlayerState:[MusicBridge getPlayerState]];
     activeSongLayer.displayPlayerPositionBar = displayPlayerPositionBar;
@@ -193,9 +195,10 @@ static const NSTimeInterval kDefaultClockScreensaverDelay = 60.0;
 
 - (void)setUpAnalogClockIfNeeded {
     if (!clock && analogClock && displayClock) {
-        clock = [[AnalogClockLayer alloc] initWithDarkMode:!whiteBackground];
+        BOOL darkMode = (effectiveAppearance == EffectiveAppearanceDark);
+        clock = [[AnalogClockLayer alloc] initWithDarkMode:darkMode];
         if (activeSongLayer.track) {
-            clock.tintColor = [activeSongLayer.track tintColorWithDarkMode:!whiteBackground strongAdjustment:true];
+            clock.tintColor = [activeSongLayer.track tintColorWithDarkMode:darkMode strongAdjustment:true];
         } else {
             clock.tintColor = [NSColor defaultTintColor];
         }
@@ -273,7 +276,7 @@ static const NSTimeInterval kDefaultClockScreensaverDelay = 60.0;
         [CATransaction begin];
         [CATransaction setValue:(id)kCFBooleanTrue forKey:kCATransactionDisableActions];
         
-        activeSongLayer = [[SongLayer alloc] initWithFrame:[self frame] whiteBackground:whiteBackground];
+        activeSongLayer = [[SongLayer alloc] initWithFrame:[self frame] effectiveAppearance:effectiveAppearance];
         //	[activeSongLayer setBackgroundColor:CGColorCreateGenericRGB(0, 0, 1, 1)];
         // auto-resize activeSongLayer as the view is resized
         [activeSongLayer setAutoresizingMask:kCALayerWidthSizable | kCALayerHeightSizable];
@@ -328,11 +331,12 @@ static const NSTimeInterval kDefaultClockScreensaverDelay = 60.0;
 
 - (void)updateClockColor {
     if (clock) {
+        BOOL darkMode = (effectiveAppearance == EffectiveAppearanceDark);
         if (currentTrack != nil) {
-            clock.tintColor = [currentTrack tintColorWithDarkMode:!whiteBackground strongAdjustment:true];
+            clock.tintColor = [currentTrack tintColorWithDarkMode:darkMode strongAdjustment:true];
         }
         NSLog(@"analog clock tint color: %@", clock.tintColor);
-        clock.darkMode = !whiteBackground;
+        clock.darkMode = darkMode;
     }
 }
 
@@ -517,33 +521,57 @@ static const NSTimeInterval kDefaultClockScreensaverDelay = 60.0;
     [self setDisplayClock:value writeDefaults:true];
 }
 
-- (void)setWhiteBackground:(BOOL)value writeDefaults:(BOOL)writeDefaults {
-    if (whiteBackground == value) return;
+- (void)applyAppearanceChanges {
+    BOOL darkMode = (effectiveAppearance == EffectiveAppearanceDark);
     
-    whiteBackground = value;
-    if (writeDefaults) {
-        [[NSUserDefaults standardUserDefaults] setBool:value forKey:kWhiteBackgroundKey];
+    if (rootLayer) {
+        [CATransaction begin];
+        [CATransaction setValue:@0.5f forKey:kCATransactionAnimationDuration];
+        
+        CGColorRef bgColor = darkMode ? CGColorCreateGenericRGB(0, 0, 0, 1) : CGColorCreateGenericRGB(1, 1, 1, 1);
+        [rootLayer setBackgroundColor:bgColor];
+        CGColorRelease(bgColor);
     }
     
-    [CATransaction begin];
-    [CATransaction setValue:@0.5f forKey:kCATransactionAnimationDuration];
-    
-    CGColorRef bgColor = value ? CGColorCreateGenericRGB(1, 1, 1, 1) : CGColorCreateGenericRGB(0, 0, 0, 1);
-    [rootLayer setBackgroundColor:bgColor];
-    CGColorRelease(bgColor);
-    
     if (activeSongLayer) {
-        [activeSongLayer setWhiteBackground:value];
+        [activeSongLayer setEffectiveAppearance:effectiveAppearance];
         [activeSongLayer updateWithDuration:0.5];
     }
     
     [self updateClockColorWithDuration:0.5];
     
-    [CATransaction commit];
+    if (rootLayer) {
+        [CATransaction commit];
+    }
 }
 
-- (void)setWhiteBackground:(BOOL)value {
-    [self setWhiteBackground:value writeDefaults:true];
+- (void)updateEffectiveAppearance {
+    EffectiveAppearance newEffectiveAppearance;
+    
+    switch (selectedAppearanceMode) {
+        case AppearanceModeLight:
+            newEffectiveAppearance = EffectiveAppearanceLight;
+            break;
+        case AppearanceModeDark:
+            newEffectiveAppearance = EffectiveAppearanceDark;
+            break;
+        case AppearanceModeSystem:
+        default:
+            newEffectiveAppearance = EffectiveAppearanceDark;
+            break;
+    }
+    
+    if (effectiveAppearance != newEffectiveAppearance) {
+        effectiveAppearance = newEffectiveAppearance;
+        [self applyAppearanceChanges];
+    }
+}
+
+- (void)setAppearanceMode:(AppearanceMode)mode {
+    if (selectedAppearanceMode == mode) return;
+    
+    selectedAppearanceMode = mode;
+    [self updateEffectiveAppearance];
 }
 
 - (void)setAnalogClockFullScreen:(BOOL)value writeDefaults:(BOOL)writeDefaults {
@@ -703,19 +731,19 @@ static const NSTimeInterval kDefaultClockScreensaverDelay = 60.0;
     NSString *character = [event characters];
     NSString *charactersIgnoringModifiers = [event charactersIgnoringModifiers];
     NSEventModifierFlags modifierFlags = [event modifierFlags];
-	int characterInt = [character intValue];
-	keyCode = [event keyCode];
-	
-	if (characterInt >= 1 && characterInt <= 9) {
-		int screen = characterInt - 1;
-		NSArray *screenArray = [NSScreen screens];
-		if (allowScreenChange && screen < [screenArray count]) {
-			// screen change is not allowed when the song is changed, otherwise the new songLayer would be too small
-			
-			// if animate is YES, you can see the window resize over to the other display
-			[self.window setFrame:[screenArray[screen] frame] display:YES animate:YES];
-		}
-	} else if ([character isEqualToString:@" "]) {
+    int characterInt = [character intValue];
+    keyCode = [event keyCode];
+    
+    if (characterInt >= 1 && characterInt <= 9) {
+        int screen = characterInt - 1;
+        NSArray *screenArray = [NSScreen screens];
+        if (allowScreenChange && screen < [screenArray count]) {
+            // screen change is not allowed when the song is changed, otherwise the new songLayer would be too small
+            
+            // if animate is YES, you can see the window resize over to the other display
+            [self.window setFrame:[screenArray[screen] frame] display:YES animate:YES];
+        }
+    } else if ([character isEqualToString:@" "]) {
         if (activeSongLayer.isSplashScreen) {
             activeSongLayer.loadingMessage = @"Starting playback...";
             [activeSongLayer updateWithDuration:.2];
@@ -725,7 +753,7 @@ static const NSTimeInterval kDefaultClockScreensaverDelay = 60.0;
         } else {
             [self handlePlaybackRequest];
         }
-	} else if ([charactersIgnoringModifiers isEqualToString:@"t"] || [charactersIgnoringModifiers isEqualToString:@"T"]) {
+    } else if ([charactersIgnoringModifiers isEqualToString:@"t"] || [charactersIgnoringModifiers isEqualToString:@"T"]) {
         if ((modifierFlags & NSEventModifierFlagOption) != 0) {
             [self toggleAnalogClockFullScreen];
         } else if ([character isEqualToString:@"T"]) {
@@ -761,9 +789,9 @@ static const NSTimeInterval kDefaultClockScreensaverDelay = 60.0;
 //		[NSTimer 
 		// 123 = previous, 124 = next
 //		[MusicBridge backTrack];
-	} else if (keyCode == 123) {
+    } else if (keyCode == 123) {
         // left arrow
-		if (activeSongLayer.isSplashScreen) {
+        if (activeSongLayer.isSplashScreen) {
             activeSongLayer.loadingMessage = @"No previous track";
             [activeSongLayer updateWithDuration:.2];
             [NSTimer scheduledTimerWithTimeInterval:2.0 target:self selector:@selector(resetLoadingMessage) userInfo:nil repeats:NO];
@@ -771,9 +799,9 @@ static const NSTimeInterval kDefaultClockScreensaverDelay = 60.0;
             self.prevTrack = YES;
             [MusicBridge backTrack];
         }
-	} else if (keyCode == 124) {
+    } else if (keyCode == 124) {
         // right arrow
-		if (activeSongLayer.isSplashScreen) {
+        if (activeSongLayer.isSplashScreen) {
             activeSongLayer.loadingMessage = @"Loading next track...";
             [activeSongLayer updateWithDuration:.2];
         }
@@ -783,11 +811,9 @@ static const NSTimeInterval kDefaultClockScreensaverDelay = 60.0;
         } else {
             [self handleNextTrackRequest];
         }
-	} else if ([character isEqualToString:@"q"] || [character isEqualToString:@"Q"]) {
-		[NSApp terminate:self];
-/*	} else if ([character isEqualToString:@"h"]) {
-		[NSApp hide:self]; // doesn't seem to work.*/
-	} else if (keyCode == 36) {			// Return
+    } else if ([character isEqualToString:@"q"] || [character isEqualToString:@"Q"]) {
+        [NSApp terminate:self];
+    } else if (keyCode == 36) {			// Return
         if (!displayPlayerPositionBar && !displayPlayerPositionLabel) {
             [self setDisplayPlayerPositionBar:true];
         } else if (displayPlayerPositionBar && !displayPlayerPositionLabel) {
@@ -810,9 +836,9 @@ static const NSTimeInterval kDefaultClockScreensaverDelay = 60.0;
         [activeSongLayer setDisplayPlayerPositionLabel:displayPlayerPositionLabel];
         [activeSongLayer updateWithDuration:.5];
     } else if ([character isEqualToString:@"w"]) {
-        [self setWhiteBackground:YES];
+        [self setAppearanceMode:AppearanceModeLight];
     } else if ([character isEqualToString:@"b"]) {
-        [self setWhiteBackground:NO];
+        [self setAppearanceMode:AppearanceModeDark];
     } else if ([character isEqualToString:@"f"] || (keyCode == 53 && [self isWindowFullScreen])) {
         // esc quits out of fullscreen
         [self.window toggleFullScreen:self];
@@ -1010,10 +1036,6 @@ static const NSTimeInterval kDefaultClockScreensaverDelay = 60.0;
         kAnalogClockFullScreenKey: ^{
             BOOL value = [[NSUserDefaults standardUserDefaults] boolForKey:kAnalogClockFullScreenKey];
             [self setAnalogClockFullScreen:value writeDefaults:NO];
-        },
-        kWhiteBackgroundKey: ^{
-            BOOL value = [[NSUserDefaults standardUserDefaults] boolForKey:kWhiteBackgroundKey];
-            [self setWhiteBackground:value writeDefaults:NO];
         }
     };
     
@@ -1031,7 +1053,7 @@ static const NSTimeInterval kDefaultClockScreensaverDelay = 60.0;
     }
     
     NSArray *debouncedCases = @[kMusicScreensaverDelayKey, kClockScreensaverDelayKey];
-
+    
     if ([debouncedCases containsObject:keyPath]) {
         [NSObject cancelPreviousPerformRequestsWithTarget:self
                                                  selector:@selector(applyDebouncedUserDefaultsUpdate:)
