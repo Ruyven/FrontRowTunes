@@ -2,7 +2,7 @@
 
 ## Objective
 
-Replace the existing `whiteBackground` Boolean state with an enum representing all three appearance modes: Light, Dark, and System.
+Replace the existing `whiteBackground` Boolean state with an enum representing all three appearance modes: Light, Dark, and System. This step focuses on the architectural refactor and rendering logic.
 
 ## 1. Define Enums in Swift
 
@@ -52,37 +52,38 @@ Replace `BOOL whiteBackground` with `EffectiveAppearance effectiveAppearance` in
 
 ## 3. Update SongView (Main Controller View)
 
+### State Refactor
 - **SongView.h/m**:
-    - Define a new constant for the appearance mode key: `static NSString * const kAppearanceModeKey = @"appearanceMode";`.
-    - Replace the `BOOL whiteBackground` instance variable with `AppearanceMode selectedAppearanceMode` and `EffectiveAppearance effectiveAppearance`.
+    - Replace the `BOOL whiteBackground` instance variable with:
+        - `AppearanceMode selectedAppearanceMode`
+        - `EffectiveAppearance effectiveAppearance`
     - Rename/Update methods:
-        - `- (void)setAppearanceMode:(AppearanceMode)mode writeDefaults:(BOOL)writeDefaults;`
+        - `- (void)setAppearanceMode:(AppearanceMode)mode;`
         - `- (void)updateEffectiveAppearance;`
-    - In `awakeFromNib`:
-        - Register the default for `kAppearanceModeKey` as `AppearanceModeSystem` (2).
-        - Implement migration logic: If `kAppearanceModeKey` is not set in `NSUserDefaults`, check the old `kWhiteBackgroundKey`. If it exists, map `YES` to `AppearanceModeLight` and `NO` to `AppearanceModeDark`.
-        - Load the initial `selectedAppearanceMode`.
-    - Implementation of `updateEffectiveAppearance`:
-        - If `selectedAppearanceMode` is `light` -> `effectiveAppearance = light`.
-        - If `selectedAppearanceMode` is `dark` -> `effectiveAppearance = dark`.
-        - If `selectedAppearanceMode` is `system` -> fallback to `dark` (or perform a static check) for now. **Note:** Full dynamic detection and observation will be implemented in Step 2.
-    - Implementation of `setAppearanceMode:writeDefaults:`:
-        - Update `selectedAppearanceMode`.
-        - Write to `NSUserDefaults` if requested.
-        - Call `updateEffectiveAppearance`.
-        - Update `rootLayer.backgroundColor` based on `effectiveAppearance`.
-        - Pass `effectiveAppearance` to `activeSongLayer` and `lastSongLayer`.
-        - Update `clock.darkMode` and `clock.tintColor` based on `effectiveAppearance`.
-    - Update `keyDown:`:
-        - Map `w` to `[self setAppearanceMode:AppearanceModeLight]`.
-        - Map `b` to `[self setAppearanceMode:AppearanceModeDark]`.
-    - Update `applyDebouncedUserDefaultsUpdate:` to handle the new `kAppearanceModeKey`.
+
+### Initialization and Logic
+- In `awakeFromNib` (or `setupLayers`):
+    - Initialize `selectedAppearanceMode` to `AppearanceModeSystem` (hardcoded for this step; persistence will be added in Step 4).
+    - Call `updateEffectiveAppearance`.
+- Implementation of `updateEffectiveAppearance`:
+    - If `selectedAppearanceMode` is `light` -> `effectiveAppearance = light`.
+    - If `selectedAppearanceMode` is `dark` -> `effectiveAppearance = dark`.
+    - If `selectedAppearanceMode` is `system` -> fallback to `dark` for now (full system detection is Step 2).
+- Implementation of `setAppearanceMode:`:
+    - Update `selectedAppearanceMode`.
+    - Call `updateEffectiveAppearance`.
+    - Update `rootLayer.backgroundColor` based on `effectiveAppearance`.
+    - Pass `effectiveAppearance` to `activeSongLayer` and `lastSongLayer`.
+    - Update `clock.darkMode` and `clock.tintColor` based on `effectiveAppearance`.
+- Update `keyDown:`:
+    - Map `w` to `[self setAppearanceMode:AppearanceModeLight]`.
+    - Map `b` to `[self setAppearanceMode:AppearanceModeDark]`.
 
 ## Verification Plan
 
 - [ ] Build and run the app.
-- [ ] Verify that the app defaults to Dark mode (if `AppearanceModeSystem` fallbacks to Dark).
+- [ ] Verify that the app defaults to Dark mode (as `AppearanceModeSystem` currently fallbacks to Dark).
 - [ ] Verify that pressing `W` switches the app to Light mode immediately.
 - [ ] Verify that pressing `B` switches the app to Dark mode immediately.
-- [ ] Verify that restarting the app persists the manual `Light` or `Dark` selection.
-- [ ] Verify that the migration from an old `whiteBackground` boolean works as expected.
+- [ ] **Note:** Persistence and migration will be verified in Step 4.
+
