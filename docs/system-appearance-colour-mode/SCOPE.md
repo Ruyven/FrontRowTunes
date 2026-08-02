@@ -21,6 +21,14 @@ The existing `W` and `B` hotkeys should continue to select their respective manu
 
 ---
 
+## Implementation Plan
+
+Follow the plan laid out in the implementation files `step-1.md`-`step-5.md`.
+
+Before starting a new step, review the implementation file against the new code. If inconsistencies are found, update the implementation file before starting implementation.
+
+---
+
 ## Step 1 — Replace the current white-background Boolean with an Appearance Mode Enum
 
 ### Objective
@@ -128,7 +136,15 @@ Ensure that observers do not accumulate if the relevant object is recreated or r
 
 ---
 
-## Step 3 — Add the `S` Hotkey for System Mode
+## Step 3 — Default colour scheme and user defaults
+
+Update user defaults: instead of storing a single boolean for `whiteBackground`, store the enum as an int.
+
+If `whiteBackground` is already set as true, default the new value to light mode (white background). Otherwise, set the new default value to dark mode (black background).
+
+---
+
+## Step 4 — Add the `S` Hotkey for System Mode
 
 ### Objective
 
@@ -171,14 +187,6 @@ Do not change the existing semantics of:
 - `B`
 
 They should continue to directly select the corresponding manual appearance modes.
-
----
-
-## Step 4 — Default colour scheme and user defaults
-
-Update user defaults: instead of storing a single boolean for `whiteBackground`, store the enum as an int.
-
-If `whiteBackground` is already set as true, default the new value to light mode (white background). Otherwise, set the new default value to dark mode (black background).
 
 ---
 

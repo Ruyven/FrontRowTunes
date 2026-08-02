@@ -1,70 +1,50 @@
-# Implementation Plan: Step 4 — Default Colour Scheme and User Defaults
+# Implementation Plan: Step 4 — Add the `S` Hotkey for System Mode
 
 ## Objective
 
-Update the persistence layer to store the appearance mode as an integer enum instead of a boolean, and implement a migration path for existing users.
+Add a new keyboard shortcut `S` to select the System appearance mode.
 
-## 1. Update User Defaults Keys and Registration
+## 1. Update Hotkey Handling in SongView
 
-In `SongView.m`, define the new key and update the default values registration.
+Modify the `keyDown:` method in `SongView.m` to detect the `S` key.
 
 ### Changes in SongView.m
 
 ```objc
-static NSString * const kAppearanceModeKey = @"appearanceMode";
-
-// Inside awakeFromNib
-NSDictionary *defaults = @{
-    // ... other defaults ...
-    kAppearanceModeKey: @(AppearanceModeSystem), // Default to System for new users
-    // kWhiteBackgroundKey: @NO // Keep for migration or remove after migration is verified
-};
-[[NSUserDefaults standardUserDefaults] registerDefaults:defaults];
-```
-
-## 2. Implement Migration Logic
-
-When the app launches, check if the new `appearanceMode` key exists. If not, perform migration from the legacy `whiteBackground` boolean.
-
-### Migration Code in SongView.m
-
-```objc
-- (void)migrateAppearanceDefaults {
-    NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
+- (void)keyDown:(NSEvent *)event {
+    NSString *character = [event charactersIgnoringModifiers];
+    // ... existing logic ...
     
-    // If the new key is already set, no migration needed
-    if ([defaults objectForKey:kAppearanceModeKey] != nil) {
-        return;
+    } else if ([character isEqualToString:@"w"]) {
+        [self setAppearanceMode:AppearanceModeLight];
+    } else if ([character isEqualToString:@"b"]) {
+        [self setAppearanceMode:AppearanceModeDark];
+    } else if ([character isEqualToString:@"s"]) {
+        [self setAppearanceMode:AppearanceModeSystem];
     }
     
-    // Check if the legacy key exists
-    if ([defaults objectForKey:kWhiteBackgroundKey] != nil) {
-        BOOL oldWhite = [defaults boolForKey:kWhiteBackgroundKey];
-        AppearanceMode migratedMode = oldWhite ? AppearanceModeLight : AppearanceModeDark;
-        [defaults setInteger:migratedMode forKey:kAppearanceModeKey];
-        
-        // Optionally remove the legacy key to clean up
-        // [defaults removeObjectForKey:kWhiteBackgroundKey];
-    } else {
-        // No legacy setting found, ensure it defaults to System
-        [defaults setInteger:AppearanceModeSystem forKey:kAppearanceModeKey];
-    }
+    // ... existing logic ...
 }
 ```
 
-## 3. Load Persistent State
+## 2. Verify Immediate Effect
 
-Update the initialization flow to call the migration and then load the authoritative `appearanceMode`.
+When the `S` hotkey is pressed, the app should:
+1. Update `selectedAppearanceMode` to `AppearanceModeSystem`.
+2. Save the change to `NSUserDefaults`.
+3. Re-calculate the `effectiveAppearance` based on the current system appearance.
+4. Update the UI if the `effectiveAppearance` changed.
 
-```objc
-[self migrateAppearanceDefaults];
-AppearanceMode savedMode = (AppearanceMode)[[NSUserDefaults standardUserDefaults] integerValueForKey:kAppearanceModeKey];
-[self setAppearanceMode:savedMode writeDefaults:NO];
-```
+This behavior is already handled by the `setAppearanceMode:writeDefaults:` and `updateEffectiveAppearance` methods designed in Step 1 and Step 2.
 
 ## Verification Plan
 
-- [ ] **Fresh Install:** Delete app preferences (`defaults delete com.yourcompany.FrontRowTunes`). Launch the app and verify it defaults to System mode.
-- [ ] **Migration (Light):** Set the old preference: `defaults write com.yourcompany.FrontRowTunes whiteBackground -bool YES`. Launch the app and verify it starts in Light mode and `appearanceMode` is now set to `0` (Light).
-- [ ] **Migration (Dark):** Set the old preference: `defaults write com.yourcompany.FrontRowTunes whiteBackground -bool NO`. Launch the app and verify it starts in Dark mode and `appearanceMode` is now set to `1` (Dark).
-- [ ] **Persistence:** Change mode via hotkey (e.g., press `B` for Dark). Relaunch the app and verify it stays in Dark mode.
+- [ ] Launch the app.
+- [ ] Press `W` -> verify Light mode.
+- [ ] Press `B` -> verify Dark mode.
+- [ ] Set macOS appearance to Dark.
+- [ ] Press `S` -> verify the app immediately switches to Dark mode.
+- [ ] Change macOS appearance to Light.
+- [ ] Verify the app switches to Light mode automatically.
+- [ ] Press `B` -> verify the app switches to Dark mode and stops following system changes.
+- [ ] Press `S` -> verify the app resumes following system changes (switches to Light).
