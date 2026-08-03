@@ -15,6 +15,7 @@ static NSString * const kClockSecondsKey = @"clockSeconds";
 static NSString * const kAnalogClockKey = @"analogClock";
 static NSString * const kAnalogClockFullScreenKey = @"analogClockFullScreen";
 static NSString * const kHasShownTutorialKey = @"hasShownTutorial";
+static NSString * const kAppearanceModeKey = @"appearanceMode";
 
 static const NSTimeInterval kDefaultMusicScreensaverDelay = 60.0;
 static const NSTimeInterval kDefaultClockScreensaverDelay = 60.0;
@@ -31,6 +32,8 @@ static const NSTimeInterval kDefaultClockScreensaverDelay = 60.0;
 - (void)applyDebouncedUserDefaultsUpdate:(NSString *)keyPath;
 - (BOOL)isSystemDarkMode;
 - (void)updateEffectiveAppearance;
+- (void)setAppearanceMode:(AppearanceMode)mode writeDefaults:(BOOL)writeDefaults;
+- (AppearanceMode)migrateAppearanceDefaults;
 @end
 
 @implementation SongView {
@@ -103,12 +106,13 @@ static const NSTimeInterval kDefaultClockScreensaverDelay = 60.0;
         kAnalogClockKey: @YES,
         kAnalogClockFullScreenKey: @NO,
         kMusicScreensaverDelayKey: @(kDefaultMusicScreensaverDelay),
-        kClockScreensaverDelayKey: @(kDefaultClockScreensaverDelay)
+        kClockScreensaverDelayKey: @(kDefaultClockScreensaverDelay),
+        kAppearanceModeKey: @(AppearanceModeDark)
     };
     [[NSUserDefaults standardUserDefaults] registerDefaults:defaults];
     
-    selectedAppearanceMode = AppearanceModeSystem;
-    [self updateEffectiveAppearance];
+    AppearanceMode savedMode = [self migrateAppearanceDefaults];
+    [self setAppearanceMode:savedMode writeDefaults:NO];
     
     playerPosition = [MusicBridge getPlayerPosition];
     
@@ -542,6 +546,27 @@ static const NSTimeInterval kDefaultClockScreensaverDelay = 60.0;
     }
 }
 
+- (AppearanceMode)migrateAppearanceDefaults {
+    NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
+    NSString *bundleIdentifier = [[NSBundle mainBundle] bundleIdentifier];
+    NSDictionary *persistentDefaults = bundleIdentifier ? [defaults persistentDomainForName:bundleIdentifier] : nil;
+    
+    if (persistentDefaults[kAppearanceModeKey] != nil) {
+        return (AppearanceMode)[[NSUserDefaults standardUserDefaults] integerForKey:kAppearanceModeKey];
+    }
+    
+    static NSString * const kWhiteBackgroundKey = @"whiteBackground";
+    if (persistentDefaults[kWhiteBackgroundKey] != nil) {
+        BOOL oldWhite = [defaults boolForKey:kWhiteBackgroundKey];
+        AppearanceMode migratedMode = oldWhite ? AppearanceModeLight : AppearanceModeDark;
+        [defaults setInteger:migratedMode forKey:kAppearanceModeKey];
+        return migratedMode;
+    }
+    
+    // return default mode
+    return (AppearanceMode)[[NSUserDefaults standardUserDefaults] integerForKey:kAppearanceModeKey];
+}
+
 - (BOOL)isSystemDarkMode {
     // System dark mode was introduced in 10.14 - currently we will always hit this path,
     // because the minimum deployment target is macOS 11.
@@ -584,10 +609,13 @@ static const NSTimeInterval kDefaultClockScreensaverDelay = 60.0;
     }
 }
 
-- (void)setAppearanceMode:(AppearanceMode)mode {
-    if (selectedAppearanceMode == mode) return;
-    
+- (void)setAppearanceMode:(AppearanceMode)mode writeDefaults:(BOOL)writeDefaults {
     selectedAppearanceMode = mode;
+    
+    if (writeDefaults) {
+        [[NSUserDefaults standardUserDefaults] setInteger:mode forKey:kAppearanceModeKey];
+    }
+    
     [self updateEffectiveAppearance];
 }
 
@@ -853,9 +881,9 @@ static const NSTimeInterval kDefaultClockScreensaverDelay = 60.0;
         [activeSongLayer setDisplayPlayerPositionLabel:displayPlayerPositionLabel];
         [activeSongLayer updateWithDuration:.5];
     } else if ([character isEqualToString:@"w"]) {
-        [self setAppearanceMode:AppearanceModeLight];
+        [self setAppearanceMode:AppearanceModeLight writeDefaults:YES];
     } else if ([character isEqualToString:@"b"]) {
-        [self setAppearanceMode:AppearanceModeDark];
+        [self setAppearanceMode:AppearanceModeDark writeDefaults:YES];
     } else if ([character isEqualToString:@"f"] || (keyCode == 53 && [self isWindowFullScreen])) {
         // esc quits out of fullscreen
         [self.window toggleFullScreen:self];
@@ -1053,6 +1081,10 @@ static const NSTimeInterval kDefaultClockScreensaverDelay = 60.0;
         kAnalogClockFullScreenKey: ^{
             BOOL value = [[NSUserDefaults standardUserDefaults] boolForKey:kAnalogClockFullScreenKey];
             [self setAnalogClockFullScreen:value writeDefaults:NO];
+        },
+        kAppearanceModeKey: ^{
+            AppearanceMode value = (AppearanceMode)[[NSUserDefaults standardUserDefaults] integerForKey:kAppearanceModeKey];
+            [self setAppearanceMode:value writeDefaults:NO];
         }
     };
     

@@ -24,7 +24,7 @@ NSDictionary *defaults = @{
 
 ## 2. Implement Migration Logic
 
-When the app launches, check if the new `appearanceMode` key exists. If not, perform migration from the legacy `whiteBackground` boolean.
+When the app launches, check whether `appearanceMode` is already persisted in the app's user defaults domain. If not, perform migration from the legacy `whiteBackground` boolean.
 
 ### Migration Code in SongView.m
 
@@ -32,8 +32,8 @@ When the app launches, check if the new `appearanceMode` key exists. If not, per
 - (void)migrateAppearanceDefaults {
     NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
     
-    // If the new key is already set, no migration needed
-    if ([defaults objectForKey:kAppearanceModeKey] != nil) {
+    // If the new key is already persisted, no migration needed
+    if ([[defaults persistentDomainForName:[[NSBundle mainBundle] bundleIdentifier]] objectForKey:kAppearanceModeKey] != nil) {
         return;
     }
     
