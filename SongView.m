@@ -29,7 +29,7 @@ static const NSTimeInterval kDefaultClockScreensaverDelay = 60.0;
 - (void)setClockSeconds:(BOOL)value writeDefaults:(BOOL)writeDefaults;
 - (BOOL)isWindowReady;
 - (void)applyDebouncedUserDefaultsUpdate:(NSString *)keyPath;
-- (EffectiveAppearance)currentSystemAppearance;
+- (BOOL)isSystemDarkMode;
 - (void)updateEffectiveAppearance;
 @end
 
@@ -54,8 +54,7 @@ static const NSTimeInterval kDefaultClockScreensaverDelay = 60.0;
     int keyCode;
     int hasShownTutorial; // Use int in case we add more tutorial versions later
     AppearanceMode selectedAppearanceMode;
-    // FIXME: this shadows the view's public `effectiveAppearance` property and creates a dangerous inconsistency
-    EffectiveAppearance effectiveAppearance;
+    BOOL isEffectiveDarkMode;
     BOOL infoLayerOn;
     
     double playerPosition;
@@ -109,7 +108,7 @@ static const NSTimeInterval kDefaultClockScreensaverDelay = 60.0;
     [[NSUserDefaults standardUserDefaults] registerDefaults:defaults];
     
     selectedAppearanceMode = AppearanceModeSystem;
-    effectiveAppearance = [self currentSystemAppearance];
+    [self updateEffectiveAppearance];
     
     playerPosition = [MusicBridge getPlayerPosition];
     
@@ -161,15 +160,14 @@ static const NSTimeInterval kDefaultClockScreensaverDelay = 60.0;
 }
 
 - (void)setupLayers {
-    BOOL darkMode = (effectiveAppearance == EffectiveAppearanceDark);
-    CGColorRef bgColor = darkMode ? CGColorCreateGenericRGB(0, 0, 0, 1) : CGColorCreateGenericRGB(1, 1, 1, 1);
+    CGColorRef bgColor = isEffectiveDarkMode ? CGColorCreateGenericRGB(0, 0, 0, 1) : CGColorCreateGenericRGB(1, 1, 1, 1);
     
     rootLayer = [CALayer layer];
     [rootLayer setBackgroundColor:bgColor];
     [self setLayer:rootLayer];
     [self setWantsLayer:YES];
     
-    activeSongLayer = [[SongLayer alloc] initWithFrame:[self frame] effectiveAppearance:effectiveAppearance];
+    activeSongLayer = [[SongLayer alloc] initWithFrame:[self frame] darkMode:isEffectiveDarkMode];
     activeSongLayer.playerPosition = playerPosition;
     [activeSongLayer setPlayerState:[MusicBridge getPlayerState]];
     activeSongLayer.displayPlayerPositionBar = displayPlayerPositionBar;
@@ -198,10 +196,9 @@ static const NSTimeInterval kDefaultClockScreensaverDelay = 60.0;
 
 - (void)setUpAnalogClockIfNeeded {
     if (!clock && analogClock && displayClock) {
-        BOOL darkMode = (effectiveAppearance == EffectiveAppearanceDark);
-        clock = [[AnalogClockLayer alloc] initWithDarkMode:darkMode];
+        clock = [[AnalogClockLayer alloc] initWithDarkMode:isEffectiveDarkMode];
         if (activeSongLayer.track) {
-            clock.tintColor = [activeSongLayer.track tintColorWithDarkMode:darkMode strongAdjustment:true];
+            clock.tintColor = [activeSongLayer.track tintColorWithDarkMode:isEffectiveDarkMode strongAdjustment:true];
         } else {
             clock.tintColor = [NSColor defaultTintColor];
         }
@@ -279,7 +276,7 @@ static const NSTimeInterval kDefaultClockScreensaverDelay = 60.0;
         [CATransaction begin];
         [CATransaction setValue:(id)kCFBooleanTrue forKey:kCATransactionDisableActions];
         
-        activeSongLayer = [[SongLayer alloc] initWithFrame:[self frame] effectiveAppearance:effectiveAppearance];
+        activeSongLayer = [[SongLayer alloc] initWithFrame:[self frame] darkMode:isEffectiveDarkMode];
         //	[activeSongLayer setBackgroundColor:CGColorCreateGenericRGB(0, 0, 1, 1)];
         // auto-resize activeSongLayer as the view is resized
         [activeSongLayer setAutoresizingMask:kCALayerWidthSizable | kCALayerHeightSizable];
@@ -334,12 +331,11 @@ static const NSTimeInterval kDefaultClockScreensaverDelay = 60.0;
 
 - (void)updateClockColor {
     if (clock) {
-        BOOL darkMode = (effectiveAppearance == EffectiveAppearanceDark);
         if (currentTrack != nil) {
-            clock.tintColor = [currentTrack tintColorWithDarkMode:darkMode strongAdjustment:true];
+            clock.tintColor = [currentTrack tintColorWithDarkMode:isEffectiveDarkMode strongAdjustment:true];
         }
         NSLog(@"analog clock tint color: %@", clock.tintColor);
-        clock.darkMode = darkMode;
+        clock.darkMode = isEffectiveDarkMode;
     }
 }
 
@@ -525,19 +521,17 @@ static const NSTimeInterval kDefaultClockScreensaverDelay = 60.0;
 }
 
 - (void)applyAppearanceChanges {
-    BOOL darkMode = (effectiveAppearance == EffectiveAppearanceDark);
-    
     if (rootLayer) {
         [CATransaction begin];
         [CATransaction setValue:@0.5f forKey:kCATransactionAnimationDuration];
         
-        CGColorRef bgColor = darkMode ? CGColorCreateGenericRGB(0, 0, 0, 1) : CGColorCreateGenericRGB(1, 1, 1, 1);
+        CGColorRef bgColor = isEffectiveDarkMode ? CGColorCreateGenericRGB(0, 0, 0, 1) : CGColorCreateGenericRGB(1, 1, 1, 1);
         [rootLayer setBackgroundColor:bgColor];
         CGColorRelease(bgColor);
     }
     
     if (activeSongLayer) {
-        [activeSongLayer setEffectiveAppearance:effectiveAppearance];
+        [activeSongLayer setIsDarkMode:isEffectiveDarkMode];
         [activeSongLayer updateWithDuration:0.5];
     }
     
@@ -548,36 +542,36 @@ static const NSTimeInterval kDefaultClockScreensaverDelay = 60.0;
     }
 }
 
-- (EffectiveAppearance)currentSystemAppearance {
+- (BOOL)isSystemDarkMode {
     // System dark mode was introduced in 10.14 - currently we will always hit this path,
     // because the minimum deployment target is macOS 11.
     if (@available(macOS 10.14, *)) {
-        NSAppearanceName appearance = [NSApp.effectiveAppearance bestMatchFromAppearancesWithNames:@[NSAppearanceNameAqua, NSAppearanceNameDarkAqua]];
+        NSAppearanceName appearance = [self.effectiveAppearance bestMatchFromAppearancesWithNames:@[NSAppearanceNameAqua, NSAppearanceNameDarkAqua]];
         if ([appearance isEqualToString:NSAppearanceNameDarkAqua]) {
-            return EffectiveAppearanceDark;
+            return true;
         }
     }
-    return EffectiveAppearanceLight;
+    return false;
 }
 
 - (void)updateEffectiveAppearance {
-    EffectiveAppearance newEffectiveAppearance;
+    BOOL newEffectiveDarkMode;
     
     switch (selectedAppearanceMode) {
         case AppearanceModeLight:
-            newEffectiveAppearance = EffectiveAppearanceLight;
+            newEffectiveDarkMode = false;
             break;
         case AppearanceModeDark:
-            newEffectiveAppearance = EffectiveAppearanceDark;
+            newEffectiveDarkMode = true;
             break;
         case AppearanceModeSystem:
         default:
-            newEffectiveAppearance = [self currentSystemAppearance];
+            newEffectiveDarkMode = [self isSystemDarkMode];
             break;
     }
     
-    if (effectiveAppearance != newEffectiveAppearance) {
-        effectiveAppearance = newEffectiveAppearance;
+    if (isEffectiveDarkMode != newEffectiveDarkMode) {
+        isEffectiveDarkMode = newEffectiveDarkMode;
         [self applyAppearanceChanges];
     }
 }

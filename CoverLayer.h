@@ -11,12 +11,12 @@
 
 @interface CoverLayer : CALayer {
     CIImage *coverImage;
-    EffectiveAppearance effectiveAppearance;
+    BOOL isDarkMode;
     CGColorSpaceRef colorSpace;
 }
 
 - (void)setCoverImageWithData:(NSData *)data;
 
-@property EffectiveAppearance effectiveAppearance;
+@property BOOL isDarkMode;
 
 @end

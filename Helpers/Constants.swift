@@ -22,8 +22,3 @@ import AppKit
     case dark = 1
     case system = 2
 }
-
-@objc public enum EffectiveAppearance: Int {
-    case light = 0
-    case dark = 1
-}

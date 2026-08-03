@@ -13,7 +13,7 @@
 }
 
 @synthesize track;
-@synthesize effectiveAppearance;
+@synthesize isDarkMode;
 @synthesize playerPosition;
 @synthesize playerState;
 
@@ -22,7 +22,7 @@
 @synthesize displayClock;
 @synthesize clockSeconds;
 
-- (id)initWithFrame:(CGRect)frame effectiveAppearance:(EffectiveAppearance)appearance {
+- (id)initWithFrame:(CGRect)frame darkMode:(BOOL)darkMode {
     if (self = [super init]) {
         [self setFrame:frame];
         
@@ -78,7 +78,7 @@
         [self addSublayer:clockLayer];
         
         
-        [self setEffectiveAppearance:appearance];
+        [self setIsDarkMode:darkMode];
         [self updateWithDuration:0.1];
         isFirstPlayerPositionSet = false;
     }
@@ -239,8 +239,7 @@
     
     clockLayer.fontSize = height * .05;
     if (displayClock) {
-        BOOL darkMode = (effectiveAppearance == EffectiveAppearanceDark);
-        NSColor *tintColor = track ? [track tintColorWithDarkMode:darkMode strongAdjustment:false] : [NSColor defaultTintColor];
+        NSColor *tintColor = track ? [track tintColorWithDarkMode:isDarkMode strongAdjustment:false] : [NSColor defaultTintColor];
         clockLayer.foregroundColor = [tintColor CGColor];
         clockLayer.opacity = 1;
     } else {
@@ -278,24 +277,24 @@
     // ToDo: is there anything else that needs to be released?
 }
 
-- (void)setEffectiveAppearance:(EffectiveAppearance)appearance {
-    effectiveAppearance = appearance;
-    coverLayer.effectiveAppearance = appearance;
+- (void)setIsDarkMode:(BOOL)darkMode {
+    isDarkMode = darkMode;
+    coverLayer.isDarkMode = darkMode;
     if (foregroundCGColor) {
         CGColorRelease(foregroundCGColor);
         foregroundCGColor = NULL;
     }
-    if (appearance == EffectiveAppearanceLight) {
-        backgroundColor = [NSColor whiteColor];
-        foregroundColor = [NSColor blackColor];
-        lightForegroundColor = [NSColor colorWithCalibratedHue:0 saturation:0 brightness:.4 alpha:1];
-        foregroundCGColor = CGColorCreateGenericRGB(0, 0, 0, 1);
-    }
-    else {
+    if (darkMode) {
         backgroundColor = [NSColor blackColor];
         foregroundColor = [NSColor whiteColor];
         lightForegroundColor = [NSColor colorWithCalibratedHue:0 saturation:0 brightness:.8 alpha:1];
         foregroundCGColor = CGColorCreateGenericRGB(1, 1, 1, 1);
+    }
+    else {
+        backgroundColor = [NSColor whiteColor];
+        foregroundColor = [NSColor blackColor];
+        lightForegroundColor = [NSColor colorWithCalibratedHue:0 saturation:0 brightness:.4 alpha:1];
+        foregroundCGColor = CGColorCreateGenericRGB(0, 0, 0, 1);
     }
 }
 

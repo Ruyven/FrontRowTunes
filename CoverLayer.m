@@ -12,7 +12,7 @@
 
 @implementation CoverLayer
 
-@synthesize effectiveAppearance;
+@synthesize isDarkMode;
 
 - (id)init {
     self = [super init];
@@ -24,7 +24,7 @@
     if (coverImage != nil) {
         [CATransaction setValue:@0.5f forKey:kCATransactionAnimationDuration];
         
-        double gradientBrightness = (effectiveAppearance == EffectiveAppearanceLight) ? 1.0 : 0.0;
+        double gradientBrightness = isDarkMode ? 0.0 : 1.0;
         
         // context options
         NSDictionary *contextOptions = @{kCIContextWorkingColorSpace: (__bridge id)colorSpace, kCIContextOutputColorSpace: (__bridge id)colorSpace};
