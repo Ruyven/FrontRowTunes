@@ -37,6 +37,13 @@ When the `S` hotkey is pressed, the app should:
 
 This behavior is already handled by the `setAppearanceMode:writeDefaults:` method added in Step 3 and the `updateEffectiveAppearance` method designed in Step 1 and Step 2.
 
+## 3. Add to documentation
+
+Add `s` hotkey to:
+
+- the Info panel
+- README.md
+
 ## Verification Plan
 
 - [ ] Launch the app.
@@ -48,3 +55,4 @@ This behavior is already handled by the `setAppearanceMode:writeDefaults:` metho
 - [ ] Verify the app switches to Light mode automatically.
 - [ ] Press `B` -> verify the app switches to Dark mode and stops following system changes.
 - [ ] Press `S` -> verify the app resumes following system changes (switches to Light).
+- [ ] Press `I` to open info panel -> verify it includes the `s` hotkey.

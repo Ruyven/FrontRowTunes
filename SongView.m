@@ -884,6 +884,8 @@ static const NSTimeInterval kDefaultClockScreensaverDelay = 60.0;
         [self setAppearanceMode:AppearanceModeLight writeDefaults:YES];
     } else if ([character isEqualToString:@"b"]) {
         [self setAppearanceMode:AppearanceModeDark writeDefaults:YES];
+    } else if ([character isEqualToString:@"s"]) {
+        [self setAppearanceMode:AppearanceModeSystem writeDefaults:YES];
     } else if ([character isEqualToString:@"f"] || (keyCode == 53 && [self isWindowFullScreen])) {
         // esc quits out of fullscreen
         [self.window toggleFullScreen:self];
