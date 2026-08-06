@@ -560,6 +560,7 @@ static const NSTimeInterval kDefaultClockScreensaverDelay = 60.0;
         BOOL oldWhite = [defaults boolForKey:kWhiteBackgroundKey];
         AppearanceMode migratedMode = oldWhite ? AppearanceModeLight : AppearanceModeDark;
         [defaults setInteger:migratedMode forKey:kAppearanceModeKey];
+        [defaults removeObjectForKey:kWhiteBackgroundKey];
         return migratedMode;
     }
     
