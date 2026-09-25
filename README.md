@@ -8,7 +8,7 @@ After FrontRow was removed in Mac OS X 10.7 Lion, in 2013 I decided to build a l
 
 - Show currently playing track with album art
 - Animated with Core Animation, e.g. on track change
-- Press [ W ] to turn background white, [ B ] to turn it black
+- Press [ W ] to turn background white, [ B ] to turn it black, [ S ] to use system appearance
 - Press [ F ] to toggle between full-screen and windowed mode
 - Press space to play/pause, arrow keys to select next/previous track
 - Display current playback progress as position bar and/or position as mm:ss - press [ ↵ ] or [ fn ] [ ↵ ] to toggle through options.

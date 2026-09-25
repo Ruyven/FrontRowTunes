@@ -136,7 +136,7 @@
                 <autoresizingMask key="autoresizingMask"/>
                 <subviews>
                     <textField verticalHuggingPriority="750" horizontalCompressionResistancePriority="250" setsMaxLayoutWidthAtFirstLayout="YES" preferredMaxLayoutWidth="490" translatesAutoresizingMaskIntoConstraints="NO" id="540">
-                        <rect key="frame" x="17" y="16" width="365" height="256"/>
+                        <rect key="frame" x="17" y="16" width="365" height="272"/>
                         <textFieldCell key="cell" controlSize="mini" sendsActionOnEndEditing="YES" id="541">
                             <font key="font" metaFont="system"/>
                             <mutableString key="title">FrontRowTunes {{appVersion}}
@@ -144,6 +144,7 @@ Copyright © 2013-2026 by Alex Decker. All rights reserved.
 Shortcut Keys:
 	w			white background
 	b			black background
+	s			system appearance-based background
 	f			full screen
 	1,2,…		show maximized on different screens
 	←, →		switch track
